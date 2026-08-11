@@ -6024,7 +6024,7 @@ function bbRecalcTotals(){
     if(extEl) extEl.textContent = cb.checked ? '$'+fmtD(ext) : '—';
     if(cb.checked){
       checkedCount++;
-      if(INSTALL_CATS.includes(cat)) installSub+=ext;
+      if(isInstallCat(cat)) installSub+=ext;
       else goodsSub+=ext;
     }
   });
@@ -6035,7 +6035,7 @@ function bbRecalcTotals(){
   const tariffPct  = parseFloat(document.getElementById('bb-tariff-pct').value)||5;
   const sub        = goodsSub + installSub;
   const fee        = goodsSub*(feePct/100);
-  const cont       = goodsSub*(contPct/100);
+  const cont       = sub*(contPct/100);   // contingency applies to the full subtotal
   const freight    = goodsSub*(freightPct/100);
   const tariff     = goodsSub*(tariffPct/100);
   const tax        = (goodsSub+freight)*(taxPct/100);
@@ -6561,7 +6561,7 @@ function calcPATotal(pa){
   const sub=allItems.reduce((a,i)=>a+((i.qty||0)*(i.price||0)),0);
   const goodsSub=splitGoodsInstall(pa.items,'price').goods;  // installation excluded from % add-ons
   const feePct=(pa.feePct??25)/100, contPct=(pa.contPct??5)/100, freightPct=(pa.freightPct??10)/100, tariffPct=(pa.tariffPct??5)/100, taxPct=(pa.taxPct??8.9)/100;
-  const fee=goodsSub*feePct, cont=goodsSub*contPct, freight=goodsSub*freightPct, tariff=goodsSub*tariffPct;
+  const fee=goodsSub*feePct, cont=sub*contPct, freight=goodsSub*freightPct, tariff=goodsSub*tariffPct;
   const tax=(goodsSub+freight)*taxPct;
   return sub+fee+cont+freight+tariff+tax;
 }
@@ -7203,7 +7203,7 @@ function recalcPA(){
   // Use saved override amounts when present (e.g. signed PA with exact PDF figures)
   const curPA=currentPAId?pas.find(p=>p.id===currentPAId):null;
   const fee    =curPA&&curPA.feeOverride    ?curPA.feeOverride    :goodsSub*feePct/100;
-  const cont   =curPA&&curPA.contOverride   ?curPA.contOverride   :goodsSub*contPct/100;
+  const cont   =curPA&&curPA.contOverride   ?curPA.contOverride   :(goodsSub+installSub)*contPct/100;
   const freight=curPA&&curPA.freightOverride?curPA.freightOverride:goodsSub*freightPct/100;
   const tariff =curPA&&curPA.tariffOverride ?curPA.tariffOverride :goodsSub*tariffPct/100;
   const tax    =curPA&&curPA.taxOverride    ?curPA.taxOverride    :(goodsSub+freight)*taxPct/100;
@@ -7965,7 +7965,7 @@ function dbRecalc(){
   const taxPct     = parseFloat(document.getElementById('db-tax-pct').value)||8.9;
   const freight = goodsSub*freightPct/100;
   const tax = (goodsSub+freight)*taxPct/100;
-  const total = sub + goodsSub*feePct/100 + goodsSub*contPct/100 + freight + tax;
+  const total = sub + goodsSub*feePct/100 + sub*contPct/100 + freight + tax;
   const el = document.getElementById('db-grand-total');
   if(el) el.textContent = '$'+fmtD(total);
 }
@@ -8354,7 +8354,7 @@ function recalcPB(){
   const items=pbLineItems;
   const sub=items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
   const _gi=splitGoodsInstall(items,'price'); const goodsSub=_gi.goods, installSub=_gi.install;  // installation excluded from % add-ons
-  const fee=goodsSub*feePct/100, cont=goodsSub*contPct/100, freight=goodsSub*freightPct/100, tax=(goodsSub+freight)*taxPct/100, total=sub+fee+cont+freight+tax;
+  const fee=goodsSub*feePct/100, cont=sub*contPct/100, freight=goodsSub*freightPct/100, tax=(goodsSub+freight)*taxPct/100, total=sub+fee+cont+freight+tax;
   let dateStr='';
   if(date){const d=new Date(date+'T12:00:00');dateStr=d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});}
 
@@ -10780,9 +10780,9 @@ function loadCloseOut(){
     if(i.isCategory){_cat=i.name;return null;}
     return{...i,_cat};
   }).filter(Boolean);
-  const goodsItems=paItemsWithCat.filter(i=>!INSTALL_CATS.includes(i._cat));
+  const goodsItems=paItemsWithCat.filter(i=>!isInstallCat(i._cat));
   const paSub=goodsItems.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
-  const installSub=paItemsWithCat.filter(i=>INSTALL_CATS.includes(i._cat)).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+  const installSub=paItemsWithCat.filter(i=>isInstallCat(i._cat)).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
 
   const taxRate=pa?(pa.taxPct??8.9)/100:0.089;
   const freightRate=pa?(pa.freightPct??10)/100:0.10;
@@ -10815,7 +10815,7 @@ function loadCloseOut(){
 
   const freightCollected = paSub*freightRate;
   const taxCollected     = paSub*taxRate;
-  const contCollected    = paSub*contRate;
+  const contCollected    = (paSub+installSub)*contRate;
   const taxOwedToState   = (paSub+freightPaid)*taxRate;
   const taxOverage       = taxCollected-taxPaid-taxOwedToState;
   const freightOverage   = freightCollected-freightPaid;
@@ -11567,8 +11567,8 @@ function renderBTTable(){
     return {...i, _cat: _currentCatName};
   }).filter(Boolean);
 
-  const goodsItems   = itemsWithCat.filter(i => !INSTALL_CATS.includes(i._cat));
-  const installItems = itemsWithCat.filter(i =>  INSTALL_CATS.includes(i._cat));
+  const goodsItems   = itemsWithCat.filter(i => !isInstallCat(i._cat));
+  const installItems = itemsWithCat.filter(i =>  isInstallCat(i._cat));
 
   const goodsSubtotal   = goodsItems.reduce((a,i)=>a+(i.qty||0)*(i.estPrice||0), 0);
   const installSubtotal = installItems.reduce((a,i)=>a+(i.qty||0)*(i.estPrice||0), 0);
@@ -11576,9 +11576,9 @@ function renderBTTable(){
 
   const feeP=bt.feePct/100, contP=bt.contPct/100, freightP=bt.freightPct/100, tariffP=(bt.tariffPct||0)/100, taxP=bt.taxPct/100;
 
-  // Fees apply to goods only
+  // Fees apply to goods only — except contingency, which is charged on the full subtotal
   const feeAmt     = goodsSubtotal * feeP;
-  const contAmt    = goodsSubtotal * contP;
+  const contAmt    = paSubtotal * contP;
   const freightAmt = goodsSubtotal * freightP;
   const tariffAmt  = goodsSubtotal * tariffP;
   const taxAmt     = (goodsSubtotal + freightAmt) * taxP;  // freight is also taxed
@@ -12548,14 +12548,14 @@ function printBudgetTracker(){
     if(i.isCategory){ _cat = i.name; return null; }
     return {...i, _cat};
   }).filter(Boolean);
-  const goodsItems   = itemsWithCat.filter(i => !INSTALL_CATS.includes(i._cat));
-  const installItems = itemsWithCat.filter(i =>  INSTALL_CATS.includes(i._cat));
+  const goodsItems   = itemsWithCat.filter(i => !isInstallCat(i._cat));
+  const installItems = itemsWithCat.filter(i =>  isInstallCat(i._cat));
   const goodsSubtotal   = goodsItems.reduce((a,i)=>a+(i.qty||0)*(i.estPrice||0),0);
   const installSubtotal = installItems.reduce((a,i)=>a+(i.qty||0)*(i.estPrice||0),0);
   const paSubtotal = goodsSubtotal + installSubtotal;
   const feeP=bt.feePct/100, contP=bt.contPct/100, freightP=bt.freightPct/100,
         tariffP=(bt.tariffPct||0)/100, taxP=bt.taxPct/100;
-  const feeAmt=goodsSubtotal*feeP, contAmt=goodsSubtotal*contP,
+  const feeAmt=goodsSubtotal*feeP, contAmt=paSubtotal*contP,
         freightAmt=goodsSubtotal*freightP, tariffAmt=goodsSubtotal*tariffP,
         taxAmt=(goodsSubtotal+freightAmt)*taxP;
   const paTotal=paSubtotal+feeAmt+contAmt+freightAmt+tariffAmt+taxAmt;
@@ -12841,13 +12841,13 @@ function generateIIF(){
     return {...i, _cat, ext:(i.qty||0)*(i.price||0)};
   }).filter(Boolean);
 
-  const goodsItems   = lineItems.filter(i => !INSTALL_CATS.includes(i._cat));
-  const installItems = lineItems.filter(i =>  INSTALL_CATS.includes(i._cat));
+  const goodsItems   = lineItems.filter(i => !isInstallCat(i._cat));
+  const installItems = lineItems.filter(i =>  isInstallCat(i._cat));
 
   const goodsTotal   = goodsItems.reduce((a,i)=>a+i.ext,0);
   const installTotal = installItems.reduce((a,i)=>a+i.ext,0);
   const feeAmt       = goodsTotal * feePct/100;
-  const contAmt      = goodsTotal * contPct/100;
+  const contAmt      = (goodsTotal+installTotal) * contPct/100;
   const freightAmt   = goodsTotal * freightPct/100;
   const tariffAmt    = goodsTotal * tariffPct/100;
   const taxAmt       = (goodsTotal + freightAmt) * taxPct/100;
@@ -12880,7 +12880,7 @@ function generateIIF(){
     let lastCat = '';
     for(const item of lineItems){
       if(item._cat !== lastCat){ lastCat = item._cat; }
-      const isInstall = INSTALL_CATS.includes(item._cat);
+      const isInstall = isInstallCat(item._cat);
       const invItem = isInstall ? itemInstall : itemGoods;
       const lineMemo = `${item.itemNum ? item.itemNum+' - ' : ''}${item.name}${item.vendor ? ' ('+item.vendor+')' : ''}`;
       addSPL(item.ext, invItem, lineMemo, item.qty||1, item.price||0, !isInstall);
@@ -12892,7 +12892,7 @@ function generateIIF(){
       catTotals[item._cat] = (catTotals[item._cat]||0) + item.ext;
     }
     for(const [cat, amt] of Object.entries(catTotals)){
-      const isInstall = INSTALL_CATS.includes(cat);
+      const isInstall = isInstallCat(cat);
       addSPL(amt, isInstall?itemInstall:itemGoods, cat, null, null, !isInstall);
     }
   }
