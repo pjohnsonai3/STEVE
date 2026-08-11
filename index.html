@@ -2702,6 +2702,14 @@
         <div class="form-row"><label>Phone</label><input id="s-phone" placeholder="+1 555 0100" /></div>
       </div>
       <div class="form-grid2">
+        <div class="form-row"><label>Website</label><input id="s-web" placeholder="vendor.com" /></div>
+        <div class="form-row"><label>Contact Person</label><input id="s-contact" placeholder="e.g. Dana Reyes" /></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Contact Email</label><input type="email" id="s-contact-email" placeholder="dana@vendor.com" /></div>
+        <div class="form-row"><label>Contact Phone</label><input id="s-contact-phone" placeholder="+1 555 0101" /></div>
+      </div>
+      <div class="form-grid2">
         <div class="form-row"><label>Rating</label><div id="s-rating-stars" style="margin-top:5px"></div><input type="hidden" id="s-rating" /></div>
         <div class="form-row"><label>Status</label>
           <select id="s-status"><option>Active</option><option>Inactive</option><option>Pending</option></select>
@@ -6186,7 +6194,7 @@ function renderSuppliers(){
     :`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)">No vendors found.</td></tr>`;
 }
 
-function openAddSupplier(){editingSupplier=null;document.getElementById('supplier-modal-title').textContent='Add Vendor';['s-name','s-country','s-lead','s-email','s-phone','s-rating','s-discount','s-notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('s-status').value='Active';buildRatingStars();openModal('supplier-modal');}
+function openAddSupplier(){editingSupplier=null;document.getElementById('supplier-modal-title').textContent='Add Vendor';['s-name','s-country','s-lead','s-email','s-phone','s-rating','s-discount','s-notes','s-web','s-contact','s-contact-email','s-contact-phone'].forEach(id=>document.getElementById(id).value='');document.getElementById('s-status').value='Active';buildRatingStars();openModal('supplier-modal');}
 
 // Remove every vendor from the directory — memory, localStorage, and the cloud.
 function clearAllSuppliers(){
@@ -6416,7 +6424,7 @@ function saveSupplier(){
   const name=document.getElementById('s-name').value.trim();
   if(!name){alert('Company name is required.');return;}
   pushUndoSnapshot(editingSupplier?'Edit vendor':'Add vendor', ['suppliers']);
-  const data={name,category:document.getElementById('s-cat').value,country:document.getElementById('s-country').value.trim(),lead:parseInt(document.getElementById('s-lead').value)||0,email:document.getElementById('s-email').value.trim(),phone:document.getElementById('s-phone').value.trim(),rating:parseFloat(document.getElementById('s-rating').value)||0,discount:parseFloat(document.getElementById('s-discount').value)||0,status:document.getElementById('s-status').value,notes:document.getElementById('s-notes').value.trim()};
+  const data={name,category:document.getElementById('s-cat').value,country:document.getElementById('s-country').value.trim(),lead:parseInt(document.getElementById('s-lead').value)||0,email:document.getElementById('s-email').value.trim(),phone:document.getElementById('s-phone').value.trim(),rating:parseFloat(document.getElementById('s-rating').value)||0,discount:parseFloat(document.getElementById('s-discount').value)||0,status:document.getElementById('s-status').value,notes:document.getElementById('s-notes').value.trim(),website:document.getElementById('s-web').value.trim(),contact:document.getElementById('s-contact').value.trim(),contactEmail:document.getElementById('s-contact-email').value.trim(),contactPhone:document.getElementById('s-contact-phone').value.trim()};
   let _rec;
   if(editingSupplier){const idx=suppliers.findIndex(s=>s.id===editingSupplier);if(idx>=0){suppliers[idx]={...suppliers[idx],...data};_rec=suppliers[idx];}}
   else {_rec={id:genId(),...data};suppliers.push(_rec);}
@@ -6426,7 +6434,7 @@ function saveSupplier(){
 function viewSupplier(id){
   const s=suppliers.find(x=>x.id===id);if(!s)return;
   editingSupplier=id;document.getElementById('supplier-modal-title').textContent='Edit Vendor';
-  document.getElementById('s-name').value=s.name;document.getElementById('s-cat').value=s.category;document.getElementById('s-country').value=s.country;document.getElementById('s-lead').value=s.lead;document.getElementById('s-email').value=s.email;document.getElementById('s-phone').value=s.phone;document.getElementById('s-rating').value=s.rating;document.getElementById('s-discount').value=s.discount||'';document.getElementById('s-status').value=s.status;document.getElementById('s-notes').value=s.notes;
+  document.getElementById('s-name').value=s.name;document.getElementById('s-cat').value=s.category;document.getElementById('s-country').value=s.country;document.getElementById('s-lead').value=s.lead;document.getElementById('s-email').value=s.email;document.getElementById('s-phone').value=s.phone;document.getElementById('s-rating').value=s.rating;document.getElementById('s-discount').value=s.discount||'';document.getElementById('s-status').value=s.status;document.getElementById('s-notes').value=s.notes;document.getElementById('s-web').value=s.website||'';document.getElementById('s-contact').value=s.contact||'';document.getElementById('s-contact-email').value=s.contactEmail||'';document.getElementById('s-contact-phone').value=s.contactPhone||'';
   buildRatingStars();
   openModal('supplier-modal');
 }
@@ -10713,8 +10721,12 @@ function vpoMatchVendor(){
   }
   // path → human label; pull each only when the PO field is currently blank
   const plan = [
-    ['mfrTel',     (s.phone||'').trim(),                              'phone'],
-    ['mfrEmail',   (s.email||'').trim(),                              'email'],
+    ['mfrTel',          (s.phone||'').trim(),        'phone'],
+    ['mfrEmail',        (s.email||'').trim(),        'email'],
+    ['mfrWeb',          (s.website||'').trim(),      'website'],
+    ['mfrContact',      (s.contact||'').trim(),      'contact'],
+    ['mfrContactEmail', (s.contactEmail||'').trim(), 'contact email'],
+    ['mfrContactTel',   (s.contactPhone||'').trim(), 'contact phone'],
     ['delivery',   s.lead ? (s.lead + (s.lead==1?' week':' weeks') + ' lead time') : '', 'lead time'],
   ];
   pushUndo('Match vendor to PO');
@@ -18225,6 +18237,7 @@ document.addEventListener('wheel', function(e){
 <script src="cleanup.js"></script>
 <script src="backup.js"></script>
 <script src="autofill.js"></script>
+<script src="vendor-fill.js"></script>
 <div id="ai3-toast-wrap"></div>
 </body>
 </html>
