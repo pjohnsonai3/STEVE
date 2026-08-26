@@ -349,7 +349,7 @@
       if (up.error) throw new Error('Cloud write failed: ' + up.error.message);
 
       if (Array.isArray(p.suppliers)) {
-        log('Replacing vendor directory…');
+        log('Replacing source directory…');
         await sbDeleteAllSuppliers();
         await sbPushAllSuppliers();
       }

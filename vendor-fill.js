@@ -1,9 +1,9 @@
 /* ============================================================================
-   STEVE — Vendor record completion  (vendor-fill.js)
-   Three ways to close the gaps in the Vendor directory:
+   STEVE — Source record completion  (source-fill.js)
+   Three ways to close the gaps in the Source directory:
      1) Backfill  — recover phone/email/website/contact already typed on POs
-                    or buried in a vendor's notes, and propose them for review.
-     2) Complete  — an inline grid of just the missing fields, vendors that get
+                    or buried in a source's notes, and propose them for review.
+     2) Complete  — an inline grid of just the missing fields, sources that get
                     the most work first.
      3) Signature — paste an email signature; it parses into the right fields.
 
@@ -35,7 +35,7 @@
   }
   function pushOne(rec) { try { if (typeof sbPushSupplier === 'function') sbPushSupplier(rec); } catch (e) {} }
 
-  // ── How busy is each vendor? ──────────────────────────────────────────────
+  // ── How busy is each source? ──────────────────────────────────────────────
   function usageIndex() {
     var u = {};
     function bump(v, n) { var k = norm(v); if (k) u[k] = (u[k] || 0) + (n || 1); }
@@ -76,8 +76,8 @@
       FIELDS.forEach(function (f) {
         if (!blank(s[f.k])) return;
         var val = po[f.k], src = 'a previous PO';
-        if (!val) { val = notes[f.k]; src = 'vendor notes'; }
-        if (val) out.push({ id: s.id, vendor: s.name, field: f.k, label: f.label, value: String(val).trim(), source: src });
+        if (!val) { val = notes[f.k]; src = 'source notes'; }
+        if (val) out.push({ id: s.id, vendor: s.name, field: f.k, label: f.label, value: String(val).trim(), vendor: src });
       });
     });
     return out;
@@ -88,7 +88,7 @@
     pending = proposals();
     var body = document.getElementById('vf-backfill-body');
     if (!pending.length) {
-      body.innerHTML = '<p style="font-size:13px;color:var(--text2);margin:0">Nothing left to recover — every blank field on your vendors is genuinely missing from your POs and notes too. Use <strong>Fill missing details</strong> or <strong>Paste signature</strong> to add them.</p>';
+      body.innerHTML = '<p style="font-size:13px;color:var(--text2);margin:0">Nothing left to recover — every blank field on your sources is genuinely missing from your POs and notes too. Use <strong>Fill missing details</strong> or <strong>Paste signature</strong> to add them.</p>';
     } else {
       body.innerHTML =
         '<p style="font-size:13px;color:var(--text2);margin:0 0 10px">Found ' + pending.length + ' detail' + (pending.length === 1 ? '' : 's') + ' already recorded elsewhere. Uncheck anything you don\u2019t want.</p>' +
@@ -96,7 +96,7 @@
         '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
         '<thead><tr style="background:var(--surface2)">' +
         '<th style="padding:6px 8px;text-align:left;width:26px"><input type="checkbox" checked onchange="vfToggleAll(this)" /></th>' +
-        '<th style="padding:6px 8px;text-align:left">Vendor</th><th style="padding:6px 8px;text-align:left">Field</th>' +
+        '<th style="padding:6px 8px;text-align:left">Source</th><th style="padding:6px 8px;text-align:left">Field</th>' +
         '<th style="padding:6px 8px;text-align:left">Value</th><th style="padding:6px 8px;text-align:left">From</th></tr></thead><tbody>' +
         pending.map(function (p, i) {
           return '<tr style="border-top:1px solid var(--border)">' +
@@ -104,7 +104,7 @@
             '<td style="padding:5px 8px">' + esc(p.vendor) + '</td>' +
             '<td style="padding:5px 8px;color:var(--text2)">' + esc(p.label) + '</td>' +
             '<td style="padding:5px 8px">' + esc(p.value) + '</td>' +
-            '<td style="padding:5px 8px;color:var(--text3)">' + esc(p.source) + '</td></tr>';
+            '<td style="padding:5px 8px;color:var(--text3)">' + esc(p.vendor) + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }
     openModal('vf-backfill-modal');
@@ -118,10 +118,10 @@
       var s = (suppliers || []).find(function (x) { return x.id === p.id; });
       if (s && blank(s[p.field])) { s[p.field] = p.value; touched[p.id] = s; }
     });
-    saveAll('Backfill vendor details');
+    saveAll('Backfill source details');
     Object.keys(touched).forEach(function (id) { pushOne(touched[id]); });
     closeModal('vf-backfill-modal');
-    toast('\u2713 Filled ' + picks.length + ' field' + (picks.length === 1 ? '' : 's') + ' across ' + Object.keys(touched).length + ' vendor' + (Object.keys(touched).length === 1 ? '' : 's'), 3600);
+    toast('\u2713 Filled ' + picks.length + ' field' + (picks.length === 1 ? '' : 's') + ' across ' + Object.keys(touched).length + ' source' + (Object.keys(touched).length === 1 ? '' : 's'), 3600);
     render();
   }
 
@@ -132,14 +132,14 @@
       .sort(function (a, b) { return (u[norm(b.name)] || 0) - (u[norm(a.name)] || 0) || String(a.name).localeCompare(String(b.name)); });
     var body = document.getElementById('vf-complete-body');
     if (!list.length) {
-      body.innerHTML = '<p style="font-size:13px;color:var(--text2);margin:0">Every vendor record is complete.</p>';
+      body.innerHTML = '<p style="font-size:13px;color:var(--text2);margin:0">Every source record is complete.</p>';
     } else {
       var inp = 'width:100%;padding:3px 5px;border:1px solid var(--border2);border-radius:3px;font-size:11.5px;font-family:inherit;box-sizing:border-box';
       body.innerHTML =
-        '<p style="font-size:13px;color:var(--text2);margin:0 0 10px">' + list.length + ' vendor' + (list.length === 1 ? '' : 's') + ' with gaps, most-used first. Edits save as you type.</p>' +
+        '<p style="font-size:13px;color:var(--text2);margin:0 0 10px">' + list.length + ' source' + (list.length === 1 ? '' : 's') + ' with gaps, most-used first. Edits save as you type.</p>' +
         '<div style="max-height:420px;overflow:auto;border:1px solid var(--border2);border-radius:var(--radius-sm)">' +
         '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
-        '<thead><tr style="background:var(--surface2)"><th style="padding:6px 8px;text-align:left;position:sticky;top:0;background:var(--surface2)">Vendor</th>' +
+        '<thead><tr style="background:var(--surface2)"><th style="padding:6px 8px;text-align:left;position:sticky;top:0;background:var(--surface2)">Source</th>' +
         FIELDS.map(function (f) { return '<th style="padding:6px 8px;text-align:left;position:sticky;top:0;background:var(--surface2)">' + f.label + '</th>'; }).join('') +
         '</tr></thead><tbody>' +
         list.map(function (s) {
@@ -159,7 +159,7 @@
     var s = (suppliers || []).find(function (x) { return String(x.id) === String(id); });
     if (!s) return;
     s[key] = String(val || '').trim();
-    saveAll('Edit vendor details');
+    saveAll('Edit source details');
     pushOne(s);
     render();
   }
@@ -199,8 +199,8 @@
   function openSignature() {
     document.getElementById('vf-sig-text').value = '';
     document.getElementById('vf-sig-result').innerHTML = '';
-    var sel = document.getElementById('vf-sig-vendor');
-    sel.innerHTML = '<option value="">Select vendor\u2026</option>' +
+    var sel = document.getElementById('vf-sig-source');
+    sel.innerHTML = '<option value="">Select source\u2026</option>' +
       (suppliers || []).slice().sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); })
         .map(function (s) { return '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>'; }).join('');
     sigParsed = null;
@@ -212,8 +212,8 @@
     var keys = Object.keys(sigParsed);
     var box = document.getElementById('vf-sig-result');
     if (!keys.length) { box.innerHTML = '<div style="font-size:12px;color:var(--text3)">Nothing recognisable found in that text.</div>'; return; }
-    // Guess the vendor from the email domain or a company-looking line
-    var sel = document.getElementById('vf-sig-vendor');
+    // Guess the source from the email domain or a company-looking line
+    var sel = document.getElementById('vf-sig-source');
     if (!sel.value && sigParsed.website) {
       var dom = norm(sigParsed.website.replace(/^https?:\/\//, '').replace(/^www\./, '').split('.')[0]);
       var hit = (suppliers || []).find(function (s) { return dom && norm(s.name).replace(/ /g, '').indexOf(dom.replace(/ /g, '')) === 0; });
@@ -226,14 +226,14 @@
       }).join('') + '</table>';
   }
   function applySig() {
-    var id = document.getElementById('vf-sig-vendor').value;
-    if (!id) { alert('Choose which vendor this signature belongs to.'); return; }
+    var id = document.getElementById('vf-sig-source').value;
+    if (!id) { alert('Choose which source this signature belongs to.'); return; }
     if (!sigParsed) { parseSig(); if (!sigParsed || !Object.keys(sigParsed).length) return; }
     var s = (suppliers || []).find(function (x) { return String(x.id) === String(id); });
     if (!s) return;
     var n = 0;
     Object.keys(sigParsed).forEach(function (k) { if (blank(s[k])) { s[k] = sigParsed[k]; n++; } });
-    saveAll('Fill vendor from signature');
+    saveAll('Fill source from signature');
     pushOne(s);
     closeModal('vf-sig-modal');
     toast(n ? ('\u2713 Filled ' + n + ' field' + (n === 1 ? '' : 's') + ' on ' + s.name) : (s.name + ' already had all of those filled'), 3400);
@@ -242,8 +242,8 @@
 
   // ── 4. Keep the directory in step with POs ────────────────────────────────
   // After a PO is saved, its manufacturer block is the freshest contact info in
-  // the system. Blank vendor fields fill silently; genuine disagreements are
-  // shown for review; an unknown manufacturer offers to become a vendor record.
+  // the system. Blank source fields fill silently; genuine disagreements are
+  // shown for review; an unknown manufacturer offers to become a source record.
   var VF_MAP = { phone: 'mfrTel', email: 'mfrEmail', website: 'mfrWeb', contact: 'mfrContact', contactEmail: 'mfrContactEmail', contactPhone: 'mfrContactTel' };
   var sync = { diffs: [], vendorId: null, newRec: null };
 
@@ -261,13 +261,13 @@
       if (d.delivery) { var wk = String(d.delivery).match(/(\d+)/); if (wk) rec.lead = parseInt(wk[1], 10) * 7; }
       sync.newRec = rec; sync.vendorId = null; sync.diffs = [];
       document.getElementById('vf-sync-body').innerHTML =
-        '<p style="font-size:13px;color:var(--text2);margin:0 0 10px"><strong>' + esc(name) + '</strong> isn\u2019t in your vendor directory. Add it now with the details from this PO?</p>' +
+        '<p style="font-size:13px;color:var(--text2);margin:0 0 10px"><strong>' + esc(name) + '</strong> isn\u2019t in your source directory. Add it now with the details from this PO?</p>' +
         '<table style="font-size:12px;border-collapse:collapse">' +
         Object.keys(rec).filter(function (k) { return k !== 'name'; }).map(function (k) {
           var f = FIELDS.find(function (x) { return x.k === k; });
           return '<tr><td style="padding:2px 12px 2px 0;color:var(--text3)">' + esc(f ? f.label : k) + '</td><td style="padding:2px 0">' + esc(rec[k]) + '</td></tr>';
         }).join('') + '</table>';
-      document.getElementById('vf-sync-go').textContent = 'Add vendor';
+      document.getElementById('vf-sync-go').textContent = 'Add source';
       openModal('vf-sync-modal');
       return;
     }
@@ -280,7 +280,7 @@
       else if (norm(s[k]) !== norm(v)) diffs.push({ field: k, was: s[k], now: v });
     });
     if (filled.length) {
-      saveAll('Sync vendor from PO');
+      saveAll('Sync source from PO');
       pushOne(s);
       toast('\u2713 Added ' + filled.length + ' detail' + (filled.length === 1 ? '' : 's') + ' to ' + s.name + ' from this PO', 3400);
       render();
@@ -317,15 +317,15 @@
       rec.notes = rec.notes || '';
       rec.lead = rec.lead || 0;
       suppliers.push(rec);
-      saveAll('Add vendor from PO');
+      saveAll('Add source from PO');
       pushOne(rec);
-      toast('\u2713 ' + rec.name + ' added to your vendor directory', 3400);
+      toast('\u2713 ' + rec.name + ' added to your source directory', 3400);
     } else if (sync.vendorId) {
       var s = (suppliers || []).find(function (x) { return x.id === sync.vendorId; });
       var picks = [].slice.call(document.querySelectorAll('.vf-diff:checked')).map(function (c) { return sync.diffs[parseInt(c.getAttribute('data-i'), 10)]; }).filter(Boolean);
       if (s && picks.length) {
         picks.forEach(function (df) { s[df.field] = df.now; });
-        saveAll('Update vendor from PO');
+        saveAll('Update source from PO');
         pushOne(s);
         toast('\u2713 Updated ' + picks.length + ' field' + (picks.length === 1 ? '' : 's') + ' on ' + s.name, 3400);
       }
@@ -340,7 +340,7 @@
     var orig = window.saveVPO;
     var wrapped = function () {
       var r = orig.apply(this, arguments);
-      try { syncFromPO(); } catch (e) { console.warn('[ai3] vendor sync failed', e); }
+      try { syncFromPO(); } catch (e) { console.warn('[ai3] source sync failed', e); }
       return r;
     };
     wrapped.__vfHooked = true;
@@ -361,10 +361,10 @@
     var st = stats();
     card.querySelector('#vf-summary').innerHTML = st.total
       ? (st.incomplete
-        ? st.incomplete + ' of ' + st.total + ' vendors are missing details (' + st.gaps + ' blank field' + (st.gaps === 1 ? '' : 's') + ')' +
+        ? st.incomplete + ' of ' + st.total + ' sources are missing details (' + st.gaps + ' blank field' + (st.gaps === 1 ? '' : 's') + ')' +
           (st.recoverable ? ' \u00b7 <span style="color:var(--green)">' + st.recoverable + ' recoverable from your own records</span>' : '')
-        : 'All ' + st.total + ' vendor records are complete.')
-      : 'No vendors in the directory yet.';
+        : 'All ' + st.total + ' source records are complete.')
+      : 'No sources in the directory yet.';
     card.querySelector('#vf-backfill-btn').disabled = !st.recoverable;
   }
 
@@ -377,7 +377,7 @@
     card.style.cssText = 'margin-bottom:14px';
     card.innerHTML =
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
-        '<div><div style="font-weight:600;font-size:14px">Complete your vendor records</div>' +
+        '<div><div style="font-weight:600;font-size:14px">Complete your source records</div>' +
         '<div id="vf-summary" style="font-size:12px;color:var(--text2);margin-top:2px"></div></div>' +
         '<div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">' +
           '<button class="btn btn-sm btn-primary" id="vf-backfill-btn" onclick="vfOpenBackfill()">Recover from POs &amp; notes</button>' +
@@ -390,20 +390,20 @@
     var modals = document.createElement('div');
     modals.innerHTML =
       '<div class="modal-overlay" id="vf-backfill-modal"><div class="modal" style="max-width:720px">' +
-        '<div class="modal-header"><div class="modal-title">Recover vendor details</div>' +
+        '<div class="modal-header"><div class="modal-title">Recover source details</div>' +
         '<button class="modal-close" onclick="closeModal(\'vf-backfill-modal\')">\u2715</button></div>' +
         '<div class="modal-body" id="vf-backfill-body"></div>' +
         '<div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end">' +
         '<button class="btn btn-sm" onclick="closeModal(\'vf-backfill-modal\')">Cancel</button>' +
         '<button class="btn btn-sm btn-primary" onclick="vfApplyBackfill()">Fill selected</button></div></div></div>' +
       '<div class="modal-overlay" id="vf-complete-modal"><div class="modal" style="max-width:1000px">' +
-        '<div class="modal-header"><div class="modal-title">Fill missing vendor details</div>' +
+        '<div class="modal-header"><div class="modal-title">Fill missing source details</div>' +
         '<button class="modal-close" onclick="closeModal(\'vf-complete-modal\')">\u2715</button></div>' +
         '<div class="modal-body" id="vf-complete-body"></div>' +
         '<div class="modal-footer" style="display:flex;justify-content:flex-end">' +
         '<button class="btn btn-sm btn-primary" onclick="closeModal(\'vf-complete-modal\')">Done</button></div></div></div>' +
       '<div class="modal-overlay" id="vf-sync-modal"><div class="modal" style="max-width:640px">' +
-        '<div class="modal-header"><div class="modal-title">Vendor directory</div>' +
+        '<div class="modal-header"><div class="modal-title">Source directory</div>' +
         '<button class="modal-close" onclick="closeModal(\'vf-sync-modal\')">\u2715</button></div>' +
         '<div class="modal-body" id="vf-sync-body"></div>' +
         '<div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end">' +
@@ -413,8 +413,8 @@
         '<div class="modal-header"><div class="modal-title">Paste an email signature</div>' +
         '<button class="modal-close" onclick="closeModal(\'vf-sig-modal\')">\u2715</button></div>' +
         '<div class="modal-body">' +
-          '<label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Vendor</label>' +
-          '<select id="vf-sig-vendor" style="width:100%;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;margin-bottom:10px"></select>' +
+          '<label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Source</label>' +
+          '<select id="vf-sig-source" style="width:100%;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;margin-bottom:10px"></select>' +
           '<label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Signature text</label>' +
           '<textarea id="vf-sig-text" rows="7" placeholder="Paste the whole signature block\u2026" oninput="vfParseSig()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;box-sizing:border-box"></textarea>' +
           '<div id="vf-sig-result" style="margin-top:10px"></div>' +

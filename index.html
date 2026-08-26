@@ -270,7 +270,10 @@
     <a data-page="home" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><path d="M9 20v-6h6v6"/></svg></span> Home</a>
     <a data-page="status" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><path d="M9 15l2 2 4-4"/></svg></span> Weekly Status</a>
     <a class="active" data-page="projects" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span> Projects</a>
-    <a data-page="suppliers" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M4 4h16l1 5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0z"/><path d="M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M9.5 20v-4.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V20"/></svg></span> Vendors</a>
+    <a data-page="templates" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="12" height="16" rx="1.5"/><path d="M8 7h4M8 11h4M8 15h2"/><path d="M8 3V1.8M20 6v13a2 2 0 0 1-2 2H9"/></svg></span> Templates</a>
+    <a data-page="suppliers" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M4 4h16l1 5a2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0 2.5 2.5 0 0 1-5 0z"/><path d="M5 11v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M9.5 20v-4.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V20"/></svg></span> Sources</a>
+    <a data-page="manufacturers" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M3 20V10l5 3V10l5 3V9l5 3v8z"/><line x1="3" y1="20" x2="21" y2="20"/><path d="M18 12V5l2-2"/></svg></span> Manufacturers</a>
+    <a data-page="contacts" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><circle cx="10" cy="10" r="2.4"/><path d="M6.2 16.4a4.2 4.2 0 0 1 7.6 0"/><line x1="16" y1="9" x2="18" y2="9"/><line x1="16" y1="12" x2="18" y2="12"/></svg></span> Contacts</a>
     <a data-page="library" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><path d="M4 5h6v14H4zM10 5h6v14h-6zM15.5 6.2l3.3.6-2.2 12.6-3.3-.6"/></svg></span> Library</a>
     <a data-page="import" onclick="nav(this)"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="8 4 8 20"/><polyline points="5 7 8 4 11 7"/><polyline points="16 20 16 4"/><polyline points="13 17 16 20 19 17"/></svg></span> Import / Export</a>
     </div>
@@ -584,12 +587,12 @@
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Find anything with ⌘K.</b> Press <b>⌘K</b> (or <b>Ctrl-K</b>) anywhere to search across projects, purchase orders, vendors, library items, and pages — and run quick actions like New project or New PO — without leaving the keyboard.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Find anything with ⌘K.</b> Press <b>⌘K</b> (or <b>Ctrl-K</b>) anywhere to search across projects, purchase orders, sources, library items, and pages — and run quick actions like New project or New PO — without leaving the keyboard.</div>
             </div>
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Vendor scorecards.</b> The <b>Vendors</b> page now has a <b>Directory / Scorecards</b> toggle that rolls up each vendor — committed value, lines, paid-to-date, open POs, lead time, late deliveries, and rating.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Source scorecards.</b> The <b>Sources</b> page now has a <b>Directory / Scorecards</b> toggle that rolls up each source — committed value, lines, paid-to-date, open POs, lead time, late deliveries, and rating.</div>
             </div>
 
             <div style="display:flex;gap:12px">
@@ -599,7 +602,7 @@
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Invoice Register.</b> Log vendor invoices against tracker lines; approving an invoice posts its amount, tax, and freight straight onto the item’s payments and recomputes the balance — and voiding it reverses the post.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Invoice Register.</b> Log source invoices against tracker lines; approving an invoice posts its amount, tax, and freight straight onto the item’s payments and recomputes the balance — and voiding it reverses the post.</div>
             </div>
 
             <div style="display:flex;gap:12px">
@@ -609,7 +612,7 @@
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Owner Close-Out Binder.</b> Collect warranties, guarantees, maintenance instructions, and flameproof certificates per vendor, track them to completion, and compile a single Owner handover binder at close-out.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Owner Close-Out Binder.</b> Collect warranties, guarantees, maintenance instructions, and flameproof certificates per source, track them to completion, and compile a single Owner handover binder at close-out.</div>
             </div>
 
             <div style="display:flex;gap:12px">
@@ -624,17 +627,17 @@
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">A far more powerful Library.</b> The <b>Library</b> now de-duplicates identical products across every PO and spec book (each card shows how many times it's used), adds combined filters (vendor, project, source, price, tags, has-image, favorites) with sorting, lets you <b>favorite</b>, <b>tag</b>, and <b>drag-drop your own photo</b> onto any product, and opens a full detail view showing every place a product appears. Select cards for <b>bulk actions</b> — favorite, tag, export CSV, or send to Sourcing.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">A far more powerful Library.</b> The <b>Library</b> now de-duplicates identical products across every PO and spec book (each card shows how many times it's used), adds combined filters (source, project, source, price, tags, has-image, favorites) with sorting, lets you <b>favorite</b>, <b>tag</b>, and <b>drag-drop your own photo</b> onto any product, and opens a full detail view showing every place a product appears. Select cards for <b>bulk actions</b> — favorite, tag, export CSV, or send to Sourcing.</div>
             </div>
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Product research &amp; a Sourcing hub.</b> Every line item in the <b>Procurement Tracker</b> and <b>Preliminary Budget</b> has a <b>Research</b> menu — find alternates, price-check across vendors, find a vendor/manufacturer, and search spec sheets or images. Save findings to an item, then compare them in the new project <b>Sourcing</b> page and push the chosen product back to the line with one click.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Product research &amp; a Sourcing hub.</b> Every line item in the <b>Procurement Tracker</b> and <b>Preliminary Budget</b> has a <b>Research</b> menu — find alternates, price-check across sources, find a source/manufacturer, and search spec sheets or images. Save findings to an item, then compare them in the new project <b>Sourcing</b> page and push the chosen product back to the line with one click.</div>
             </div>
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Find vendors to bid against a spec.</b> In <b>Bid Analysis</b>, a bid package can now pull spec-matched vendors automatically — from the item's saved Sourcing findings and an AI search near your budget allowance — so you have real competitors to bid out in a couple of clicks.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Find sources to bid against a spec.</b> In <b>Bid Analysis</b>, a bid package can now pull spec-matched sources automatically — from the item's saved Sourcing findings and an AI search near your budget allowance — so you have real competitors to bid out in a couple of clicks.</div>
             </div>
 
             <div style="display:flex;gap:12px">
@@ -644,7 +647,7 @@
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">A guided Excel import.</b> <b>Import / Export</b> now walks an Excel workbook through a five-step wizard — upload, recognize the tabs, map columns, review, import — and creates the project, its purchase authorizations, a seeded tracker, vendor POs, and product images from your ai3 estimate template.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">A guided Excel import.</b> <b>Import / Export</b> now walks an Excel workbook through a five-step wizard — upload, recognize the tabs, map columns, review, import — and creates the project, its purchase authorizations, a seeded tracker, source POs, and product images from your ai3 estimate template.</div>
             </div>
 
             <div style="display:flex;gap:12px">
@@ -684,7 +687,7 @@
 
             <div style="display:flex;gap:12px">
               <div style="flex-shrink:0;width:7px;height:7px;border-radius:50%;background:var(--accent-ink);margin-top:6px"></div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Import Purchase Orders from PDF.</b> On the Purchase Orders page, use <b>↑ Import from PDF</b> to have AI read an existing PO and create a new Vendor PO — manufacturer, ship-to, item, pricing, and terms filled in for review.</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.55"><b style="color:var(--text)">Import Purchase Orders from PDF.</b> On the Purchase Orders page, use <b>↑ Import from PDF</b> to have AI read an existing PO and create a new Source PO — manufacturer, ship-to, item, pricing, and terms filled in for review.</div>
             </div>
 
             <div style="display:flex;gap:12px">
@@ -737,7 +740,7 @@
 
         <div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px">
           <div style="font-size:18px;font-weight:700;color:var(--accent-ink);margin-bottom:4px">Welcome to STEVE</div>
-          <div style="font-size:13.5px;color:var(--text2);line-height:1.6">STEVE is ai3's FF&amp;E procurement workspace. It carries a project from its first budget through purchase orders, vendor payments, and final close-out — with everything stored together in the cloud. This guide explains how the pieces fit together and answers common questions. Use the search box to jump to a topic.</div>
+          <div style="font-size:13.5px;color:var(--text2);line-height:1.6">STEVE is ai3's FF&amp;E procurement workspace. It carries a project from its first budget through purchase orders, source payments, and final close-out — with everything stored together in the cloud. This guide explains how the pieces fit together and answers common questions. Use the search box to jump to a topic.</div>
         </div>
 
         <input class="search-input" placeholder="Search help…  (try “email a PO”, “attach PDF”, “save my work”)" oninput="helpFilter(this.value)" style="width:100%;margin-bottom:6px" />
@@ -751,7 +754,7 @@
               <li><b style="color:var(--text)">Set a budget</b> with <b>Prelim Budget</b>, or let <b>AI Budget</b> draft one for you.</li>
               <li><b style="color:var(--text)">Source &amp; research</b> items with the <b>Research</b> menu and the <b>Sourcing</b> page — and bid the big lines out in <b>Bid Analysis</b>.</li>
               <li><b style="color:var(--text)">Get spend approved</b> with a <b>Purchase Authorization</b> the client signs off on.</li>
-              <li><b style="color:var(--text)">Order from vendors</b> by creating <b>Purchase Orders</b> and emailing them out.</li>
+              <li><b style="color:var(--text)">Order from sources</b> by creating <b>Purchase Orders</b> and emailing them out.</li>
               <li><b style="color:var(--text)">Track money, delivery &amp; cash flow</b> in the <b>Procurement Tracker</b>, <b>Receiving</b>, and <b>Cash-Flow Projection</b>.</li>
               <li><b style="color:var(--text)">Reconcile at the end</b> in <b>Close-Out</b>, comparing estimated vs. actual.</li>
             </ol>
@@ -768,25 +771,25 @@
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Prelim Budget</div><div style="line-height:1.5">Build an early FF&amp;E budget by category or area before anything is ordered.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">AI Budget</div><div style="line-height:1.5">Drafts a starting budget for you from a short description, which you can then refine.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Procurement Tracker</div><div style="line-height:1.5">The financial heart of a project: every line item with quantities, prices, deposits, payments made, balance due, lead time, and delivery status. Each item supports up to two payments (with a check-number field), a product photo, an <b>Urgent</b> status, and a <b>Research</b> menu for sourcing.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Sourcing</div><div style="line-height:1.5">A research workbench for the project: a queue of items still needing sourcing, with saved findings compared side-by-side (price, lead time, vendor). Choose a winner and it writes back to the line item. Products sent from the Library land here first.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Sourcing</div><div style="line-height:1.5">A research workbench for the project: a queue of items still needing sourcing, with saved findings compared side-by-side (price, lead time, source). Choose a winner and it writes back to the line item. Products sent from the Library land here first.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Specifications</div><div style="line-height:1.5">The project's spec book — a per-item record of finishes, dimensions, materials, and product data that feeds POs and the Library.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Cash-Flow Projection</div><div style="line-height:1.5">Projects the funding needed month by month to sustain purchasing — long-lead items first — read straight from the tracker, with the procurement fee billed in the first month.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Invoice Register</div><div style="line-height:1.5">Log vendor invoices against tracker lines. Approving an invoice posts its amount, tax, and freight onto the item's payments and recomputes the balance; voiding it reverses the post.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Invoice Register</div><div style="line-height:1.5">Log source invoices against tracker lines. Approving an invoice posts its amount, tax, and freight onto the item's payments and recomputes the balance; voiding it reverses the post.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Reports Overview</div><div style="line-height:1.5">Rolls up budget, committed, and paid across all projects (or just the open one) in switchable chart layouts.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Owner Statement</div><div style="line-height:1.5">A monthly statement to the owner — PO status, a funds-in-trust reconciliation, and the advance funding request — generated from the tracker, invoices, and POs, ready to save as PDF.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Bid Analysis</div><div style="line-height:1.5">Put a line item out to competitive bid: capture vendor bids, find spec-matched vendors automatically, compare them, and award with an audit trail when the low bid isn't chosen.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Bid Analysis</div><div style="line-height:1.5">Put a line item out to competitive bid: capture source bids, find spec-matched sources automatically, compare them, and award with an audit trail when the low bid isn't chosen.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Purchase Authorizations</div><div style="line-height:1.5">Client-facing documents that authorize spend before you place orders. Can be imported from a PA PDF, and lead times entered here flow into the tracker.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Client Approvals</div><div style="line-height:1.5">Send a Purchase Authorization to the client for sign-off. They review a read-only document and approve with a typed signature, moving it Draft → Sent → Approved (or Changes requested).</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Purchase Orders</div><div style="line-height:1.5">Create and edit vendor POs, print or save them as PDF, and email them to the vendor. You can also <b>import a PO from a PDF</b>, and <b>print several POs at once</b> by selecting them on the list.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Purchase Orders</div><div style="line-height:1.5">Create and edit source POs, print or save them as PDF, and email them to the source. You can also <b>import a PO from a PDF</b>, and <b>print several POs at once</b> by selecting them on the list.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Submittal Log</div><div style="line-height:1.5">Tracks shop drawings, material data, samples, and COM approvals per line item — requested → received → approved — with a four-day review clock and overdue flags.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Receiving / Expediting</div><div style="line-height:1.5">Track deliveries and outstanding items. Receiving stays in sync with the tracker — marking an item received in one updates the other, using the date the status changed.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Credit Card Auth</div><div style="line-height:1.5">Generate a credit-card authorization document for vendors that need one on file.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Credit Card Auth</div><div style="line-height:1.5">Generate a credit-card authorization document for sources that need one on file.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Close-Out</div><div style="line-height:1.5">Wrap up a project by reconciling estimated vs. actual costs.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Owner Close-Out Binder</div><div style="line-height:1.5">Collect warranties, guarantees, maintenance instructions, and flameproof certificates per vendor, track them to completion, and compile a single Owner handover binder at close-out.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Owner Close-Out Binder</div><div style="line-height:1.5">Collect warranties, guarantees, maintenance instructions, and flameproof certificates per source, track them to completion, and compile a single Owner handover binder at close-out.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Files</div><div style="line-height:1.5">A central place for documents and images attached to the project.</div></div>
               <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Library</div><div style="line-height:1.5">A firm-wide catalog of every product across all projects' POs and spec books, de-duplicated. Filter, favorite, tag, add photos, and reuse a product by sending it to a project's Sourcing page.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Import / Export</div><div style="line-height:1.5">A five-step wizard pulls an Excel workbook (the ai3 estimate template) into a project — creating its authorizations, tracker, vendor POs, and product images — or exports your data.</div></div>
-              <div style="display:flex;gap:14px;padding:11px 0"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Vendors</div><div style="line-height:1.5">Your vendor directory — contacts, emails, and status used throughout POs and emails. A <b>Directory / Scorecards</b> toggle rolls up each vendor's committed value, paid-to-date, open POs, lead time, late deliveries, and rating.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Import / Export</div><div style="line-height:1.5">A five-step wizard pulls an Excel workbook (the ai3 estimate template) into a project — creating its authorizations, tracker, source POs, and product images — or exports your data.</div></div>
+              <div style="display:flex;gap:14px;padding:11px 0"><div style="min-width:170px;font-weight:600;color:var(--accent-ink)">Sources</div><div style="line-height:1.5">Your source directory — contacts, emails, and status used throughout POs and emails. A <b>Directory / Scorecards</b> toggle rolls up each source's committed value, paid-to-date, open POs, lead time, late deliveries, and rating.</div></div>
             </div>
           </div>
         </div>
@@ -797,12 +800,12 @@
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
             <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Find anything fast with ⌘K</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Press <b>⌘K</b> (or <b>Ctrl-K</b>) from any screen — or click <b>Search</b> in the top bar — to open the command palette. Start typing to jump to a <b>project</b>, <b>purchase order</b> (by name or PO number), <b>vendor</b>, <b>library product</b>, or any <b>page</b> in the current project — and run quick actions like <b>New project</b> or <b>New PO</b>. Use <b>↑ ↓</b> to move, <b>↵</b> to open, and <b>Esc</b> to close, all without the mouse.</div>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Press <b>⌘K</b> (or <b>Ctrl-K</b>) from any screen — or click <b>Search</b> in the top bar — to open the command palette. Start typing to jump to a <b>project</b>, <b>purchase order</b> (by name or PO number), <b>source</b>, <b>library product</b>, or any <b>page</b> in the current project — and run quick actions like <b>New project</b> or <b>New PO</b>. Use <b>↑ ↓</b> to move, <b>↵</b> to open, and <b>Esc</b> to close, all without the mouse.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
-            <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Compare vendors with scorecards</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Open <b>Vendors</b> and use the <b>Directory / Scorecards</b> toggle at the top-right. <b>Scorecards</b> rolls up each vendor across your projects — <b>committed value</b>, <b>paid-to-date</b>, <b>balance</b>, number of <b>lines</b> and <b>open POs</b>, <b>lead time</b>, a <b>late-delivery</b> count, and the vendor's <b>rating</b> — sorted by commitment. Search or filter narrows the cards live; the most-active vendors show first, and you can search by name to surface vendors with no current activity.</div>
+            <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Compare sources with scorecards</summary>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Open <b>Sources</b> and use the <b>Directory / Scorecards</b> toggle at the top-right. <b>Scorecards</b> rolls up each source across your projects — <b>committed value</b>, <b>paid-to-date</b>, <b>balance</b>, number of <b>lines</b> and <b>open POs</b>, <b>lead time</b>, a <b>late-delivery</b> count, and the source's <b>rating</b> — sorted by commitment. Search or filter narrows the cards live; the most-active sources show first, and you can search by name to surface sources with no current activity.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
@@ -817,17 +820,17 @@
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
             <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Import an FF&amp;E Excel workbook</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Go to <b>Import / Export</b> and drop in your Excel estimate. A five-step wizard reads every tab, recognizes the ai3 estimate template, and creates the project with its purchase authorizations, a seeded Procurement Tracker, vendor POs, and product images — with a review step before anything is saved.</div>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Go to <b>Import / Export</b> and drop in your Excel estimate. A five-step wizard reads every tab, recognizes the ai3 estimate template, and creates the project with its purchase authorizations, a seeded Procurement Tracker, source POs, and product images — with a review step before anything is saved.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
             <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Create a purchase order</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Open the project and go to <b>Purchase Orders</b>. Create a new PO, choose the vendor, add the item details, links, delivery, and tax handling. Everything you enter flows into the printed PO and the email.</div>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Open the project and go to <b>Purchase Orders</b>. Create a new PO, choose the source, add the item details, links, delivery, and tax handling. Everything you enter flows into the printed PO and the email.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
-            <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Email a PO to a vendor (with the PDF attached)</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">On the purchase order: <b>1.</b> click <b>Print / Save PDF</b> and save the PO as a PDF. <b>2.</b> click <b>✉ Email</b> — your mail app opens a new message already filled in with the vendor, subject, and body. <b>3.</b> drag the saved PDF onto the message and send. <br><br><span style="color:var(--text3)">Email links can't carry an attachment on their own, so the quick drag is the one manual step. Your mail app adds your own signature automatically.</span></div>
+            <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Email a PO to a source (with the PDF attached)</summary>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">On the purchase order: <b>1.</b> click <b>Print / Save PDF</b> and save the PO as a PDF. <b>2.</b> click <b>✉ Email</b> — your mail app opens a new message already filled in with the source, subject, and body. <b>3.</b> drag the saved PDF onto the message and send. <br><br><span style="color:var(--text3)">Email links can't carry an attachment on their own, so the quick drag is the one manual step. Your mail app adds your own signature automatically.</span></div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
@@ -847,7 +850,7 @@
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
             <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Research or source an item</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Click the <b>Research</b> (magnifier) button on any line in the <b>Procurement Tracker</b> or <b>Preliminary Budget</b>. Choose a tool — find alternates, price-check, find a vendor, or search spec sheets/images. <b>Save</b> the results you like; they collect on the item. Then open the project's <b>Sourcing</b> page to compare saved findings side-by-side and click <b>Use on item</b> to write the chosen product (name, vendor, price, lead time) back to the line.</div>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">Click the <b>Research</b> (magnifier) button on any line in the <b>Procurement Tracker</b> or <b>Preliminary Budget</b>. Choose a tool — find alternates, price-check, find a source, or search spec sheets/images. <b>Save</b> the results you like; they collect on the item. Then open the project's <b>Sourcing</b> page to compare saved findings side-by-side and click <b>Use on item</b> to write the chosen product (name, source, price, lead time) back to the line.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
@@ -856,8 +859,8 @@
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
-            <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Put a line out to bid &amp; find vendors</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">In <b>Bid Analysis</b>, use <b>Put a line out to bid</b> and pick the item — its budget allowance comes along as the benchmark. Then <b>✦ Find vendors to bid</b> pulls spec-matched competitors (from the item's saved findings and an AI search) that you add as bids in one click, or enter bids manually. Compare and <b>Award</b>; if you don't pick the low bid, STEVE asks for a short rationale and keeps it on the package.</div>
+            <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Put a line out to bid &amp; find sources</summary>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">In <b>Bid Analysis</b>, use <b>Put a line out to bid</b> and pick the item — its budget allowance comes along as the benchmark. Then <b>✦ Find sources to bid</b> pulls spec-matched competitors (from the item's saved findings and an AI search) that you add as bids in one click, or enter bids manually. Compare and <b>Award</b>; if you don't pick the low bid, STEVE asks for a short rationale and keeps it on the package.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
@@ -877,7 +880,7 @@
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
             <summary style="cursor:pointer;padding:13px 16px;font-weight:600;font-size:13.5px;color:var(--text)">Import a purchase order from a PDF</summary>
-            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">On <b>Purchase Orders</b>, click <b>↑ Import from PDF</b>, paste your AI key if prompted, and drop in an existing PO PDF. AI reads the manufacturer, ship-to, item, pricing, and terms and creates a new Vendor PO for you to review and save.</div>
+            <div style="padding:0 16px 14px;font-size:13px;color:var(--text2);line-height:1.65">On <b>Purchase Orders</b>, click <b>↑ Import from PDF</b>, paste your AI key if prompted, and drop in an existing PO PDF. AI reads the manufacturer, ship-to, item, pricing, and terms and creates a new Source PO for you to review and save.</div>
           </details>
 
           <details class="help-item" style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);margin-bottom:8px">
@@ -961,7 +964,7 @@
     <div class="page" id="page-library">
       <div style="max-width:1120px">
         <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:12px">
-          <div style="font-size:13px;color:var(--text2);line-height:1.55;flex:1">Every product from your specifications and purchase orders — plus items you add here — gathered into one catalog and sorted into categories. Add a product once with <b>AI Fill</b> from a cut sheet or vendor link, then reuse it on any project's specs and POs instead of re-entering it.</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.55;flex:1">Every product from your specifications and purchase orders — plus items you add here — gathered into one catalog and sorted into categories. Add a product once with <b>AI Fill</b> from a cut sheet or source link, then reuse it on any project's specs and POs instead of re-entering it.</div>
           <div style="display:flex;gap:8px;flex-shrink:0">
             <button class="btn btn-primary" onclick="libAiOpen()" title="Add a product from a cut sheet or web link — no manual typing">✨ AI Add Product</button>
             <button class="btn" onclick="libBulkOpen()" title="Import a whole manufacturer catalogue — STEVE splits it into individual products">📚 Import Catalogue</button>
@@ -1273,7 +1276,7 @@
       const provider=_libAiProvider(); const hasKey=!!_libAiKey(); const f=_libAiFile;
       body.innerHTML = `
         <div style="font-size:12.5px;color:var(--text2);line-height:1.5;margin-bottom:14px">
-          Add a product to the library from a <strong>cut sheet</strong> (PDF or image) or a <strong>vendor web link</strong> — no typing.
+          Add a product to the library from a <strong>cut sheet</strong> (PDF or image) or a <strong>source web link</strong> — no typing.
           ${(provider==='anthropic'?'Claude':'ChatGPT')} pulls the name, manufacturer, model #, category, price, and image, and STEVE checks it isn't already in your library.
         </div>
         <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
@@ -1689,6 +1692,15 @@
     }
     </script>
 
+    <!-- TEMPLATES PAGE (built by templates.js) -->
+    <div class="page" id="page-templates"></div>
+
+    <!-- MANUFACTURERS PAGE (built by manufacturers.js) -->
+    <div class="page" id="page-manufacturers"></div>
+
+    <!-- CONTACTS PAGE (built by contacts.js) -->
+    <div class="page" id="page-contacts"></div>
+
     <!-- SUPPLIERS PAGE -->
     <div class="page" id="page-suppliers">
       <div class="search-row">
@@ -1702,7 +1714,7 @@
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th onclick="sortSuppliers('name')" style="cursor:pointer;user-select:none;white-space:nowrap">Vendor <span class="sort-ind" data-k="name" style="font-size:10px;color:var(--accent)"></span></th>
+              <th onclick="sortSuppliers('name')" style="cursor:pointer;user-select:none;white-space:nowrap">Source <span class="sort-ind" data-k="name" style="font-size:10px;color:var(--accent)"></span></th>
               <th onclick="sortSuppliers('category')" style="cursor:pointer;user-select:none;white-space:nowrap">Category <span class="sort-ind" data-k="category" style="font-size:10px;color:var(--accent)"></span></th>
               <th onclick="sortSuppliers('country')" style="cursor:pointer;user-select:none;white-space:nowrap">Country <span class="sort-ind" data-k="country" style="font-size:10px;color:var(--accent)"></span></th>
               <th onclick="sortSuppliers('lead')" style="cursor:pointer;user-select:none;white-space:nowrap">Lead Time <span class="sort-ind" data-k="lead" style="font-size:10px;color:var(--accent)"></span></th>
@@ -1952,11 +1964,11 @@
           <div class="import-result" id="result-projects"></div>
         </div>
 
-        <!-- Vendors import -->
+        <!-- Sources import -->
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
-              <div style="font-weight:500;font-size:14px">Vendors</div>
+              <div style="font-weight:500;font-size:14px">Sources</div>
               <div style="font-size:12px;color:var(--text3);margin-top:2px">name, category, country, lead_time, email, phone, rating, status, notes</div>
             </div>
             <button class="btn btn-sm" onclick="downloadTemplate('suppliers')">↓ Template</button>
@@ -1996,7 +2008,7 @@
       <div id="export-project-notice" style="font-size:12px;color:var(--accent-ink);margin-bottom:12px;display:none"></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn" onclick="exportCSV('projects')">↓ All Projects</button>
-        <button class="btn" onclick="exportCSV('suppliers')">↓ Vendors</button>
+        <button class="btn" onclick="exportCSV('suppliers')">↓ Sources</button>
         <button class="btn" onclick="exportCSV('expenses')">↓ Expenses</button>
       </div>
 
@@ -2294,6 +2306,7 @@
           <select class="select-styled" id="vpo-type-filter" onchange="renderVPOList()">
             <option value="">All Types</option>
             <option>Furniture</option><option>Fabric / COM</option><option>Casegoods</option>
+            <option>Table Top</option><option>Table Base</option>
             <option>Lighting</option><option>Drapery</option><option>Carpet</option>
             <option>Art</option><option>Accessories</option><option>Installation</option>
           </select>
@@ -2317,8 +2330,8 @@
       </div>
       <div id="vpo-editor" style="display:none">
         <div class="breadcrumb">
-          <a onclick="closeVPOEditor()">Vendor POs</a><span>›</span>
-          <span id="vpo-editor-breadcrumb">New Vendor PO</span>
+          <a onclick="closeVPOEditor()">Source POs</a><span>›</span>
+          <span id="vpo-editor-breadcrumb">New Source PO</span>
         </div>
         <style>
           #vpo-preview .vpo-field{border-radius:3px;padding:0 1px;cursor:pointer;transition:background .12s,box-shadow .12s}
@@ -2333,6 +2346,7 @@
           <div style="font-size:12px;color:var(--text2)">PO Type
             <select id="vpo-type" onchange="vpoTypeChanged()" style="margin-left:6px">
               <option>Seating</option><option>Chair Fabric</option><option>Table</option>
+              <option>Table Top</option><option>Table Base</option>
               <option>Casegoods</option><option>Lighting</option><option>Mirror</option>
               <option>Art</option><option>Umbrella</option><option>Umbrella Base</option>
               <option>Planter</option><option>Accessories</option><option>Drapery</option>
@@ -2457,6 +2471,10 @@
       <div class="form-grid2">
         <div class="form-row"><label>Client Contact Person</label><input id="proj-contact" placeholder="Name" /></div>
         <div class="form-row"><label>Client Email</label><input type="email" id="proj-email" placeholder="client@company.com" /></div>
+      </div>
+      <div class="form-grid2">
+        <div class="form-row"><label>Purchasing Agent <span style="font-weight:400;color:var(--text3)">(applies to this project's POs)</span></label><select id="proj-agent"><option value="">— none —</option></select></div>
+        <div class="form-row"><label style="visibility:hidden">.</label><div style="font-size:11.5px;color:var(--text3);padding-top:9px;line-height:1.4">Manage the team list on <strong>Contacts</strong>.</div></div>
       </div>
       <div class="form-grid2">
         <div class="form-row"><label>Project Type</label>
@@ -2664,7 +2682,7 @@
   </div>
 </div>
 
-<!-- Vendor rating (click-to-rate stars) -->
+<!-- Source rating (click-to-rate stars) -->
 <style>
   .star-rate{display:inline-flex;align-items:center;gap:1px;vertical-align:middle}
   .sr-star{position:relative;display:inline-block;width:22px;height:24px;cursor:pointer}
@@ -2679,11 +2697,11 @@
   .sr-clear:hover{opacity:1;color:var(--red)}
 </style>
 
-<!-- Vendor Modal -->
+<!-- Source Modal -->
 <div class="modal-overlay" id="supplier-modal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title" id="supplier-modal-title">Add Vendor</div>
+      <div class="modal-title" id="supplier-modal-title">Add Source</div>
       <button class="modal-close" onclick="closeModal('supplier-modal')">✕</button>
     </div>
     <div class="modal-body">
@@ -2723,38 +2741,38 @@
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('supplier-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSupplier()">Save Vendor</button>
+      <button class="btn btn-primary" onclick="saveSupplier()">Save Source</button>
     </div>
   </div>
 </div>
 
-<!-- Clear All Vendors confirmation -->
+<!-- Clear All Sources confirmation -->
 <div class="modal-overlay" id="clear-suppliers-modal">
   <div class="modal" style="max-width:460px">
     <div class="modal-header">
-      <div class="modal-title">Clear all vendors?</div>
+      <div class="modal-title">Clear all sources?</div>
       <button class="modal-close" onclick="closeModal('clear-suppliers-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--text2)">This permanently removes <b id="clear-suppliers-count">all</b> vendors from the directory, including the shared cloud copy. This cannot be undone from another device.</p>
+      <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:var(--text2)">This permanently removes <b id="clear-suppliers-count">all</b> sources from the directory, including the shared cloud copy. This cannot be undone from another device.</p>
       <div class="form-row"><label>Type <b>DELETE</b> to confirm</label><input id="clear-suppliers-input" placeholder="DELETE" autocomplete="off" oninput="document.getElementById('clear-suppliers-go').disabled = this.value.trim().toUpperCase()!=='DELETE'" onkeydown="if(event.key==='Enter' && this.value.trim().toUpperCase()==='DELETE')confirmClearSuppliers()" /></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('clear-suppliers-modal')">Cancel</button>
-      <button class="btn btn-primary" id="clear-suppliers-go" onclick="confirmClearSuppliers()" disabled>Delete all vendors</button>
+      <button class="btn btn-primary" id="clear-suppliers-go" onclick="confirmClearSuppliers()" disabled>Delete all sources</button>
     </div>
   </div>
 </div>
 
-<!-- Import Vendors -->
+<!-- Import Sources -->
 <div class="modal-overlay" id="import-suppliers-modal">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <div class="modal-title">Import vendors</div>
+      <div class="modal-title">Import sources</div>
       <button class="modal-close" onclick="closeModal('import-suppliers-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:var(--text2)">Import vendors from an Excel (<b>.xlsx</b>) or <b>.csv</b> file. Columns are matched automatically — it understands Outlook contact exports (Full Name, Company Name, Job Title, Phone, Email, Categories) as well as STEVE's own vendor columns.</p>
+      <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:var(--text2)">Import sources from an Excel (<b>.xlsx</b>) or <b>.csv</b> file. Columns are matched automatically — it understands Outlook contact exports (Full Name, Company Name, Job Title, Phone, Email, Categories) as well as STEVE's own source columns.</p>
       <div class="form-row"><label>File</label><input type="file" id="import-suppliers-file" accept=".xlsx,.csv" onchange="handleSupplierImportFile(this.files[0])" /></div>
       <div id="import-suppliers-status" style="font-size:13px;color:var(--text2);margin-top:6px"></div>
       <div id="import-suppliers-preview" style="display:none;margin-top:12px;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden">
@@ -2763,7 +2781,7 @@
       </div>
       <label id="import-suppliers-replace-row" style="display:none;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--text2);cursor:pointer">
         <input type="checkbox" id="import-suppliers-replace" style="width:auto;margin:0" />
-        Replace my current vendor list (clear existing first)
+        Replace my current source list (clear existing first)
       </label>
     </div>
     <div class="modal-footer">
@@ -2812,7 +2830,7 @@
         </label>
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px">
           <input type="checkbox" id="pbpa-vendors" checked style="margin-top:2px" />
-          <div><div style="font-weight:500">Vendor names</div><div style="font-size:12px;color:var(--text3)">Pre-fill the vendor field on each item</div></div>
+          <div><div style="font-weight:500">Source names</div><div style="font-size:12px;color:var(--text3)">Pre-fill the source field on each item</div></div>
         </label>
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px">
           <input type="checkbox" id="pbpa-leadtimes" checked style="margin-top:2px" />
@@ -2935,7 +2953,7 @@
     <div class="modal-header">
       <div>
         <div class="modal-title">Import Excel Workbook</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">Bring a legacy ai3 estimate into STEVE &mdash; project, authorizations, tracker &amp; vendor POs</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">Bring a legacy ai3 estimate into STEVE &mdash; project, authorizations, tracker &amp; source POs</div>
       </div>
       <button class="modal-close" onclick="closeModal('ffe-import-modal')">&times;</button>
     </div>
@@ -2955,7 +2973,7 @@
       <!-- STEP 1 UPLOAD -->
       <section class="fw-panel" data-fw="1">
         <div class="fw-h">Upload a legacy Excel workbook</div>
-        <div class="fw-lede">STEVE reads every tab &mdash; purchase authorizations, the procurement tracker and vendor PO templates &mdash; and turns them into structured records. Nothing is written until the final step.</div>
+        <div class="fw-lede">STEVE reads every tab &mdash; purchase authorizations, the procurement tracker and source PO templates &mdash; and turns them into structured records. Nothing is written until the final step.</div>
         <div id="ffe-drop" style="border:2px dashed var(--border2);border-radius:var(--radius);padding:34px 20px;text-align:center;background:var(--surface2);transition:border-color .15s,background .15s">
           <div style="font-size:30px;margin-bottom:8px">&#128202;</div>
           <div style="font-size:13.5px;font-weight:500">Drop your workbook here, or <label for="ffe-file" style="color:var(--accent-ink);text-decoration:underline;cursor:pointer">browse</label></div>
@@ -3007,7 +3025,7 @@
         <div class="fw-seclbl">Validation</div>
         <div class="card" style="padding:4px 16px" id="fw-validation"></div>
         <div class="fw-seclbl" id="fw-preview-lbl">Line-item preview</div>
-        <div class="card" style="overflow:hidden"><div style="overflow-x:auto"><table class="fw-table"><thead><tr><th>Item</th><th>Description</th><th>Vendor</th><th style="text-align:right">Qty</th><th style="text-align:right">Est. price</th><th style="text-align:right">Extension</th></tr></thead><tbody id="fw-preview"></tbody></table></div></div>
+        <div class="card" style="overflow:hidden"><div style="overflow-x:auto"><table class="fw-table"><thead><tr><th>Item</th><th>Description</th><th>Source</th><th style="text-align:right">Qty</th><th style="text-align:right">Est. price</th><th style="text-align:right">Extension</th></tr></thead><tbody id="fw-preview"></tbody></table></div></div>
       </section>
 
       <!-- STEP 5 IMPORT -->
@@ -3078,13 +3096,13 @@
   </div>
 </div>
 
-<!-- Vendor PO PDF Import Modal -->
+<!-- Source PO PDF Import Modal -->
 <div class="modal-overlay" id="vpo-import-modal">
   <div class="modal" style="width:560px">
     <div class="modal-header">
       <div>
         <div class="modal-title">Import PO from PDF</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">AI will read the document and create a new Vendor PO</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">AI will read the document and create a new Source PO</div>
       </div>
       <button class="modal-close" onclick="closeModal('vpo-import-modal')">✕</button>
     </div>
@@ -3107,7 +3125,7 @@
       <div id="vpo-import-drop" style="border:2px dashed var(--border2);border-radius:var(--radius);padding:28px 20px;text-align:center;background:var(--surface2);transition:border-color .15s,background .15s">
         <div style="font-size:28px;margin-bottom:8px">📄</div>
         <div style="font-size:13px;font-weight:500">Drop PO PDF here or <label for="vpo-import-file" style="color:var(--accent-ink);text-decoration:underline;cursor:pointer">click to browse</label></div>
-        <div style="font-size:11.5px;color:var(--text3);margin-top:4px">Existing vendor Purchase Order PDF</div>
+        <div style="font-size:11.5px;color:var(--text3);margin-top:4px">Existing source Purchase Order PDF</div>
         <input type="file" id="vpo-import-file" accept=".pdf" style="display:none" />
       </div>
       <div id="vpo-import-file-status" style="margin-top:10px;font-size:12px;color:var(--text2);display:none"></div>
@@ -3268,7 +3286,7 @@
     </div>
     <div class="modal-body">
       <div style="background:var(--amber-bg);border:1px solid var(--amber);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px">
-        <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">⚠ Vendor price exceeds PA estimate</div>
+        <div style="font-size:12px;font-weight:600;color:var(--amber);margin-bottom:8px">⚠ Source price exceeds PA estimate</div>
         <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px" id="cont-modal-item"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:12px">
           <div><div style="color:var(--text3);margin-bottom:2px">PA Estimate</div><div style="font-weight:600" id="cont-modal-est"></div></div>
@@ -3285,7 +3303,7 @@
         <label>Reason for overage</label>
         <select id="cont-modal-reason" style="width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;color:var(--text);background:var(--surface);outline:none">
           <option value="">Select reason…</option>
-          <option>Vendor price increase</option>
+          <option>Source price increase</option>
           <option>Annual price increase</option>
           <option>Client reselection / upgrade</option>
           <option>Specification change</option>
@@ -3593,6 +3611,10 @@ const GIST = {
 };
 
 let suppliers  = DB.load('fp11_suppliers',[]);
+// ai3 purchasing agents (internal staff) and client companies with ship/bill addresses.
+let docTemplates   = DB.load('fp11_templates',[]);   // reusable PO / spec shells
+let ai3Team        = DB.load('fp11_ai3team',[]);
+let clientContacts = DB.load('fp11_clients',[]);
 let pos        = DB.load('fp11_pos',[]);
 let inventory  = DB.load('fp11_inventory',[]);
 let budgetCats = DB.load('fp11_budgetcats',[]);
@@ -4001,7 +4023,7 @@ let _ffeParsed = null;
   /* ============ 5-step import wizard ============ */
   let _fwStep=1;
   const FW_TY={ pa:{l:'Purchase Authorization',dot:'#2563A8'}, tracker:{l:'Procurement Tracker',dot:'#6D4AA0'},
-    po:{l:'Vendor PO',dot:'#3A7D55'}, item:{l:'Item Spec',dot:'#93A1A8'}, skip:{l:'Skipped',dot:'#C6CFD4'} };
+    po:{l:'Source PO',dot:'#3A7D55'}, item:{l:'Item Spec',dot:'#93A1A8'}, skip:{l:'Skipped',dot:'#C6CFD4'} };
   const _money=n=>'$'+(n||0).toLocaleString('en-US',{maximumFractionDigits:0});
   const _fwContribute=(p,s)=>{ if(s.type==='pa') return true;
     if(s.type==='tracker') return (p._richNames||[]).includes(s.name);
@@ -4097,7 +4119,7 @@ let _ffeParsed = null;
     if(paCount) chips.push(['#2563A8',paCount,'Purchase Authorization'+(paCount>1?'s':'')]);
     const trkCount=(p._richNames||[]).length;
     if(trkCount) chips.push(['#6D4AA0',trkCount,'Procurement Tracker'+(trkCount>1?'s':'')]);
-    if(p.stats.pos) chips.push(['#3A7D55',p.stats.pos,'Vendor orders']);
+    if(p.stats.pos) chips.push(['#3A7D55',p.stats.pos,'Source orders']);
     if(p.stats.items) chips.push(['#93A1A8',p.stats.items,'Line items']);
     const skipCount=p.sheets.filter(s=>!_fwContribute(p,s)).length;
     if(skipCount) chips.push(['#C6CFD4',skipCount,'Tabs skipped']);
@@ -4143,16 +4165,16 @@ let _ffeParsed = null;
     document.getElementById('fw-stats').innerHTML=
       stat('Authorizations',st.pas||0,'PA tabs')
       +stat('Line items',st.items,st.categories+' categories')
-      +stat('Vendors',st.vendors,'<span style="color:var(--green)">'+newVendors.length+' new</span>')
-      +stat('Vendor POs',st.pos,st.pos?'from PO tabs':'none filled')
+      +stat('Sources',st.vendors,'<span style="color:var(--green)">'+newVendors.length+' new</span>')
+      +stat('Source POs',st.pos,st.pos?'from PO tabs':'none filled')
       +stat('Images',p.imageCount||0,'product/swatch');
     const vrow=(ic,col,html)=>'<div class="fw-vrow"><span class="fw-vi" style="color:'+col+'">'+ic+'</span><div>'+html+'</div></div>';
     let v='';
     if(st.pas) v+=vrow('&#10003;','var(--green)','<b>'+st.pas+' Purchase Authorization'+(st.pas>1?'s':'')+'</b> will be created with all line items and lead times.');
     v+=vrow('&#10003;','var(--green)','<b>A seeded Budget Tracker</b> will be built from the '+st.items+' tracked line items.');
-    if(newVendors.length) v+=vrow('&#9432;','var(--accent-ink)','<b>'+newVendors.length+' vendor name'+(newVendors.length>1?'s':'')+' referenced</b> &mdash; '+escHtml(newVendors.slice(0,5).join(', '))+(newVendors.length>5?'…':'')+'.');
+    if(newVendors.length) v+=vrow('&#9432;','var(--accent-ink)','<b>'+newVendors.length+' source name'+(newVendors.length>1?'s':'')+' referenced</b> &mdash; '+escHtml(newVendors.slice(0,5).join(', '))+(newVendors.length>5?'…':'')+'.');
     if(zeroItems.length) v+=vrow('&#9888;','var(--amber)','<b>'+zeroItems.length+' line items have no price</b> &mdash; they import at $0 and flag for review.');
-    if(st.pos===0) v+=vrow('&#9432;','var(--accent-ink)','<b>PO tabs are blank templates</b> in this workbook, so no vendor POs are created. Line items still carry their vendor.');
+    if(st.pos===0) v+=vrow('&#9432;','var(--accent-ink)','<b>PO tabs are blank templates</b> in this workbook, so no source POs are created. Line items still carry their vendor.');
     if(p.imageCount) v+=vrow('&#10003;','var(--green)','<b>'+p.imageCount+' product/swatch image'+(p.imageCount>1?'s':'')+'</b> found on item-spec tabs &mdash; attached to matching POs (downscaled on import).');
     if(skipped.length) v+=vrow('&#9432;','var(--accent-ink)','<b>'+skipped.length+' tabs skipped</b> &mdash; item-spec sheets, templates &amp; blank PO tabs.');
     if(exists) v+='<div class="fw-vrow"><label style="display:flex;align-items:center;gap:8px;font-size:12.5px"><input type="checkbox" id="ffe-replace" checked> A project named <b>&ldquo;'+escHtml(p.projName)+'&rdquo;</b> already exists &mdash; replace its tracker &amp; POs (uncheck to import as a copy).</label></div>';
@@ -4162,7 +4184,7 @@ let _ffeParsed = null;
     const items=p.tracker.filter(t=>!t.isCategory).slice(0,7);
     document.getElementById('fw-preview').innerHTML=items.map(r=>{
       const ext=(r.qty||0)*(r.estPrice||0);
-      return '<tr><td class="fw-mono" style="font-weight:600">'+escHtml(r.itemNum)+'</td><td>'+escHtml(r.name)+'</td><td>'+escHtml(r.vendor||'—')+'</td>'
+      return '<tr><td class="fw-mono" style="font-weight:600">'+escHtml(r.itemNum)+'</td><td>'+escHtml(r.name)+'</td><td>'+escHtml(r.source||'—')+'</td>'
         +'<td style="text-align:right" class="fw-mono">'+(r.qty||0)+'</td><td style="text-align:right" class="fw-mono">'+(r.estPrice?_money(r.estPrice):'—')+'</td>'
         +'<td style="text-align:right;font-weight:600" class="fw-mono">'+(ext?_money(ext):'—')+'</td></tr>';
     }).join('');
@@ -4281,7 +4303,7 @@ let _ffeParsed = null;
         +'<div style="font-size:18px;font-weight:700;margin-bottom:5px">Import complete</div>'
         +'<div style="font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 18px;line-height:1.5"><b>'+escHtml(name)+'</b> is now live in STEVE with all line items, lead times and a seeded Budget Tracker.</div>'
         +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;text-align:center;max-width:520px;margin:0 auto">'
-        +card('Line items',p.stats.items)+card('Authorizations',p.stats.pas||1)+card('Vendors',p.stats.vendors)+card('Vendor POs',p.stats.pos)
+        +card('Line items',p.stats.items)+card('Authorizations',p.stats.pas||1)+card('Sources',p.stats.sources)+card('Source POs',p.stats.pos)
         +'</div>'
         +'<div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:20px">'
         +'<button class="btn btn-primary" onclick="closeModal(\'ffe-import-modal\');if(typeof nav===\'function\'){var a=[...document.querySelectorAll(\'nav a\')].find(x=>/projects/i.test(x.textContent));if(a)nav(a);}">Open Projects &rarr;</button>'
@@ -4681,7 +4703,7 @@ function seedData(){
     {id:67,desc:"Installation — Caudelle's Receipt, Storage and Installation",amount:14240.00,date:'2024-11-01',cat:'Installation',project:'One Alliance Center Lobby Renovation'},
   ];
 
-  // vendorPOs and pas are empty by default — users build these from the Vendor POs and Purchase Authorizations pages
+  // vendorPOs and pas are empty by default — users build these from the Source POs and Purchase Authorizations pages
   vendorPOs=[{id:2001,poNum:"PO 2024-11-100",project:"One Alliance Center Lobby Renovation",client:"Highwoods",type:"Furniture",status:"Submitted",issueDate:"2026-03-11",revisionDate:"",mfrName:"Williams Sonoma, Inc. Business to Business",mfrTel:"888.837.4888",mfrEmail:"WSIB2B@wsgc.com",mfrWeb:"www.wsib2b.com",mfrContact:"Teri L Williams",mfrContactTel:"",mfrContactEmail:"",mfrAddr:"",mfrCity:"",shipName:"Caudelle Interior Installations",shipAttn:"Easter Caudelle",shipAddr:"101 Villanova Dr SW",shipCity:"Atlanta, GA 30336, USA",shipPhone:"404.355.6878",shipContact:"Easter Caudelle",shipInstructions:"Please Call 24 Hours Prior to Delivery\nMonday-Thursday 7:30-4:30",ai3Contact:"Sabrina Sandrea",ai3Tel:"470.964.0595",ai3Email:"ssandrea@ai3online.com",itemNum:"100",itemHeadline:"Curved Sectional",itemName:"West Elm Contract, Laurent 2-Piece Wedge Sectional",itemFinish:"Fabric and Color: Sand, Performance + Yarn Dyed",itemDims:"Overall: 111.5\"W x 79\"D x 30.75\"H x 17.75\"SH",itemDetails:"Not Applicable",itemLocation:"The Living Room",qty:1,unitPrice:2319.2,delivery:"Quoted 19 Weeks",salesTax:"charge",imgProduct:"",imgSwatch:""},
 {id:2002,poNum:"PO 2024-11-101",project:"One Alliance Center Lobby Renovation",client:"Highwoods",type:"Furniture",status:"Submitted",issueDate:"2026-03-11",revisionDate:"",mfrName:"Bernhardt Hospitality",mfrTel:"90.850.522.24.10",mfrEmail:"hospitalityorders@bernhardt.com",mfrWeb:"www.bernhardthospitality.com",mfrContact:"Ashli Moriarty",mfrContactTel:"",mfrContactEmail:"",mfrAddr:"",mfrCity:"",shipName:"Caudelle Interior Installations",shipAttn:"Easter Caudelle",shipAddr:"101 Villanova Dr SW",shipCity:"Atlanta, GA 30336, USA",shipPhone:"404.355.6878",shipContact:"Easter Caudelle",shipInstructions:"Please Call 24 Hours Prior to Delivery\nMonday-Thursday 7:30-4:30",ai3Contact:"Sabrina Sandrea",ai3Tel:"470.964.0595",ai3Email:"ssandrea@ai3online.com",itemNum:"101",itemHeadline:"Swivel Chairs",itemName:"Bernhardt Hospitality, Cleo Fabric Swivel Chair, SKU: N8702S",itemFinish:"COM - 5.4 Yards Each",itemDims:"41\"W X 37.50\"D X 30.25\"H X 14\"SH",itemDetails:"Not Applicable",itemLocation:"The Living Room",qty:2,unitPrice:1113.0,delivery:"Quoted 4-6 Weeks from COM",salesTax:"charge",imgProduct:"",imgSwatch:""},
 {id:2003,poNum:"PO 2024-11-101A",project:"One Alliance Center Lobby Renovation",client:"Highwoods",type:"Fabric / COM",status:"Submitted",issueDate:"2026-03-11",revisionDate:"",mfrName:"Pollack",mfrTel:"212.627.7766",mfrEmail:"customerservice@pollackassociates.com",mfrWeb:"www.pollackassociates.com",mfrContact:"Jenny Perez Tompkins",mfrContactTel:"",mfrContactEmail:"",mfrAddr:"",mfrCity:"",shipName:"Caudelle Interior Installations",shipAttn:"Easter Caudelle",shipAddr:"101 Villanova Dr SW",shipCity:"Atlanta, GA 30336, USA",shipPhone:"404.355.6878",shipContact:"Easter Caudelle",shipInstructions:"Please Call 24 Hours Prior to Delivery\nMonday-Thursday 7:30-4:30",ai3Contact:"Sabrina Sandrea",ai3Tel:"470.964.0595",ai3Email:"ssandrea@ai3online.com",itemNum:"101A",itemHeadline:"Upholstery Fabric for Swivel Chairs",itemName:"Pollack, New Orleans",itemFinish:"",itemDims:"",itemDetails:"Not Applicable",itemLocation:"",qty:11,unitPrice:53.0,delivery:"Pending Stock",salesTax:"charge",imgProduct:"",imgSwatch:""},
@@ -4842,7 +4864,7 @@ const pageConfig={
   'status':{title:'Weekly Status',actions:'<span style="display:inline-flex;gap:4px;align-items:center;border-right:1px solid var(--border);padding-right:9px;margin-right:3px"><span style="font-size:11px;color:var(--text3)">Flag text:</span><button class="btn btn-sm" onmousedown="return false" onclick="statusColor(\'#1A1A1A\')">Normal</button><button class="btn btn-sm" onmousedown="return false" onclick="statusColor(\'#AE1A1D\')" style="color:#AE1A1D;font-weight:700">Red</button><button class="btn btn-sm" onmousedown="return false" onclick="statusColor(\'#2563A8\')" style="color:#2563A8;font-weight:700">Blue</button></span><button class="btn btn-sm" onclick="statusSyncProjects()" title="Add any STEVE projects not yet on the report">↻ Sync projects</button> <button class="btn btn-sm" onclick="statusAddRow()">+ Add project</button> <button class="btn btn-primary" onclick="statusPrint()">⎙ Print / PDF</button>'},
   'reports':{title:'Reports & Analytics',actions:''},
   'home':{title:'Home',actions:''},
-  'suppliers':{title:'Vendors',actions:'<button class="btn" onclick="openImportSuppliers()" title="Import vendors from an Excel or CSV file">Import</button><button class="btn" onclick="clearAllSuppliers()" title="Remove every vendor from the directory">Clear All</button><button class="btn btn-primary" onclick="openAddSupplier()">+ Add Vendor</button>'},
+  'suppliers':{title:'Sources',actions:'<button class="btn" onclick="openImportSuppliers()" title="Import vendors from an Excel or CSV file">Import</button><button class="btn" onclick="clearAllSuppliers()" title="Remove every vendor from the directory">Clear All</button><button class="btn btn-primary" onclick="openAddSupplier()">+ Add Source</button>'},
   'budget-tracker':{title:'Procurement Tracker',actions:'<button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'invoice-register':{title:'Invoice Register',actions:'<button class="btn btn-primary" onclick="irOpenLog()">+ Log invoice</button>'},
   'owner-statement':{title:'Owner Statement',actions:''},
@@ -4854,7 +4876,7 @@ const pageConfig={
   'doc-budget':{title:'AI Budget Generator',actions:'<button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'prelim-budget':{title:'Preliminary Budgets',actions:'<button class="btn btn-primary" onclick="openNewPB()">+ New Budget</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'purchase-auth':{title:'Purchase Authorizations',actions:'<button class="btn btn-primary" onclick="openNewPA()">+ New Authorization</button> <button class="btn btn-sm" onclick="openPAImport()">↑ Import PDF</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
-  'vendor-pos':{title:'Purchase Orders',actions:'<button class="btn btn-primary" onclick="openNewVPO()">+ New Vendor PO</button> <button class="btn btn-sm" onclick="openVPOImport()" title="Read an existing PO PDF and create a Vendor PO">↑ Import from PDF</button> <button class="btn btn-sm" onclick="openGeneratePOsFromPA()" title="Create a PO for every line item in a PA">⚡ Generate from PA</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
+  'vendor-pos':{title:'Purchase Orders',actions:'<button class="btn btn-primary" onclick="openNewVPO()">+ New Source PO</button> <button class="btn btn-sm" onclick="openVPOImport()" title="Read an existing PO PDF and create a Source PO">↑ Import from PDF</button> <button class="btn btn-sm" onclick="openGeneratePOsFromPA()" title="Create a PO for every line item in a PA">⚡ Generate from PA</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'credit-card-auth':{title:'Credit Card Authorizations',actions:'<button class="btn btn-primary" onclick="openNewCCA()">+ New Authorization</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'closeout':{title:'Close-Out Tracking',actions:'<button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'delivery':{title:'Delivery & Expediting',actions:'<button class="btn btn-primary" onclick="dlPrint()">⎙ Monthly status PDF</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
@@ -4925,7 +4947,7 @@ function nav(el){
   // and the global links elsewhere. (Help is context-neutral — leaves it as-is.)
   // A link living inside #project-nav always keeps the project sidebar — this lets
   // the project-scoped Reports group show its analytics without losing the nav.
-  const SIDEBAR_GLOBAL = ['dashboard','projects','status','home','reports','suppliers','library','import'];
+  const SIDEBAR_GLOBAL = ['dashboard','projects','status','home','reports','suppliers','library','import','contacts','manufacturers','templates'];
   const inProjectNav = !!(el.closest && el.closest('#project-nav'));
   if(page!=='help' && typeof showProjectSidebar==='function') showProjectSidebar(inProjectNav || !SIDEBAR_GLOBAL.includes(page));
   // Reflect active child on its parent nav group
@@ -4942,6 +4964,24 @@ function nav(el){
     document.getElementById('topbar-title').textContent = pageConfig[page].title;
     document.getElementById('topbar-actions').innerHTML = pageConfig[page].actions;
     closeProjectDetail(); renderProjects();
+    return;
+  }
+  if(page==='templates'){
+    document.getElementById('topbar-title').textContent = 'Templates';
+    document.getElementById('topbar-actions').innerHTML = '';
+    if(typeof tplRender==='function') tplRender();
+    return;
+  }
+  if(page==='manufacturers'){
+    document.getElementById('topbar-title').textContent = 'Manufacturers';
+    document.getElementById('topbar-actions').innerHTML = '';
+    if(typeof mfRender==='function') mfRender();
+    return;
+  }
+  if(page==='contacts'){
+    document.getElementById('topbar-title').textContent = 'Contacts';
+    document.getElementById('topbar-actions').innerHTML = '';
+    if(typeof ctRender==='function') ctRender();
     return;
   }
   if(page==='status'){
@@ -5118,12 +5158,12 @@ function renderDashboard(){
       <div class="stat-sub">${projects.length} total</div>
     </div>
     <div class="stat-card" style="display:flex;flex-direction:column;justify-content:space-between;min-height:72px">
-      <div class="stat-label">Outstanding to Vendors</div>
+      <div class="stat-label">Outstanding to Sources</div>
       <div class="stat-value" style="font-size:22px;color:${totalOutstanding>0?'var(--red)':'var(--green)'}">${fmt(totalOutstanding)}</div>
-      <div class="stat-sub">Unpaid vendor balances</div>
+      <div class="stat-sub">Unpaid source balances</div>
     </div>
     <div class="stat-card" style="display:flex;flex-direction:column;justify-content:space-between;min-height:72px">
-      <div class="stat-label">Paid to Vendors</div>
+      <div class="stat-label">Paid to Sources</div>
       <div class="stat-value" style="font-size:22px;color:var(--green)">${fmt(totalPaid)}</div>
       <div class="stat-sub">Across active projects</div>
     </div>
@@ -5385,7 +5425,7 @@ function openProjectDetail(id){
         const tag = w>=16?'Order first':w>=10?'Order soon':'Schedule';
         return `<div ${_goTracker} class="pd-row" style="padding:10px 18px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center">
           <div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_itemLabel(i)}</div>
-            <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(i.vendor||'Vendor TBD')} · ${fmt(_ext(i))}</div></div>
+            <div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(i.vendor||'Source TBD')} · ${fmt(_ext(i))}</div></div>
           <div style="text-align:right;flex-shrink:0"><div style="font-size:12.5px;font-weight:700;color:${col}">${escHtml(i.leadTime)}</div>
             <div style="font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:${col}">${tag}</div></div>
         </div>`; }).join('')
@@ -5633,6 +5673,7 @@ function editCurrentProject(){
   document.getElementById('proj-location').value=p.location||'';
   document.getElementById('proj-notes').value=p.notes||'';
   document.getElementById('proj-billto').value=p.billTo||'';
+  if(typeof ctFillAgentSelect==='function') ctFillAgentSelect(p.agent||'');
   // Document type — show current value; lock it if project already has linked data
   const dt = p.docType || 'po';
   document.getElementById('proj-doctype-'+dt).checked = true;
@@ -5666,7 +5707,7 @@ function saveProject(){
   pushUndoSnapshot(editingProject?'Edit project':'Add project', _undoKeys);
   const docTypeEl = document.querySelector('input[name="proj-doctype"]:checked');
   const docType = docTypeEl ? docTypeEl.value : 'po';
-  const data={name,projNumber:document.getElementById('proj-number').value.trim(),client,contact:document.getElementById('proj-contact').value.trim(),email:document.getElementById('proj-email').value.trim(),type:document.getElementById('proj-type').value,status:document.getElementById('proj-status').value,start:document.getElementById('proj-start').value,end:document.getElementById('proj-end').value,budget:parseFloat(document.getElementById('proj-budget').value)||0,location:document.getElementById('proj-location').value.trim(),notes:document.getElementById('proj-notes').value.trim(),billTo:document.getElementById('proj-billto').value.trim(),docType:docType};
+  const data={name,projNumber:document.getElementById('proj-number').value.trim(),client,contact:document.getElementById('proj-contact').value.trim(),email:document.getElementById('proj-email').value.trim(),type:document.getElementById('proj-type').value,status:document.getElementById('proj-status').value,start:document.getElementById('proj-start').value,end:document.getElementById('proj-end').value,budget:parseFloat(document.getElementById('proj-budget').value)||0,location:document.getElementById('proj-location').value.trim(),notes:document.getElementById('proj-notes').value.trim(),billTo:document.getElementById('proj-billto').value.trim(),docType:docType,agent:(document.getElementById('proj-agent')||{value:''}).value};
   if(editingProject){
     const idx=projects.findIndex(p=>p.id===editingProject);
     if(idx<0){alert('Project not found.');return;}
@@ -5678,7 +5719,7 @@ function saveProject(){
     if(oldName!==name || oldClient!==client){
       // Purchase Authorizations
       pas.forEach(pa=>{ if(pa.project===oldName){ pa.project=name; pa.client=client; } });
-      // Vendor POs
+      // Source POs
       vendorPOs.forEach(v=>{ if(v.project===oldName){ v.project=name; v.client=client; } });
       // Prelim Budgets
       prelimBudgets.forEach(pb=>{ if(pb.project===oldName){ pb.project=name; pb.client=client; } });
@@ -6191,10 +6232,10 @@ function renderSuppliers(){
         <td>${statusBadge(s.status)}</td>
         <td><button class="btn btn-sm" onclick="viewSupplier(${s.id})">Edit</button></td>
       </tr>`).join('')
-    :`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)">No vendors found.</td></tr>`;
+    :`<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3)">No sources found.</td></tr>`;
 }
 
-function openAddSupplier(){editingSupplier=null;document.getElementById('supplier-modal-title').textContent='Add Vendor';['s-name','s-country','s-lead','s-email','s-phone','s-rating','s-discount','s-notes','s-web','s-contact','s-contact-email','s-contact-phone'].forEach(id=>document.getElementById(id).value='');document.getElementById('s-status').value='Active';buildRatingStars();openModal('supplier-modal');}
+function openAddSupplier(){editingSupplier=null;document.getElementById('supplier-modal-title').textContent='Add Source';['s-name','s-country','s-lead','s-email','s-phone','s-rating','s-discount','s-notes','s-web','s-contact','s-contact-email','s-contact-phone'].forEach(id=>document.getElementById(id).value='');document.getElementById('s-status').value='Active';buildRatingStars();openModal('supplier-modal');}
 
 // Remove every vendor from the directory — memory, localStorage, and the cloud.
 function clearAllSuppliers(){
@@ -6415,7 +6456,7 @@ async function runSupplierImport(){
   saveAll(); closeModal('import-suppliers-modal');
   if(typeof renderSuppliers==='function') renderSuppliers();
   if(typeof sbPushAllSuppliers==='function' && typeof sbClient!=='undefined' && sbClient){
-    sbPushAllSuppliers().then(ok=>{ if(typeof ai3Toast==='function' && !ok) ai3Toast('Vendors added locally — cloud sync will retry.', 3200); });
+    sbPushAllSuppliers().then(ok=>{ if(typeof ai3Toast==='function' && !ok) ai3Toast('Sources added locally — cloud sync will retry.', 3200); });
   }
   if(typeof ai3Toast==='function') ai3Toast('Imported '+added+' vendor'+(added!==1?'s':'')+(skipped?(' · '+skipped+' already in your list, skipped'):'')+(replace?' (list replaced)':''), 4200);
 }
@@ -6433,7 +6474,7 @@ function saveSupplier(){
 }
 function viewSupplier(id){
   const s=suppliers.find(x=>x.id===id);if(!s)return;
-  editingSupplier=id;document.getElementById('supplier-modal-title').textContent='Edit Vendor';
+  editingSupplier=id;document.getElementById('supplier-modal-title').textContent='Edit Source';
   document.getElementById('s-name').value=s.name;document.getElementById('s-cat').value=s.category;document.getElementById('s-country').value=s.country;document.getElementById('s-lead').value=s.lead;document.getElementById('s-email').value=s.email;document.getElementById('s-phone').value=s.phone;document.getElementById('s-rating').value=s.rating;document.getElementById('s-discount').value=s.discount||'';document.getElementById('s-status').value=s.status;document.getElementById('s-notes').value=s.notes;document.getElementById('s-web').value=s.website||'';document.getElementById('s-contact').value=s.contact||'';document.getElementById('s-contact-email').value=s.contactEmail||'';document.getElementById('s-contact-phone').value=s.contactPhone||'';
   buildRatingStars();
   openModal('supplier-modal');
@@ -6937,7 +6978,7 @@ function renderDocLineItemsForm(prefix, items, recalcFn){
         <input value="${escHtml(item.name||'')}" placeholder="Item name"
           style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box;margin-bottom:2px"
           oninput="paLineItems[${i}].name=this.value;${recalcFn}()" />
-        <input value="${escHtml(item.description||'')}" placeholder="Vendor / description"
+        <input value="${escHtml(item.description||'')}" placeholder="Source / description"
           style="padding:2px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
           oninput="paLineItems[${i}].description=this.value;${recalcFn}()" />
       </div>
@@ -7135,7 +7176,7 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
     } else {
       const ext=(parseFloat(item.qty)||0)*(parseFloat(item.price)||0);
       const priceC = editable ? '$'+docField('pa',i,'price',item.price,{type:'number'}) : (item.price?'$'+fmtD(item.price):'');
-      const descC  = editable ? docField('pa',i,'description',item.description,{placeholder:'Vendor / description',multi:true}) : (item.description?escHtml(item.description):'');
+      const descC  = editable ? docField('pa',i,'description',item.description,{placeholder:'Source / description',multi:true}) : (item.description?escHtml(item.description):'');
       rows+=`<tr style="vertical-align:top;border-bottom:1px solid #eee">
         <td style="padding:5px 8px;font-size:11px">${cell(i,'itemNum',item.itemNum,{placeholder:'#'})}</td>
         <td style="padding:5px 8px;font-size:11.5px">
@@ -7237,7 +7278,7 @@ function recalcPA(){
         <div style="flex:1"><div style="font-size:11px;margin-bottom:20px">AUTHORIZATION:</div><div style="border-bottom:1px solid #999;margin-bottom:4px"></div><div style="font-size:10px;color:#666">Signature</div></div>
         <div style="width:160px"><div style="font-size:11px;margin-bottom:20px">Date:</div><div style="border-bottom:1px solid #999;margin-bottom:4px"></div><div style="font-size:10px;color:#666">Date</div></div>
       </div>
-      <div style="font-size:9.5px;line-height:1.55;color:#333"><strong>TERMS AND CONDITIONS:</strong> Make check payable to ai3, Inc. Payment will serve as authorization for ai3, Inc. to purchase the above-referenced goods, services, or materials on your behalf. The balance of this order plus applicable shipping charges, receipt and installation fees, contingency fee, and all applicable sales tax are due IN FULL prior to purchasing. Any discrepancies or differences in pricing estimates must be balanced/paid in full prior to order shipment. Caudelle's Furniture Specialists will act as the Owner's agent in receipt and storage of all goods. The Owner has the right to inspect all goods in conjunction with Caudelle's inspection. ai3 is not responsible for any damages incurred in transit. ai3 is not responsible for charges incurred due to Owner revisions or reselections, vendor price increases, or variances in freight and sales tax.</div>
+      <div style="font-size:9.5px;line-height:1.55;color:#333"><strong>TERMS AND CONDITIONS:</strong> Make check payable to ai3, Inc. Payment will serve as authorization for ai3, Inc. to purchase the above-referenced goods, services, or materials on your behalf. The balance of this order plus applicable shipping charges, receipt and installation fees, contingency fee, and all applicable sales tax are due IN FULL prior to purchasing. Any discrepancies or differences in pricing estimates must be balanced/paid in full prior to order shipment. Caudelle's Furniture Specialists will act as the Owner's agent in receipt and storage of all goods. The Owner has the right to inspect all goods in conjunction with Caudelle's inspection. ai3 is not responsible for any damages incurred in transit. ai3 is not responsible for charges incurred due to Owner revisions or reselections, source price increases, or variances in freight and sales tax.</div>
     </div>
   </div>`;
   document.getElementById('pa-preview').innerHTML=paBody+authBlock;
@@ -7539,7 +7580,7 @@ function processImportFile(file, type) {
       if (skipped > 0) msg += ` ${skipped} skipped (missing required fields or duplicates).`;
       setResult(type, imported > 0 ? 'success' : 'warning', msg);
 
-      // Vendors live in their own cloud table (not the shared blob), so a bulk
+      // Sources live in their own cloud table (not the shared blob), so a bulk
       // import must be pushed up explicitly or it won't survive a reload.
       if (type === 'suppliers' && imported > 0 && typeof sbPushAllSuppliers === 'function') {
         setResult(type, 'success', msg + ' Saving to the cloud…');
@@ -8231,7 +8272,7 @@ function pbRenderCategoriesForm(){
           <button onclick="pbRemoveItem(${ci},${ii})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:2px;line-height:1" title="Remove">✕</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:2px">
-          <input value="${escHtml(item.vendor||'')}" placeholder="Vendor / manufacturer" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
+          <input value="${escHtml(item.vendor||'')}" placeholder="Source / manufacturer" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
             oninput="pbUpdateItem(${ci},${ii},'vendor',this.value)" />
           <input value="${escHtml(item.leadTime||'')}" placeholder="Lead time" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
             oninput="pbUpdateItem(${ci},${ii},'leadTime',this.value)" />
@@ -8430,7 +8471,7 @@ function buildPBAreaPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
     <thead><tr style="background:#f2f2f2;border-top:1.5px solid #999;border-bottom:1px solid #ccc">
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left;width:46px">Item #</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left">Description / Notes</th>
-      <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left;width:110px">Vendor</th>
+      <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left;width:110px">Source</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:center;width:42px">Qty</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:right;width:86px">Unit Price</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:right;width:86px">Extension</th>
@@ -8493,7 +8534,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
       }
       const priceCell = editable ? '$'+docField('pb',idx,'price',item.price,{type:'number'}) : (item.price?'$'+fmtD(item.price):'');
       const descCell  = editable ? docField('pb',idx,'description',item.description,{placeholder:'Description',multi:true}) : (item.description?escHtml(item.description):'');
-      const vendorCell= editable ? docField('pb',idx,'vendor',item.vendor,{placeholder:'Vendor'}) : (item.vendor?`<div style="font-weight:500">${escHtml(item.vendor)}</div>`:'<span style="color:#bbb">—</span>');
+      const vendorCell= editable ? docField('pb',idx,'vendor',item.vendor,{placeholder:'Source'}) : (item.vendor?`<div style="font-weight:500">${escHtml(item.vendor)}</div>`:'<span style="color:#bbb">—</span>');
       allRows+=`<tr style="vertical-align:top;border-bottom:1px solid #e8e8e8">
         <td style="padding:7px 8px;font-size:11px;color:#555;white-space:nowrap">${F(idx,'itemNum',item.itemNum,{placeholder:'#'})}</td>
         <td style="padding:7px 8px;font-size:11.5px">
@@ -8539,7 +8580,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
     <thead><tr style="background:#f2f2f2;border-top:1.5px solid #999;border-bottom:1px solid #ccc">
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left;width:46px">Item #</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left">Description / Notes</th>
-      <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left;width:110px">Vendor</th>
+      <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:left;width:110px">Source</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:center;width:42px">Qty</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:right;width:86px">Unit Price</th>
       <th style="padding:6px 8px;font-size:10.5px;font-weight:600;text-align:right;width:86px">Extension</th>
@@ -8813,7 +8854,7 @@ function altRenderLoading(container){
   container.innerHTML = `<div style="text-align:center;padding:24px 0">
     <div style="font-size:22px;margin-bottom:8px;animation:spin 1.5s linear infinite;display:inline-block">🔄</div>
     <div style="font-size:13px;font-weight:500;color:var(--text)">Finding alternatives…</div>
-    <div style="font-size:12px;color:var(--text3);margin-top:4px">Searching a broad range of vendors at the same or lower price</div>
+    <div style="font-size:12px;color:var(--text3);margin-top:4px">Searching a broad range of sources at the same or lower price</div>
   </div>`;
 }
 
@@ -8823,7 +8864,7 @@ function altRenderError(container, msg){
 
 let _altSwapCallback = null;
 
-// Fuzzy-match an alternative's vendor name against our Vendors list.
+// Fuzzy-match an alternative's vendor name against our Sources list.
 // Returns the matched supplier record, or null.
 function matchKnownVendor(name){
   if(!name || typeof suppliers==='undefined' || !suppliers.length) return null;
@@ -8867,8 +8908,8 @@ function altRenderResults(container, alts, onSwap){
   container.innerHTML = alts.map((a,i)=>{
     const known = matchKnownVendor(a.vendor);
     const tag = known
-      ? `<span title="This vendor is in your Vendors list" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--green);background:#fff;border:1px solid var(--green);border-radius:3px;padding:1px 6px;margin-left:6px;white-space:nowrap">✓ In your Vendors${known.rating?` · ${known.rating.toFixed(1)}★`:''}</span>`
-      : `<span title="Not in your Vendors list" style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;color:var(--text3);background:var(--surface2,#f4f4f5);border:1px solid var(--border2);border-radius:3px;padding:1px 6px;margin-left:6px;white-space:nowrap">New vendor</span>`;
+      ? `<span title="This vendor is in your Sources list" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--green);background:#fff;border:1px solid var(--green);border-radius:3px;padding:1px 6px;margin-left:6px;white-space:nowrap">✓ In your Sources${known.rating?` · ${known.rating.toFixed(1)}★`:''}</span>`
+      : `<span title="Not in your Sources list" style="display:inline-flex;align-items:center;font-size:10px;font-weight:600;color:var(--text3);background:var(--surface2,#f4f4f5);border:1px solid var(--border2);border-radius:3px;padding:1px 6px;margin-left:6px;white-space:nowrap">New source</span>`;
     const accent = known ? 'border-left:3px solid var(--green);' : 'border-left:3px solid var(--border2);';
     return `
     <div style="border:1px solid var(--border);${accent}border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px">
@@ -8982,24 +9023,24 @@ async function aiGetAlternatives(itemName, vendor, description, price, qty, proj
     ).join('\n');
     prompt = `You are an FF&E procurement specialist for ${projectType||'commercial'} interiors. From these real product search results, choose the 5 best and most varied alternatives to the original item. Deliberately include a broad range of sources - major contract lines, boutique and specialty/artisan makers, hospitality- or residential-focused brands, importers, and regional or trade-only vendors - not only the largest manufacturers. Avoid returning multiple items from the same brand unless one is clearly the best fit.
 
-Original item: ${itemName} | Vendor: ${vendor||''} | Price: $${fmtD(price||0)} | Type: ${projectType||'Commercial'}
+Original item: ${itemName} | Source: ${vendor||''} | Price: $${fmtD(price||0)} | Type: ${projectType||'Commercial'}
 
 Search results:
 ${resultsList}
 
 Return ONLY a JSON array — no explanation, no markdown:
-[{"name":"Product name","vendor":"Vendor name","description":"Key spec under 70 chars","price":0.00,"leadTime":"8-12 wks","savings":0.00,"url":"exact URL from results above","notes":"Why it is a good alternative"}]
+[{"name":"Product name","vendor":"Source name","description":"Key spec under 70 chars","price":0.00,"leadTime":"8-12 wks","savings":0.00,"url":"exact URL from results above","notes":"Why it is a good alternative"}]
 
 savings = $${fmtD(price||0)} minus alt price. Use the exact URL from the search results above.`;
   } else {
     // No SerpApi — use AI knowledge + constructed search URLs
     prompt = `You are an FF&E procurement specialist for ${projectType||'commercial'} interiors. Suggest 5 varied alternatives to this furniture item, at or below the same price. Return ONLY a JSON array.
 
-Item: ${itemName} | Vendor: ${vendor||''} | Spec: ${description||''} | Price: $${fmtD(price||0)} | Type: ${projectType||'Commercial'}
+Item: ${itemName} | Source: ${vendor||''} | Spec: ${description||''} | Price: $${fmtD(price||0)} | Type: ${projectType||'Commercial'}
 
 Draw alternatives from a BROAD range of real vendors appropriate to the project type - not just the largest brands. Include a mix where relevant: major contract manufacturers, boutique/specialty and artisan makers, hospitality- or residential-focused lines, importers, and regional or trade-only vendors. Vary the vendor across your suggestions.
 
-For each alternative, set "url" to a Google search that will find it, e.g. "https://www.google.com/search?q=Vendor+Product+Name".
+For each alternative, set "url" to a Google search that will find it, e.g. "https://www.google.com/search?q=Source+Product+Name".
 
 [{"name":"Product name","vendor":"Manufacturer","description":"Key spec under 70 chars","price":0.00,"leadTime":"X-X wks","savings":0.00,"url":"https://www.google.com/search?q=...","notes":"Why it fits"}]
 
@@ -9144,10 +9185,12 @@ async function paFindAlternatives(){
 let currentVPOId = null;
 
 const VPO_BOILERPLATE = {
+  'Table Top': ['All table tops must be contract quality and suitable for commercial use.','Manufacturer to coordinate fabrication of top with the base(s) ordered separately — verify that the base is appropriate for the specified top size and weight.','Verify all dimensions, edge profiles, and finishes prior to fabrication.','Tops to be sealed on all surfaces and edges, including the underside.','Submit finish sample for approval prior to fabrication.','All pieces must be tagged with sidemarks/item numbers as specified.','Any alternate specification or material substitution must be approved by ai3 in writing.'],
+  'Table Base': ['All table bases must be contract quality and suitable for commercial use.','Manufacturer to coordinate base with the table top ordered separately — verify that the base is rated for the specified top size, material, and weight.','Base to include levelers/glides appropriate to the finished floor.','Verify column height so the finished table height is as specified with the top installed.','Submit finish sample for approval prior to fabrication.','All pieces must be tagged with sidemarks/item numbers as specified.','Any alternate specification or material substitution must be approved by ai3 in writing.'],
   'Furniture': ['All furniture pieces must be contract quality and suitable for commercial use.','Attached images are intended to express conceptual design intent and should be considered as reference for development, not final submittal.','Manufacturer must submit all applicable finish samples, frame, fabric, for approval prior to fabrication.','All wood must be treated to be insect and vermin free. All metal joints to be welded, braised, and polished.','All internal hardware (hinges, screws, bolts, etc) shall be corrosion proof.','Upholstery: Tight. Cushions to be fabricated with high density flame retardant foam, wrapped in flame retardant poly-dacron wrap.','Must meet all applicable fire codes.','Glides: Provide heavy-duty nylon glides suitable for carpet floors. Finish to be brown.','Manufacturer to provide maintenance instructions to Purchasing Agent prior to delivery.','Any alternate specification/manufacturer must be approved by ai3.'],
   'Fabric / COM': ['All goods to be contract quality suitable for commercial use.','Fabric must be first run goods from full bolts.','Leather must be top grain goods from full hides.','Rips, holes, scratches, or scars are not acceptable.','Printing, dying, gluing, and finishing methods should be appropriate for use of fabric.','Goods should be pre-shrunk, non-fading, non-cracking, and non-pilling.','Upon installation goods must be mildew-free.','Must pass all other applicable state and local fire codes.','Submit finished cutting for approval prior to shipment.','All yardage requirements must be verified by manufacturer.','Manufacturer to provide flame certificate to purchasing agent at time order is shipped.','Any alternate specification or manufacturer must be approved by ai3.'],
   'Casegoods': ['To be contract quality and suitable for commercial use.','Manufacturer to coordinate fabrication of tables with bases/legs.','All wood must be kiln-dried 3/4 hardwood, treated to be insect and vermin-free.','All wood joints to be reinforced, screwed and glued in place.','Submit scaled, reproducible shop drawings for approval prior to fabrication.','Submit finish samples for approval prior to fabrication.','All internal hardware (hinges, screws, bolts, etc) shall be corrosion proof.','Must meet all applicable fire codes.','Levelers: Provide heavy-duty adjustable levelers suitable for carpet floors. Finish to be clear.','Any alternate specification/manufacturer must be approved by ai3.'],
-  'Lighting': ['Must be contract quality and suitable for commercial use.','Attached images are intended to express conceptual design intent and should be considered as reference for development, not final submittal.','All metal parts to be corrosion proof, this includes diffuser components.','Manufacturer to submit reproducible shop drawings for approval prior to fabrication.','Manufacturer to submit finish samples for approval prior to fabrication.','Vendor is responsible for verifying quantity, wattage and bulb type required.','Manufacturer to confirm weight of fixture(s), installation method and mounting points.','Manufacturer to provide specified lamps.','Fixture to meet all applicable codes and be U.L. approved.','Any alternate specification/manufacturer must be approved by ai3.'],
+  'Lighting': ['Must be contract quality and suitable for commercial use.','Attached images are intended to express conceptual design intent and should be considered as reference for development, not final submittal.','All metal parts to be corrosion proof, this includes diffuser components.','Manufacturer to submit reproducible shop drawings for approval prior to fabrication.','Manufacturer to submit finish samples for approval prior to fabrication.','Source is responsible for verifying quantity, wattage and bulb type required.','Manufacturer to confirm weight of fixture(s), installation method and mounting points.','Manufacturer to provide specified lamps.','Fixture to meet all applicable codes and be U.L. approved.','Any alternate specification/manufacturer must be approved by ai3.'],
   'Drapery': ['All goods to be contract quality suitable for commercial use.','Submit sample for approval prior to fabrication.','All workmanship to be first class.','Any alternate specification or manufacturer must be approved by ai3.'],
   'Installation': ['All items have been specified to be tagged accordingly.','All items are to be installed according to attached furniture plan and legend.','Installation to be coordinated with ai3 and GC.','All furniture pieces must be completely assembled and installed per manufacturer specifications.','Installer is responsible for inspecting all goods upon receipt. Any damage must be documented and reported to ai3 immediately.','Any alternate installation method must be approved by ai3.'],
   'Seating': ['All furniture pieces must be contract quality and suitable for commercial use.','Attached images are intended to express conceptual design intent and should be considered as reference for development, not final submittal.','Manufacturer to submit scaled shop drawings for approval prior to fabrication.','Frames to be constructed of 5/4 kiln-dried solid hardwood, reinforced with corner blocks, screwed and glued in place.','All wood must be treated to be insect and vermin free.','All internal hardware (hinges, screws, bolts, etc) shall be corrosion proof.','Must meet all applicable fire codes.','Glides: Provide heavy-duty nylon glides suitable for tile floors. Finish to be brown.','Manufacturer to provide maintenance instructions to Purchasing Agent prior to delivery.','Any alternate specification/manufacturer must be approved by ai3.'],
@@ -9172,6 +9215,8 @@ function detectPOType(code){
   if(/^INS/.test(c)) return 'Installation';
   if(/\.F\d*$/.test(c) || /^CF/.test(c)) return 'Chair Fabric';
   if(/^DF/.test(c)) return 'Drapery Fabric';
+  if(/^TT/.test(c)) return 'Table Top';
+  if(/^TB/.test(c)) return 'Table Base';
   if(/^LT/.test(c)) return 'Lighting';
   if(/^UB/.test(c)) return 'Umbrella Base';
   if(/^U/.test(c))  return 'Umbrella';
@@ -9189,6 +9234,8 @@ function detectPOType(code){
 // Common keys (itemName/itemFinish/itemDims/itemDetails/bulb/fabric*) are reused
 // so existing POs, the list view, search and PA import keep working unchanged.
 const PO_TYPE_FIELDS = {
+  'Table Top':      [['Product Name/#','itemName'],['Material / Finish','itemFinish',1],['Edge Profile','itemFrame'],['Dimensions','itemDims'],['Details','itemDetails',1]],
+  'Table Base':     [['Product Name/#','itemName'],['Material / Finish','itemFinish',1],['Mounting','itemMounting'],['Dimensions','itemDims'],['Details','itemDetails',1]],
   'Seating':        [['Product Name','itemName'],['Finish','itemFinish',1],['Dimensions','itemDims'],['Details','itemDetails',1],['COM Information','comInfo',1],['COM Requirement','comReq'],['COM Tag','comTag'],['COM Approval','comApproval',1]],
   'Chair Fabric':   [['Item Name, No','itemName'],['Color','itemColor'],['Width','fabricWidth'],['Content','fabricContent',1],['Repeat','fabricRepeat'],['Durability','fabricAbrasion']],
   'Table':          [['Product Name/#','itemName'],['Material','itemFinish',1],['Dimensions','itemDims'],['Details','itemDetails',1]],
@@ -9398,7 +9445,7 @@ function genPOsPreview(){
     </div>
     <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden">
       <div style="background:var(--surface2);padding:7px 12px;display:grid;grid-template-columns:60px 1fr 80px 60px;gap:8px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">
-        <div>Item #</div><div>Name</div><div>Vendor</div><div>Price</div>
+        <div>Item #</div><div>Name</div><div>Source</div><div>Price</div>
       </div>
       ${items.map(item=>`
         <div style="padding:7px 12px;display:grid;grid-template-columns:60px 1fr 80px 60px;gap:8px;font-size:12px;border-bottom:1px solid var(--border)">
@@ -9462,7 +9509,7 @@ function executeGeneratePOs(){
       unitPrice:    item.price||0,
       delivery:     item.leadTime||'',
       salesTax:     'charge',
-      // Vendor from PA item
+      // Source from PA item
       mfrName:      item.vendor||item.description||'',
       mfrTel:'', mfrEmail:'', mfrWeb:'', mfrContact:'',
       mfrContactTel:'', mfrContactEmail:'', mfrAddr:'', mfrCity:'',
@@ -9490,7 +9537,7 @@ function executeGeneratePOs(){
   alert(`✓ Created ${created} Purchase Order${created!==1?'s':''} from ${pa.paNum||'PA'}.\n\nOpen each PO to add vendor details, product images, and submit.`);
 }
 
-// ── Vendor PO PDF Import (AI extraction — mirrors the PA import flow) ────────
+// ── Source PO PDF Import (AI extraction — mirrors the PA import flow) ────────
 let _vpoImportPdfB64 = '';
 let _vpoImportFileName = '';
 
@@ -9785,7 +9832,7 @@ function vpoToggleFmt(kind){
 function showVPOEditor(v){
   document.getElementById('vpo-list-view').style.display='none';
   document.getElementById('vpo-editor').style.display='block';
-  document.getElementById('topbar-actions').innerHTML='<button class="btn btn-primary" onclick="saveVPO()">Save</button><button class="btn" onclick="printVPO()">Print / Save PDF</button><span style="display:inline-flex;gap:4px;align-items:center;border-left:1px solid var(--border);border-right:1px solid var(--border);padding:0 8px;margin:0 2px"><button class="btn btn-sm" onclick="vpoToggleFmt(\'b\')" title="Bold the last field you clicked" style="font-weight:700">B</button><button class="btn btn-sm" onclick="vpoToggleFmt(\'hl\')" title="Highlight the last field you clicked">🖍 Highlight</button></span><button class="btn" onclick="emailVPO()" title="Open Outlook with this PO">✉ Email</button><button class="btn" onclick="openVpoFillModal()" title="Populate manufacturer & item details from a product cut sheet or web link">✨ AI Fill</button><button class="btn" onclick="vpoMatchVendor()" title="Cross-reference the manufacturer with your Vendors directory and fill in missing phone, email & contact">🔗 Match Vendor</button><button class="btn" onclick="vpoFindAlternatives()" title="Find similar products at same or lower price">🔄 Find Alternatives</button><button class="btn" onclick="vpoAddPage()" title="Add a continuation page with extra text and images">＋ Add Page</button><button class="btn" onclick="vpoRenumber()" title="Reset PO number to the standard {project number}-{item number} format">↻ Renumber</button><button class="btn btn-danger btn-sm" onclick="deleteCurrentVPO()">Delete</button><button class="btn btn-sm" onclick="closeVPOEditor()">← Back</button>';
+  document.getElementById('topbar-actions').innerHTML='<button class="btn btn-primary" onclick="saveVPO()">Save</button><button class="btn" onclick="tplSaveCurrentPO()">Save as Template</button><button class="btn" onclick="printVPO()">Print / Save PDF</button><span style="display:inline-flex;gap:4px;align-items:center;border-left:1px solid var(--border);border-right:1px solid var(--border);padding:0 8px;margin:0 2px"><button class="btn btn-sm" onclick="vpoToggleFmt(\'b\')" title="Bold the last field you clicked" style="font-weight:700">B</button><button class="btn btn-sm" onclick="vpoToggleFmt(\'hl\')" title="Highlight the last field you clicked">🖍 Highlight</button></span><button class="btn" onclick="emailVPO()" title="Open Outlook with this PO">✉ Email</button><button class="btn" onclick="openVpoFillModal()" title="Populate manufacturer & item details from a product cut sheet or web link">✨ AI Fill</button><button class="btn" onclick="vpoMatchVendor()" title="Cross-reference the manufacturer with your Sources directory and fill in missing phone, email & contact">🔗 Match Source</button><button class="btn" onclick="vpoFindAlternatives()" title="Find similar products at same or lower price">🔄 Find Alternatives</button><button class="btn" onclick="vpoAddPage()" title="Add a continuation page with extra text and images">＋ Add Page</button><button class="btn" onclick="vpoRenumber()" title="Reset PO number to the standard {project number}-{item number} format">↻ Renumber</button><button class="btn btn-danger btn-sm" onclick="deleteCurrentVPO()">Delete</button><button class="btn btn-sm" onclick="closeVPOEditor()">← Back</button>';
   vpoLastFieldKey = null;
   const today=new Date().toISOString().split('T')[0];
   const initType=v?(v.type||'Furniture'):'Furniture';
@@ -9876,7 +9923,7 @@ function showVPOEditor(v){
   const sp = document.getElementById('vpo-img-swatch-preview');
   const st = document.getElementById('vpo-img-swatch-thumb');
   if(vpoImages.swatch && sp && st){ st.src=vpoImages.swatch; sp.style.display='block'; } else if(sp) sp.style.display='none';
-  document.getElementById('vpo-editor-breadcrumb').textContent=v?v.poNum:'New Vendor PO';
+  document.getElementById('vpo-editor-breadcrumb').textContent=v?v.poNum:'New Source PO';
   recalcVPO();
 }
 function closeVPOEditor(){currentVPOId=null;document.getElementById('vpo-list-view').style.display='';document.getElementById('vpo-editor').style.display='none';document.getElementById('topbar-actions').innerHTML=pageConfig['vendor-pos'].actions;renderVPOList();}
@@ -9898,7 +9945,8 @@ function vpoTypeChanged(){
 function vpoF(editable, key, value, opts){
   opts = opts || {};
   const raw = (value==null) ? '' : String(value);
-  const disp = opts.multiline ? escHtml(raw).replace(/\n/g,'<br>') : escHtml(raw);
+  // Any field may hold line breaks now, so always render them.
+  const disp = escHtml(raw).replace(/\n/g,'<br>');
   // Per-field formatting (bold / highlight) — applies in both edit and print views
   const fmt = (vpoForm && vpoForm.fmt && vpoForm.fmt[key]) || null;
   let fmtStyle='';
@@ -9939,21 +9987,46 @@ function vpoEditField(span){
     el.onchange = commit; el.onblur = commit;
   } else if(span.dataset.multi==='1'){
     el = document.createElement('textarea'); el.value=cur; el.onblur = commit;
+    el.style.overflow='hidden'; el.style.resize='vertical';
+    el.oninput = ()=> vpoGrow(el);
+    el.onkeydown = e=>{ if(e.key==='Escape'){ committed=true; recalcVPO(); } };
     const lines = String(cur).split('\n').length;
     el.rows = Math.min(24, Math.max(span.dataset.big?6:2, lines));
     if(span.dataset.big){ el.style.width='100%'; el.style.minWidth='420px'; el.style.maxWidth='680px'; }
-  } else {
+  } else if(type==='number' || type==='date'){
     el = document.createElement('input');
-    el.type = (type==='number'?'number':type==='date'?'date':'text'); el.value=cur;
+    el.type = (type==='number'?'number':'date'); el.value=cur;
     el.onblur = commit;
     el.onkeydown = e=>{ if(e.key==='Enter'){ e.preventDefault(); el.blur(); } if(e.key==='Escape'){ committed=true; recalcVPO(); } };
     if(type==='date') el.onchange = commit;
+  } else {
+    // Plain text edits in a textarea so Return makes a new line and the box
+    // grows with the content. Blur (or click away) commits; Escape cancels.
+    el = document.createElement('textarea');
+    el.value = cur; el.rows = 1;
+    el.style.cssText = 'overflow:hidden;resize:none;min-height:1.3em';
+    el.onblur = commit;
+    el.onkeydown = e=>{
+      if(e.key==='Escape'){ committed=true; recalcVPO(); return; }
+      if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){ e.preventDefault(); el.blur(); }
+    };
+    el.oninput = ()=> vpoGrow(el);
   }
   span.innerHTML=''; span.appendChild(el); el.focus();
+  if(el.tagName==='TEXTAREA') vpoGrow(el);
   if(el.select && type!=='date' && !span.dataset.sel) el.select();
 }
 
+// Size a textarea to its content, so a field grows as you type instead of
+// scrolling inside a fixed box.
+function vpoGrow(el){
+  if(!el || el.tagName!=='TEXTAREA') return;
+  el.style.height='auto';
+  el.style.height=(el.scrollHeight+2)+'px';
+}
+
 function vpoAfterEdit(key){
+  vpoStampRevision(key);
   if(key==='poNum') vpoForm._poNumEdited = !!(vpoForm.poNum && vpoForm.poNum.trim());
   if(key==='billTo') vpoForm._billToEdited = !!(vpoForm.billTo && vpoForm.billTo.trim());
   // Item code drives the PO type: auto-set it from the leading letter(s) unless
@@ -9974,6 +10047,24 @@ function vpoAfterEdit(key){
     if(!vpoForm._billToEdited) vpoForm.billTo = vpoDefaultBillTo(proj);
   }
   recalcVPO();
+}
+
+// Changing an already-issued PO makes it a revision, so the revision date
+// becomes today — once per editing session, and never for a template, a brand
+// new PO, or an edit to the dates themselves.
+function vpoStampRevision(key){
+  if(key==='revisionDate' || key==='issueDate') return;
+  if(typeof window.tplTemplateMode!=='undefined' && window.tplTemplateMode) return;
+  if(!currentVPOId) return;                       // unsaved PO is not a revision
+  const rec=(vendorPOs||[]).find(x=>x.id===currentVPOId);
+  if(!rec || !rec.issueDate) return;              // never issued, so nothing to revise
+  const today=new Date().toISOString().split('T')[0];
+  if(vpoForm.revisionDate===today) return;
+  vpoForm.revisionDate=today;
+  if(typeof ai3Toast==='function' && !vpoForm._revToasted){
+    vpoForm._revToasted=1;
+    ai3Toast('Revision date set to today', 2600);
+  }
 }
 
 // ── VPO image handling ──────────────────────────────────────────────────────
@@ -10270,7 +10361,7 @@ function getVPOFormData(){
   const f=vpoForm||{};
   // Persist every possible per-type spec field so switching types never loses data.
   const extraFields={};
-  ['itemColor','itemFrame','itemGlass','itemMounting','bulb','fabricWidth','fabricContent','fabricRepeat','fabricAbrasion','fabricFlam','drpFunction','drpHardware','drpHeading','drpFullness','drpLining','drpDraw','drpFinishLen','drpHem','comInfo','comReq','comTag','comApproval','scopeText','quoteText'].forEach(function(k){ extraFields[k]=f[k]||''; });
+  ['skuNum','itemColor','itemFrame','itemGlass','itemMounting','bulb','fabricWidth','fabricContent','fabricRepeat','fabricAbrasion','fabricFlam','drpFunction','drpHardware','drpHeading','drpFullness','drpLining','drpDraw','drpFinishLen','drpHem','comInfo','comReq','comTag','comApproval','scopeText','quoteText'].forEach(function(k){ extraFields[k]=f[k]||''; });
   return {
     type, status,
     project:f.project||'',
@@ -10287,6 +10378,9 @@ function getVPOFormData(){
     mfrContactEmail:f.mfrContactEmail||'',
     srcName:f.srcName||'',
     srcWeb:f.srcWeb||'',
+    srcContact:f.srcContact||'',
+    srcContactTel:f.srcContactTel||'',
+    srcContactEmail:f.srcContactEmail||'',
     shipName:f.shipName||'',
     shipAttn:f.shipAttn||'',
     shipAddr:f.shipAddr||'',
@@ -10324,7 +10418,7 @@ function getVPOFormData(){
 }
 
 // ── PO NUMBERING — SINGLE SOURCE OF TRUTH ────────────────────────────────────
-// A Vendor PO number is ALWAYS: "PO {project number}-{item number}".
+// A Source PO number is ALWAYS: "PO {project number}-{item number}".
 //  • project number  → the project's Project Number field (falls back to digits
 //    scraped from the project name only when no number has been entered yet)
 //  • item number     → entered as-is; carries its own suffixes (A, B, P, H) and
@@ -10383,7 +10477,7 @@ function recalcVPO(){
   document.getElementById('vpo-preview').innerHTML=buildVPODoc(d,true);
 }
 
-// Build the Vendor PO document. editable=true → inline-editable fields (editor);
+// Build the Source PO document. editable=true → inline-editable fields (editor);
 // editable=false → clean static text with empty optionals omitted (print/PDF).
 function buildVPODoc(d, editable){
   const proj=projects.find(p=>p.name===d.project);
@@ -10402,7 +10496,8 @@ function buildVPODoc(d, editable){
     specRows=(editable||d.bulb)?`<tr><td style="padding:3px 0;font-size:11px;color:#555;width:100px">Bulb/Wattage:</td><td style="padding:3px 0;font-size:11px">${vpoF(editable,'bulb',d.bulb,{placeholder:'Bulb / Wattage'})}</td></tr>`:'';
   }
   // Generic, type-driven spec rows — labels & fields come from PO_TYPE_FIELDS[type].
-  const _specFields = PO_TYPE_FIELDS[d.type] || PO_TYPE_FIELDS['Furniture'];
+  // Every type carries SKU # / Product No. first, right under the Item # header.
+  const _specFields = [['SKU # / Product No.','skuNum']].concat(PO_TYPE_FIELDS[d.type] || PO_TYPE_FIELDS['Furniture']);
   let _comStarted=false;
   const specBody = _specFields.map(function(fd){
     const label=fd[0], key=fd[1], multi=!!fd[2];
@@ -10482,6 +10577,9 @@ function buildVPODoc(d, editable){
       ${(editable||d.mfrTel)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Phone:</td><td>${vpoF(editable,'mfrTel',d.mfrTel,{placeholder:'Phone'})}</td></tr>`:''}
       ${(editable||d.mfrEmail)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Email:</td><td>${vpoF(editable,'mfrEmail',d.mfrEmail,{placeholder:'Email'})}</td></tr>`:''}
       ${(editable||d.mfrWeb)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Website:</td><td>${vpoF(editable,'mfrWeb',d.mfrWeb,{placeholder:'Website'})}</td></tr>`:''}
+      ${(editable||d.mfrContact)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Contact:</td><td style="font-weight:600">${vpoF(editable,'mfrContact',d.mfrContact,{placeholder:'Contact person'})}${(editable&&typeof ctPickBtn==='function')?ctPickBtn('mfr',d.mfrName):''}</td></tr>`:''}
+      ${(editable||d.mfrContactTel)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Contact Tel:</td><td>${vpoF(editable,'mfrContactTel',d.mfrContactTel,{placeholder:'Phone'})}</td></tr>`:''}
+      ${(editable||d.mfrContactEmail)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Contact Email:</td><td>${vpoF(editable,'mfrContactEmail',d.mfrContactEmail,{placeholder:'Email'})}</td></tr>`:''}
     </table>
   </div>
 
@@ -10498,9 +10596,9 @@ function buildVPODoc(d, editable){
     </table>
     <table style="border-collapse:collapse;width:100%">
       ${(editable||d.srcName)?`<tr><td style="padding:2px 8px 2px 0;color:#777;white-space:nowrap;width:100px">Source:</td><td style="font-weight:700">${vpoF(editable,'srcName',d.srcName,{placeholder:'Source company'})}</td></tr>`:''}
-      ${(editable||d.mfrContact)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Contact:</td><td style="font-weight:600">${vpoF(editable,'mfrContact',d.mfrContact,{placeholder:'Contact person'})}</td></tr>`:''}
-      ${(editable||d.mfrContactTel)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Phone:</td><td>${vpoF(editable,'mfrContactTel',d.mfrContactTel,{placeholder:'Phone'})}</td></tr>`:''}
-      ${(editable||d.mfrContactEmail)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Email:</td><td>${vpoF(editable,'mfrContactEmail',d.mfrContactEmail,{placeholder:'Email'})}</td></tr>`:''}
+      ${(editable||d.srcContact)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Contact:</td><td style="font-weight:600">${vpoF(editable,'srcContact',d.srcContact,{placeholder:'Contact person'})}${(editable&&typeof ctPickBtn==='function')?ctPickBtn('src',d.srcName):''}</td></tr>`:''}
+      ${(editable||d.srcContactTel)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Phone:</td><td>${vpoF(editable,'srcContactTel',d.srcContactTel,{placeholder:'Phone'})}</td></tr>`:''}
+      ${(editable||d.srcContactEmail)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Email:</td><td>${vpoF(editable,'srcContactEmail',d.srcContactEmail,{placeholder:'Email'})}</td></tr>`:''}
       ${(editable||d.srcWeb)?`<tr><td style="padding:2px 8px 2px 0;color:#777">Website:</td><td>${vpoF(editable,'srcWeb',d.srcWeb,{placeholder:'Website'})}</td></tr>`:''}
     </table>
   </div>
@@ -10509,7 +10607,7 @@ function buildVPODoc(d, editable){
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;font-size:10.5px">
     <table style="border-collapse:collapse;width:100%">
       <tr><td style="padding:2px 8px 2px 0;color:#777;font-weight:700;white-space:nowrap;vertical-align:top">Bill To:</td><td>${editable?vpoF(true,'billTo',d.billTo,{multiline:true,placeholder:'Bill-to name & address'}):(d.billTo?d.billTo.split('\n').map((l,i)=>i===0?`<strong>${escHtml(l)}</strong>`:escHtml(l)).join('<br>'):'')}</td></tr>
-      <tr><td style="padding:4px 8px 2px 0;color:#777">Purchasing Agent:</td><td>${vpoF(editable,'ai3Contact',d.ai3Contact,{placeholder:'Designer name'})}</td></tr>
+      <tr><td style="padding:4px 8px 2px 0;color:#777">Purchasing Agent:</td><td>${vpoF(editable,'ai3Contact',d.ai3Contact,{placeholder:'Designer name',select:(typeof ctAgentOpts==='function'?ctAgentOpts(d.ai3Contact):null)})}</td></tr>
       <tr><td style="padding:2px 8px 2px 0;color:#777">Tel:</td><td>${vpoF(editable,'ai3Tel',d.ai3Tel,{placeholder:'Tel'})}</td></tr>
       <tr><td style="padding:2px 8px 2px 0;color:#777">Email:</td><td>${vpoF(editable,'ai3Email',d.ai3Email,{placeholder:'Email'})}</td></tr>
     </table>
@@ -10681,16 +10779,16 @@ function vpoBulkRenumberApply(){
   alert(`✓ Renumbered ${applied} PO${applied!==1?'s':''} to the {project number}-{item number} format.`);
 }
 async function printVPO(){
-  const poNum = currentVPOId ? (vendorPOs.find(v=>v.id===currentVPOId)||{poNum:'Vendor PO'}).poNum : 'Vendor PO';
+  const poNum = currentVPOId ? (vendorPOs.find(v=>v.id===currentVPOId)||{poNum:'Source PO'}).poNum : 'Source PO';
   const el = document.getElementById('vpo-preview');
   const saved = el.innerHTML;
   el.innerHTML = buildVPODoc(getVPOFormData(), false); // clean render: no edit controls, empties omitted
   await sbHydrateImages(el);                            // sign private-bucket images before the print clone
-  printPreview('vpo-preview','Vendor PO','@page{margin:0.6in 0.7in}', poNum);
+  printPreview('vpo-preview','Source PO','@page{margin:0.6in 0.7in}', poNum);
   el.innerHTML = saved; // restore the editable document
 }
 
-// ── Cross-reference the PO's Manufacturer against the Vendors directory ───────
+// ── Cross-reference the PO's Manufacturer against the Sources directory ───────
 // Matches vpoForm.mfrName to a supplier and fills ONLY blank manufacturer-block
 // fields (phone, email, contact, lead time). Never overwrites entered values.
 function _vpoNormVendor(s){
@@ -10713,10 +10811,10 @@ function vpoFindVendorMatch(name){
 }
 function vpoMatchVendor(){
   const name = (vpoForm.mfrName||'').trim();
-  if(!name){ ai3Toast('Enter a Manufacturer name first, then Match Vendor.'); return; }
+  if(!name){ ai3Toast('Enter a Manufacturer name first, then Match Source.'); return; }
   const s = vpoFindVendorMatch(name);
   if(!s){
-    ai3Toast('No vendor in your directory matches “'+name+'”. Add it on the Vendors page to auto-fill next time.', 4200);
+    ai3Toast('No vendor in your directory matches “'+name+'”. Add it on the Sources page to auto-fill next time.', 4200);
     return;
   }
   // path → human label; pull each only when the PO field is currently blank
@@ -10737,7 +10835,7 @@ function vpoMatchVendor(){
   recalcVPO();
   const matchedDifferent = _vpoNormVendor(s.name)!==_vpoNormVendor(name);
   const who = matchedDifferent ? ' (matched “'+s.name+'”)' : '';
-  if(filled.length) ai3Toast('Filled '+filled.join(', ')+' from your Vendors directory'+who+'.', 3600);
+  if(filled.length) ai3Toast('Filled '+filled.join(', ')+' from your Sources directory'+who+'.', 3600);
   else ai3Toast('“'+s.name+'” is already in your directory — nothing was missing to fill'+who+'.', 3600);
 }
 
@@ -10855,9 +10953,9 @@ function loadCloseOut(){
   document.getElementById('co-content').innerHTML=`
     <div class="stat-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:24px">
       <div class="stat-card"><div class="stat-label">Collected from Owner</div><div class="stat-value">${fmtD(paTotal)}</div><div class="stat-sub">${pa?'From PA':'No PA found'}</div></div>
-      <div class="stat-card"><div class="stat-label">Paid to Vendors</div><div class="stat-value">${fmtD(amtPaid)}</div><div class="stat-sub">From ${autoSource}</div></div>
+      <div class="stat-card"><div class="stat-label">Paid to Sources</div><div class="stat-value">${fmtD(amtPaid)}</div><div class="stat-sub">From ${autoSource}</div></div>
       <div class="stat-card"><div class="stat-label">Client Owes ai3</div><div class="stat-value" style="color:${clientOwesAi3>0?'var(--red)':'var(--green)'}">${fmtD(clientOwesAi3)}</div><div class="stat-sub">PA total − received from client</div></div>
-      <div class="stat-card"><div class="stat-label">ai3 Owes Vendors</div><div class="stat-value" style="color:${btVendorBalance>0?'var(--red)':'var(--green)'}">${fmtD(btVendorBalance)}</div><div class="stat-sub">${btHasData?'From Procurement Tracker':'No BT data'}</div></div>
+      <div class="stat-card"><div class="stat-label">ai3 Owes Sources</div><div class="stat-value" style="color:${btVendorBalance>0?'var(--red)':'var(--green)'}">${fmtD(btVendorBalance)}</div><div class="stat-sub">${btHasData?'From Procurement Tracker':'No BT data'}</div></div>
       <div class="stat-card"><div class="stat-label">Potential Refund</div><div class="stat-value" style="color:${potentialRefund>=0?'var(--green)':'var(--red)'}">${fmtD(potentialRefund)}</div></div>
     </div>
     ${btTotal>0?`<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
@@ -10893,7 +10991,7 @@ function loadCloseOut(){
         ${sRow('Payment Collected from Owner',paTotal,pa?`PA — goods $${fmtD(paSub)} + install $${fmtD(installSub)}`:'')}
         ${sRow('Paid to Date (vendors)',amtPaid,`From ${autoSource}`)}
         ${sRow('Client Owes ai3',clientOwesAi3,'PA total − received from client',clientOwesAi3>0?'var(--red)':'var(--green)')}
-        ${sRow('ai3 Owes Vendors',btVendorBalance,btHasData?'Sum of unpaid BT item balances':'Enter payments in Procurement Tracker',btVendorBalance>0?'var(--red)':'var(--green)')}
+        ${sRow('ai3 Owes Sources',btVendorBalance,btHasData?'Sum of unpaid BT item balances':'Enter payments in Procurement Tracker',btVendorBalance>0?'var(--red)':'var(--green)')}
         ${sRow('Tax Paid to Date',taxPaid,`From ${autoSource}`)}
         ${sRow('Tax Owed to State',taxOwedToState,`${(taxRate*100).toFixed(1)}% × (goods + freight paid)`)}
         ${sRow('Tax Overage / (Deficit)',taxOverage,'Collected − Paid − Owed',taxOverage>=0?'var(--green)':'var(--red)')}
@@ -10910,7 +11008,7 @@ function loadCloseOut(){
       <div class="section-title" style="font-size:15px;margin-bottom:14px">Procurement Tracker — Payment Detail</div>
       <div class="table-wrap" style="max-height:400px;overflow-y:auto"><table>
         <thead style="position:sticky;top:0;z-index:2;background:var(--surface2)">
-          <tr><th>Item #</th><th>Description</th><th>Vendor</th><th>Est. Total</th><th>Amt Paid</th><th>Tax Paid</th><th>Freight</th><th>Balance</th><th>Order No.</th><th>Status</th></tr>
+          <tr><th>Item #</th><th>Description</th><th>Source</th><th>Est. Total</th><th>Amt Paid</th><th>Tax Paid</th><th>Freight</th><th>Balance</th><th>Order No.</th><th>Status</th></tr>
         </thead>
         <tbody>${(()=>{
           let _c=''; let rows='';
@@ -11619,7 +11717,7 @@ function renderBTTable(){
     ['Received from Client', clientReceived!==null ? '$'+fmtD(clientReceived) : '— not logged', clientReceived!==null?'color:var(--green)':'color:var(--text3)'],
     ['Client Balance Due / Possible Overage', clientBalance!==null ? '$'+fmtD(Math.max(0,clientBalance)) : '—', clientBalance!==null&&clientBalance>0?'color:var(--red)':clientBalance!==null?'color:var(--green)':'color:var(--text3)'],
     ['Paid to Date', '$'+fmtD(totalPaid), totalPaid>0?'color:var(--green)':''],
-    ['Outstanding Vendor Payments', '$'+fmtD(totalBalance), totalBalance>0?'color:var(--red)':'color:var(--green)'],
+    ['Outstanding Source Payments', '$'+fmtD(totalBalance), totalBalance>0?'color:var(--red)':'color:var(--green)'],
     ['Items Ordered', orderedCount+' / '+lineItems.length, ''],
     ['Pending', pendingCount+' items', pendingCount>0?'color:var(--amber)':'color:var(--green)'],
     ...(itemsWithActual.length>0?[
@@ -11880,7 +11978,7 @@ function renderBTTable(){
           onchange="btUpdateField('${projName}',${item.id},'name',this.value)"
           style="width:100%;padding:3px 5px;border:1px solid transparent;border-radius:3px;font-size:12px;font-family:inherit;background:transparent;font-weight:500;box-sizing:border-box"
           onfocus="${_ieF}" onblur="${_ieB}" />
-        <input value="${escHtml(item.vendor||'')}" placeholder="Vendor"
+        <input value="${escHtml(item.vendor||'')}" placeholder="Source"
           onchange="btUpdateField('${projName}',${item.id},'vendor',this.value)"
           style="width:100%;padding:2px 5px;border:1px solid transparent;border-radius:3px;font-size:11px;font-family:inherit;background:transparent;color:var(--text3);box-sizing:border-box"
           onfocus="${_ieF}" onblur="${_ieB}" />
@@ -12642,7 +12740,7 @@ function printBudgetTracker(){
   </div>
   <table>
     <thead><tr>
-      <th>Item #</th><th>Description / Vendor</th><th style="text-align:center">Qty</th>
+      <th>Item #</th><th>Description / Source</th><th style="text-align:center">Qty</th>
       <th style="text-align:right">Actual Price</th><th style="text-align:right">Extension</th>
       <th>Order No.</th><th style="text-align:right">Amt. Paid</th>
       <th style="text-align:right">Balance</th><th>Pay Type</th><th>Status / Remarks</th>
@@ -12686,7 +12784,7 @@ function printBudgetTracker(){
         <thead>
           <tr style="background:#f0ede8;border-bottom:2px solid #c8c3ba">
             <th style="padding:5px 6px;text-align:left;font-size:8.5px">Item #</th>
-            <th style="padding:5px 6px;text-align:left;font-size:8.5px">Description / Vendor</th>
+            <th style="padding:5px 6px;text-align:left;font-size:8.5px">Description / Source</th>
             <th style="padding:5px 6px;text-align:center;font-size:8.5px">Qty</th>
             <th style="padding:5px 6px;text-align:right;font-size:8.5px">Actual Price</th>
             <th style="padding:5px 6px;text-align:right;font-size:8.5px">Extension</th>
@@ -12720,7 +12818,7 @@ function exportBTcsv(){
   const projName = btCurrentProject;
   if(!projName || !budgetTrackers[projName]){ alert('No project loaded.'); return; }
   const bt = budgetTrackers[projName];
-  const rows = [['Item #','Description','Vendor','Qty','Actual Price','Extension','Order No.','Amt. Paid','Balance Due','Payment Type','Tax Paid','Freight Paid','Date Paid','Status/Remarks']];
+  const rows = [['Item #','Description','Source','Qty','Actual Price','Extension','Order No.','Amt. Paid','Balance Due','Payment Type','Tax Paid','Freight Paid','Date Paid','Status/Remarks']];
   let currentCat = '';
   for(const item of bt.items){
     if(item.isCategory){ currentCat=item.name; rows.push(['--- '+item.name+' ---','','','','','','','','','','','','','']); continue; }
@@ -14578,7 +14676,7 @@ function sbApplySupplierChange(payload){
 const SB_STATE = [
   {k:'projects',   ls:'fp11_projects',   get:()=>projects,       set:v=>{projects=v;},       render:()=>{ if(document.getElementById('projects-grid')||document.getElementById('projects-list')||document.getElementById('project-list')) renderProjects(); }},
   {k:'pas',        ls:'fp11_pas',        get:()=>pas,            set:v=>{pas=v;},            render:()=>{ if(document.getElementById('pa-list-view')) renderPAList(); }},
-  {k:'vpos',       ls:'fp11_vpos',       get:()=>vendorPOs,      set:v=>{vendorPOs=v;},      render:()=>{ if(document.getElementById('vpo-list')||document.getElementById('vpo-list-view')) renderVPOList(); }},
+  {k:'vpos',       ls:'fp11_vpos',       get:()=>vendorPOs,      set:v=>{vendorPOs=v;},      render:()=>{ if(typeof ctMigrateContacts==='function') ctMigrateContacts(); if(document.getElementById('vpo-list')||document.getElementById('vpo-list-view')) renderVPOList(); }},
   {k:'pb',         ls:'fp11_pb',         get:()=>prelimBudgets,  set:v=>{prelimBudgets=v;},  render:()=>{ if(document.getElementById('pb-list-view')||document.getElementById('pb-list')) renderPBList(); }},
   {k:'bt',         ls:'fp11_bt',         get:()=>budgetTrackers, set:v=>{budgetTrackers=v;}, render:()=>{ if(document.getElementById('bt-table')||document.getElementById('bt-table-wrap')) renderBTTable(); }},
   {k:'libmeta',    ls:'fp11_libmeta',    get:()=>libMeta,        set:v=>{libMeta=v&&typeof v==='object'?v:{};}, render:()=>{ const _p=document.getElementById('page-library'); if(_p&&_p.classList.contains('active')&&typeof libRender==='function') libRender(); }},
@@ -14591,6 +14689,9 @@ const SB_STATE = [
   {k:'bids',       ls:'fp11_bids',       get:()=>bidPackages,    set:v=>{bidPackages=Array.isArray(v)?v:[];},   render:()=>{ const _p=document.getElementById('page-bid-analysis'); if(_p&&_p.classList.contains('active')&&typeof renderBidAnalysis==='function') renderBidAnalysis(); }},
   {k:'closeout',   ls:'fp11_closeout',   get:()=>closeoutDocs,   set:v=>{closeoutDocs=Array.isArray(v)?v:[];},  render:()=>{ const _p=document.getElementById('page-closeout-binder'); if(_p&&_p.classList.contains('active')&&typeof renderCloseoutBinder==='function') renderCloseoutBinder(); }},
   {k:'ccas',       ls:'fp11_ccas',       get:()=>ccas,           set:v=>{ccas=v;},           render:()=>{ if(document.getElementById('cca-list-view')) renderCCAList(); }},
+  {k:'templates',  ls:'fp11_templates',  get:()=>docTemplates,   set:v=>{docTemplates=Array.isArray(v)?v:[];},   render:()=>{ if(typeof tplRender==='function') tplRender(); }},
+  {k:'ai3team',    ls:'fp11_ai3team',    get:()=>ai3Team,        set:v=>{ai3Team=Array.isArray(v)?v:[];},        render:()=>{ if(typeof ctRender==='function') ctRender(); }},
+  {k:'clients',    ls:'fp11_clients',    get:()=>clientContacts, set:v=>{clientContacts=Array.isArray(v)?v:[];}, render:()=>{ if(typeof ctRender==='function') ctRender(); }},
   {k:'inventory',  ls:'fp11_inventory',  get:()=>inventory,      set:v=>{inventory=v;},      render:()=>{}},
   {k:'budgetcats', ls:'fp11_budgetcats', get:()=>budgetCats,     set:v=>{budgetCats=v;},     render:()=>{}},
   {k:'pos',        ls:'fp11_pos',        get:()=>pos,            set:v=>{pos=v;},            render:()=>{}},
@@ -14895,10 +14996,50 @@ async function sbAttachmentSignedUrl(path){
 }
 
 // Best-effort delete (called when records are removed). Failures are ignored.
+// Duplicated POs, templates and library-sourced POs share image URLs, so
+// removing a picture from one record must not delete the file another record is
+// still showing. Count every remaining reference first; an orphaned file left in
+// storage is cheap, a broken image on someone else's PO is not.
+function sbImageRefCount(url, exceptVpoId){
+  if(!url) return 0;
+  let n=0;
+  const hit=v=>{ if(v===url) n++; };
+  try{
+    (vendorPOs||[]).forEach(po=>{
+      if(exceptVpoId!=null && po.id===exceptVpoId) return;
+      (po.imgProducts||[]).forEach(hit);
+      hit(po.imgProduct); hit(po.imgSwatch);
+      (po.extraPages||[]).forEach(pg=>(pg.images||[]).forEach(hit));
+    });
+  }catch(_){}
+  // The PO on screen counts through its live working copy, not its saved row.
+  try{
+    if(typeof vpoImages==='object' && vpoImages){
+      (vpoImages.products||[]).forEach(hit);
+      hit(vpoImages.swatch);
+    }
+    (((typeof vpoForm==='object'&&vpoForm)?vpoForm.extraPages:[])||[]).forEach(pg=>(pg.images||[]).forEach(hit));
+  }catch(_){}
+  try{
+    for(const pn in (specBooks||{})){
+      const b=specBooks[pn]; if(!b) continue;
+      (b.items||[]).forEach(it=>(it.images||[]).forEach(im=>hit(im&&im.src)));
+      if(b.cover) hit(b.cover.heroImage);
+      for(const c in (b.sections||{})) hit(b.sections[c] && b.sections[c].heroImage);
+    }
+  }catch(_){}
+  try{ (libraryOwn||[]).forEach(r=>hit(r&&r.image)); }catch(_){}
+  try{ for(const pn in (librarySaved||{})) (librarySaved[pn]||[]).forEach(r=>hit(r&&r.image)); }catch(_){}
+  return n;
+}
 function sbDeleteImageByUrl(url){
   if(!sbClient || !sbIsPublicImageUrl(url)) return;
   const path = sbPathFromPublicUrl(url);
   if(!path) return;
+  if(sbImageRefCount(url, typeof currentVPOId!=='undefined'?currentVPOId:null) > 0){
+    console.log('[ai3] kept shared image (still referenced):', path);
+    return;
+  }
   try{ sbClient.storage.from(SB_BUCKET_IMG).remove([path]).catch(()=>{}); }catch(_){}
 }
 function sbDeleteAttachment(path){
@@ -14988,7 +15129,7 @@ async function sbRunMigration(progressCb){
   }
   if(specDirty) _saveSpecs();
 
-  // 2) Vendor PO images (products, legacy single, swatch)
+  // 2) Source PO images (products, legacy single, swatch)
   let vpoDirty = false;
   for(const po of (vendorPOs||[])){
     const tag = (po.id||'vpo').toString().replace(/[^a-zA-Z0-9_-]/g,'_');
@@ -16330,7 +16471,7 @@ function specFillApply(){
   try { if(document.getElementById('page-specifications').classList.contains('active')) {} } catch(e){}
 }
 
-// ── AI Fill (Vendor Purchase Order) ─────────────────────────────────────────
+// ── AI Fill (Source Purchase Order) ─────────────────────────────────────────
 // Same idea as the spec-item AI Fill, but targets the PO's vpoForm fields:
 // manufacturer block, item name/finish/dimensions/details, delivery, unit price,
 // and the type-specific rows (Fabric / COM or Lighting). Reuses _specFillCallAI.
@@ -16735,6 +16876,7 @@ function renderSpecifications(){
           <button class="btn btn-sm" onclick="openSpecCoverModal()" title="Brand line, hero image">📕 Cover</button>
           <button class="btn btn-sm" onclick="openSpecSectionsModal()" title="Per-area divider / section pages">📑 Section Pages</button>
           <button class="btn btn-sm" onclick="openSpecAreasManager()" title="Manage project areas">🏛 Areas</button>
+          <button class="btn btn-sm" onclick="tplSaveCurrentSpec()" title="Save these areas and cover settings as a reusable template">🗂 Save as Template</button>
           <button class="btn btn-sm" onclick="specPrintBook()" title="Generate spec book PDF (cover + index + all items)" ${items.length===0?'disabled':''}>🖨 Print Spec Book</button>
           <button class="btn btn-sm" onclick="openSpecAiModal()" title="Scan a tagged FF&E plan to add spec items">✨ AI Starter</button>
           <button class="btn btn-primary btn-sm" onclick="openSpecNewItem()">+ New Item</button>
@@ -17010,7 +17152,7 @@ function specDeleteItem(id){
 
 // ── Item Editor (Phase 2b) ──────────────────────────────────────────────────
 // Document-preview style — the editor IS the spec sheet. Click any field to
-// edit it inline (mirrors the Vendor PO editor). Every commit auto-saves.
+// edit it inline (mirrors the Source PO editor). Every commit auto-saves.
 
 let _specLastFieldPath = null; // reserved for a future Bold/Highlight toolbar
 
@@ -17212,7 +17354,7 @@ const SPEC_BOILERPLATE_BY_TYPE = {
     'All wood to be kiln dried and treated to be insect and vermin free.',
     'Final images or Artist renderings required for Designer review prior to completion.',
     'Manufacturer to provide security brackets to be installed onto each frame, 2 at top and 1 at bottom center. Hardware and instructions to be included.',
-    'Vendor to provide all parts and details for a complete installation.',
+    'Source to provide all parts and details for a complete installation.',
     'Must meet all applicable local and fire codes.',
     'All internal hardware (hinges, screws, glides, bolts, etc.) shall be corrosion proof, heavy-duty and suitable for commercial use.',
   ],
@@ -18238,6 +18380,12 @@ document.addEventListener('wheel', function(e){
 <script src="backup.js"></script>
 <script src="autofill.js"></script>
 <script src="vendor-fill.js"></script>
+<script src="contacts.js"></script>
+<script src="contacts-companies.js"></script>
+<script src="manufacturers.js"></script>
+<script src="po-autosave.js"></script>
+<script src="templates.js"></script>
+<script src="po-window.js"></script>
 <div id="ai3-toast-wrap"></div>
 </body>
 </html>

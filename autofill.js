@@ -1,7 +1,7 @@
 /* ============================================================================
-   STEVE — Vendor autocomplete + fill-from-Library  (autofill.js)
-   1) Any vendor/manufacturer field suggests names from the Vendor directory
-      plus every vendor already used on a project.
+   STEVE — Source autocomplete + fill-from-Library  (autofill.js)
+   1) Any source/manufacturer field suggests names from the Source directory
+      plus every source already used on a project.
    2) Any item-name field suggests products STEVE has seen before; accepting one
       fills the manufacturer (and lead time) on the same row when they're empty.
 
@@ -12,7 +12,7 @@
 (function () {
   'use strict';
 
-  var VENDOR_PH = ['vendor', 'vendor / manufacturer', 'vendor / description', 'manufacturer'];
+  var VENDOR_PH = ['vendor', 'source / manufacturer', 'source / description', 'manufacturer'];
   var NAME_PH = ['item name'];
   // Purchase Orders use click-to-edit spans (.vpo-field[data-f]) whose inputs
   // carry no placeholder, so map those field keys directly.
@@ -100,9 +100,9 @@
       if (nm && nm.length > 2) {
         var pk = norm(nm);
         if (!pk) return;
-        var rec = p[pk] || (p[pk] = { label: nm, count: 0, vendors: {}, price: 0, leadTime: '' });
+        var rec = p[pk] || (p[pk] = { label: nm, count: 0, sources: {}, price: 0, leadTime: '' });
         rec.count++;
-        if (vn) rec.vendors[vn] = (rec.vendors[vn] || 0) + 1;
+        if (vn) rec.sources[vn] = (rec.sources[vn] || 0) + 1;
         if (!rec.price && it.price) rec.price = it.price;
         if (!rec.leadTime && it.leadTime) rec.leadTime = it.leadTime;
       }
@@ -112,12 +112,12 @@
     _products = Object.keys(p).map(function (k) {
       var r = p[k];
       var best = '', bn = 0;
-      Object.keys(r.vendors).forEach(function (n) { if (r.vendors[n] > bn) { bn = r.vendors[n]; best = n; } });
+      Object.keys(r.sources).forEach(function (n) { if (r.sources[n] > bn) { bn = r.sources[n]; best = n; } });
       return { key: k, label: r.label, count: r.count, vendor: best, price: r.price, leadTime: r.leadTime };
     });
     _builtAt = Date.now();
   }
-  function indexes() { if (!_vendors || Date.now() - _builtAt > 30000) build(); return { vendors: _vendors, products: _products }; }
+  function indexes() { if (!_vendors || Date.now() - _builtAt > 30000) build(); return { sources: _vendors, products: _products }; }
 
   // ── Scoring ───────────────────────────────────────────────────────────────
   function initials(label) {
@@ -203,8 +203,8 @@
     box.style.display = 'block';
     place();
   }
-  // ── Purchase Order: pull the rest of a vendor's details ───────────────────
-  // Sources, in order: the Vendor directory record, anything parseable out of
+  // ── Purchase Order: pull the rest of a source's details ───────────────────
+  // Sources, in order: the Source directory record, anything parseable out of
   // its notes (contact / website / extra email), then the most recent PO issued
   // to the same manufacturer. Only ever fills fields that are currently blank.
   var PO_CARRY = ['mfrTel', 'mfrEmail', 'mfrWeb', 'srcName', 'srcWeb', 'mfrContact', 'mfrContactTel', 'mfrContactEmail', 'delivery', 'terms', 'shipVia'];
@@ -248,9 +248,9 @@
       if (d[k] && !String(vpoForm[k] || '').trim()) { vpoForm[k] = d[k]; filled.push(k); }
     });
     if (filled.length) {
-      try { if (typeof pushUndo === 'function') pushUndo('Fill vendor details'); } catch (e) {}
+      try { if (typeof pushUndo === 'function') pushUndo('Fill source details'); } catch (e) {}
       try {
-        if (typeof ai3Toast === 'function') ai3Toast('Filled ' + filled.length + ' field' + (filled.length === 1 ? '' : 's') + ' from your vendor records', 3000);
+        if (typeof ai3Toast === 'function') ai3Toast('Filled ' + filled.length + ' field' + (filled.length === 1 ? '' : 's') + ' from your source records', 3000);
       } catch (e) {}
     }
   }
@@ -290,7 +290,7 @@
     if (k === 'name' && q.trim().length < MIN_NAME) { hide(); return; }
     var ix = indexes();
     mode = k; target = input;
-    rows = search(k === 'vendor' ? ix.vendors : ix.products, q);
+    rows = search(k === 'vendor' ? ix.sources : ix.products, q);
     if (rows.length === 1 && norm(rows[0].label) === norm(q)) rows = [];
     sel = -1;
     paint();
