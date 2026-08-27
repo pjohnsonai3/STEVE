@@ -8154,7 +8154,7 @@ function openNewPB(){
 function showPBEditor(pb){
   document.getElementById('pb-list-view').style.display='none';
   document.getElementById('pb-editor').style.display='block';
-  document.getElementById('topbar-actions').innerHTML='<button class="btn btn-primary" onclick="savePB()">Save</button><button class="btn" onclick="printPB()">Print / PDF</button><button class="btn" onclick="openPBtoPA()" style="color:var(--accent-ink);border-color:var(--accent-ink)">→ Convert to PA</button><button class="btn btn-sm" onclick="closePBEditor()">← Back</button>';
+  document.getElementById('topbar-actions').innerHTML='<button class="btn btn-primary" onclick="savePB()">Save</button><button class="btn" onclick="printPB()">Print / PDF</button><button class="btn" onclick="pbsSourceInHub()">🔍 Source</button><button class="btn" onclick="openPBtoPA()" style="color:var(--accent-ink);border-color:var(--accent-ink)">→ Convert to PA</button><button class="btn btn-sm" onclick="closePBEditor()">← Back</button>';
   const psel=document.getElementById('pb-project');
   psel.innerHTML='<option value="">Select project…</option>'+projects.map(p=>`<option ${pb&&pb.project===p.name?'selected':''}>${p.name}</option>`).join('');
   const today=new Date().toISOString().split('T')[0];
@@ -9329,7 +9329,7 @@ function renderVPOList(){
   const list=vendorPOs.filter(v=>{
     if(projFilter && v.project !== projFilter) return false;
     if(tf && v.type !== tf) return false;
-    if(q && !(v.poNum||'').toLowerCase().includes(q) && !(v.project||'').toLowerCase().includes(q) && !(v.mfrName||'').toLowerCase().includes(q)) return false;
+    if(q && !(v.poNum||'').toLowerCase().includes(q) && !(v.project||'').toLowerCase().includes(q) && !(v.mfrName||'').toLowerCase().includes(q) && !(v.itemHeadline||v.itemName||'').toLowerCase().includes(q)) return false;
     return true;
   });
 
@@ -9337,6 +9337,7 @@ function renderVPOList(){
   const sortAccessors = {
     poNum:  v => (v.poNum||'').toLowerCase(),
     itemNum:v => (v.itemNum||'').toLowerCase(),
+    itemName:v => (v.itemHeadline||v.itemName||'').toLowerCase(),
     project:v => (v.project||'').toLowerCase(),
     mfrName:v => (v.mfrName||'').toLowerCase(),
     type:   v => (v.type||'').toLowerCase(),
@@ -9365,6 +9366,7 @@ function renderVPOList(){
     '<th style="width:34px;text-align:center"><input type="checkbox" id="vpo-ckall" onclick="vpoToggleAll(this.checked)" title="Select all"></th>' +
     sortableTh('poNum','PO #') +
     sortableTh('itemNum','Item #') +
+    sortableTh('itemName','Item') +
     (showProjCol ? sortableTh('project','Project') : '') +
     sortableTh('mfrName','Manufacturer') +
     sortableTh('type','Type') +
@@ -9378,6 +9380,7 @@ function renderVPOList(){
         <td style="text-align:center"><input type="checkbox" data-poid="${v.id}" ${vpoSelected.has(v.id)?'checked':''} onclick="vpoToggleSel(${v.id},this.checked)"></td>
         <td style="font-weight:500;color:var(--accent-ink)">${v.poNum||'—'}</td>
         <td style="font-size:12px">${v.itemNum||'—'}</td>
+        <td style="font-size:12px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(v.itemHeadline||v.itemName||'')}">${escHtml(v.itemHeadline||v.itemName||'')||'—'}</td>
         ${showProjCol ? `<td>${v.project||'—'}</td>` : ''}
         <td>${v.mfrName||'—'}</td>
         <td><span class="badge badge-gray">${v.type||'—'}</span></td>
@@ -9388,7 +9391,7 @@ function renderVPOList(){
           <button class="btn btn-sm" onclick="openVPOEditor(${v.id})">Edit</button>
           <button class="btn btn-sm" onclick="openVPOEditor(${v.id},true)">Print</button>
         </td></tr>`).join('')
-    :`<tr><td colspan="${showProjCol?10:9}" style="text-align:center;padding:32px;color:var(--text3)">No purchase orders${activeProject?' for this project':''} yet.</td></tr>`;
+    :`<tr><td colspan="${showProjCol?11:10}" style="text-align:center;padding:32px;color:var(--text3)">No purchase orders${activeProject?' for this project':''} yet.</td></tr>`;
   vpoUpdateSelBar();
 }
 
@@ -18386,6 +18389,7 @@ document.addEventListener('wheel', function(e){
 <script src="po-autosave.js"></script>
 <script src="templates.js"></script>
 <script src="po-window.js"></script>
+<script src="pb-sourcing.js"></script>
 <div id="ai3-toast-wrap"></div>
 </body>
 </html>

@@ -370,17 +370,33 @@
     if (!proj) { host.innerHTML = '<div class="rp-empty" style="padding:40px;text-align:center;color:var(--text3)">Open a project to source its items.</div>'; return; }
     try { if (typeof ensureBudgetTracker === 'function') ensureBudgetTracker(proj.name); } catch (e) {}
 
-    // Resolve the source: Procurement Tracker first, else Preliminary Budget.
-    let items = _items(proj.name), source = 'Procurement Tracker';
+    // Resolve the source. An explicit choice wins (the picker below, or the
+    // Preliminary Budget's "Source in hub" button); otherwise prefer the
+    // Procurement Tracker and fall back to the latest budget with line items.
+    const ovr = (window.srcSourceOverride && window.srcSourceOverride.project === proj.name) ? window.srcSourceOverride : null;
+    let items = [], source = '';
     _hubStore = 'bt'; _hubPBId = null;
-    if (!items.length) {
-      const pb = _latestPB(proj.name);
-      if (pb) {
-        _hubStore = 'pbrec'; _hubPBId = pb.id;
-        (pb.items || []).forEach(function (it) { if (it.id == null || it.id === '') it.id = Date.now() + Math.random(); });
-        items = (pb.items || []).filter(function (i) { return !i.isCategory && (i.name || i.itemNum); });
-        source = 'Preliminary Budget' + (pb.name ? ' · ' + pb.name : '');
-      }
+
+    function usePB(pb) {
+      if (!pb) return false;
+      _hubStore = 'pbrec'; _hubPBId = pb.id;
+      (pb.items || []).forEach(function (it) { if (it.id == null || it.id === '') it.id = Date.now() + Math.random(); });
+      items = (pb.items || []).filter(function (i) { return !i.isCategory && (i.name || i.itemNum); });
+      source = 'Preliminary Budget' + (pb.pbNum ? ' · ' + pb.pbNum : '');
+      return !!items.length;
+    }
+    function useBT() {
+      _hubStore = 'bt'; _hubPBId = null;
+      items = _items(proj.name);
+      source = 'Procurement Tracker';
+      return !!items.length;
+    }
+
+    if (ovr && ovr.store === 'pbrec') {
+      const want = (prelimBudgets || []).find(function (p) { return p.id === ovr.pbId; });
+      if (!usePB(want)) useBT();
+    } else {
+      if (!useBT()) usePB(_latestPB(proj.name));
     }
     if (!items.length) { host.innerHTML = '<div class="rp-empty" style="padding:40px;text-align:center;color:var(--text3)">No line items yet. Build a Preliminary Budget or Procurement Tracker first, then source its items here.</div>'; return; }
 
@@ -394,7 +410,23 @@
     const sel = items.find(function (i) { return String(i.id) === String(_srcSel); });
 
     const kpi = function (l, v, s) { return '<div class="rp-kpi"><div class="rp-kpi-label">' + l + '</div><div class="rp-kpi-value sm">' + v + '</div><div class="rp-kpi-sub">' + s + '</div></div>'; };
-    const bar = '<div class="rp-toolbar"><div class="rp-toolbar-left"><div class="rp-scope-name">' + esc(proj.name) + '</div><div class="rp-period">Sourcing from ' + esc(source) + '</div></div></div>' +
+    // Which documents could be sourced for this project?
+    const btCount = _items(proj.name).length;
+    const pbList = (typeof prelimBudgets !== 'undefined' ? (prelimBudgets || []) : []).filter(function (p) {
+      return p.project === proj.name && (p.items || []).some(function (i) { return !i.isCategory && (i.name || i.itemNum); });
+    });
+    const curVal = _hubStore === 'pbrec' ? ('pb:' + _hubPBId) : 'bt';
+    const picker = (btCount && pbList.length) || pbList.length > 1
+      ? '<select onchange="srcSetSource(\'' + _q(proj.name) + '\',this.value)" style="height:30px;font-size:12px;font-family:inherit;border:1px solid var(--border2);border-radius:4px;background:var(--surface);padding:0 8px;cursor:pointer">' +
+          (btCount ? '<option value="bt"' + (curVal === 'bt' ? ' selected' : '') + '>Procurement Tracker \u00b7 ' + btCount + ' lines</option>' : '') +
+          pbList.map(function (p) {
+            const n = (p.items || []).filter(function (i) { return !i.isCategory && (i.name || i.itemNum); }).length;
+            return '<option value="pb:' + p.id + '"' + (curVal === 'pb:' + p.id ? ' selected' : '') + '>Prelim Budget ' + esc(p.pbNum || '') + ' \u00b7 ' + n + ' lines</option>';
+          }).join('') +
+        '</select>'
+      : '';
+    const bar = '<div class="rp-toolbar"><div class="rp-toolbar-left"><div class="rp-scope-name">' + esc(proj.name) + '</div><div class="rp-period">Sourcing from ' + esc(source) + '</div></div>' +
+      (picker ? '<div class="rp-toolbar-right">' + picker + '</div>' : '') + '</div>' +
       '<div class="rp-kpi-row k4" style="margin-bottom:16px">' +
         kpi('Sourced', sourced + ' / ' + items.length, 'have a chosen source') +
         kpi('In research', withFindings, 'with saved findings') +
@@ -411,6 +443,13 @@
     host.innerHTML = bar + _shortlistHTML(proj.name, items) + '<div class="card" style="padding:0;overflow:hidden"><div class="src-grid">' + queue + '<div class="src-col-right" id="src-detail">' + _detailHTML(_hubStore, proj.name, sel) + '</div></div></div>';
   };
   window.srcSelect = function (itemId) { _srcSel = itemId; renderSourcing(); };
+  window.srcSetSource = function (projName, val) {
+    window.srcSourceOverride = (val === 'bt')
+      ? { store: 'bt', project: projName }
+      : { store: 'pbrec', pbId: (function (v) { const n = Number(v); return isNaN(n) ? v : n; })(String(val).slice(3)), project: projName };
+    _srcSel = null;
+    renderSourcing();
+  };
 
   // Shortlist = products parked from the Library for this project, not yet
   // attached to a specific line item.
