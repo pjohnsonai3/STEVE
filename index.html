@@ -222,6 +222,7 @@
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
   input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+#pb-gennotes:empty:before{content:attr(data-ph);color:#bbb}#pb-gennotes:focus{border-style:solid;border-color:var(--accent)}
 </style>
 <link rel="stylesheet" href="reports.css" />
 <link rel="stylesheet" href="features.css" />
@@ -4527,7 +4528,9 @@ function docField(store, idx, field, value, opts){
   const disp = opts.multi ? escHtml(raw).replace(/\n/g,'<br>') : escHtml(raw);
   const inner = raw!=='' ? disp : `<span class="doc-ph">${escHtml(opts.placeholder||'—')}</span>`;
   const sel  = opts.select ? ` data-sel="${encodeURIComponent(JSON.stringify(opts.select))}"` : '';
-  return `<span class="doc-field" data-store="${store}" data-idx="${idx}" data-f="${field}" data-type="${opts.type||'text'}" data-multi="${opts.multi?'1':''}"${sel} onclick="docEditField(this)" title="Click to edit">${inner}</span>`;
+  // data-list = type freely, with the values already used offered as suggestions
+  const dl   = (opts.list && opts.list.length) ? ` data-list="${encodeURIComponent(JSON.stringify(opts.list))}"` : '';
+  return `<span class="doc-field" data-store="${store}" data-idx="${idx}" data-f="${field}" data-type="${opts.type||'text'}" data-multi="${opts.multi?'1':''}"${sel}${dl} onclick="docEditField(this)" title="Click to edit">${inner}</span>`;
 }
 function docEditField(span){
   if(span.querySelector('input,textarea,select')) return;
@@ -4554,11 +4557,21 @@ function docEditField(span){
     el=document.createElement('input');
     el.type=(type==='number'?'number':type==='date'?'date':'text'); el.value=cur;
     if(type==='number'){ el.step='0.01'; }
+    if(span.dataset.list){
+      const vals=JSON.parse(decodeURIComponent(span.dataset.list));
+      if(vals.length){
+        const lid='dl-'+store+'-'+idx+'-'+field;
+        const dlEl=document.createElement('datalist'); dlEl.id=lid;
+        vals.forEach(v=>{ const o=document.createElement('option'); o.value=v; dlEl.appendChild(o); });
+        span.appendChild(dlEl); el.setAttribute('list',lid);
+      }
+    }
     el.onblur=commit;
     el.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();el.blur();} if(e.key==='Escape'){committed=true;_docAfter(store);} };
     if(type==='date') el.onchange=commit;
   }
-  span.innerHTML=''; span.appendChild(el); el.focus();
+  const keepList = span.querySelector('datalist');
+  span.innerHTML=''; if(keepList) span.appendChild(keepList); span.appendChild(el); el.focus();
   if(el.select && type!=='date' && !span.dataset.sel) el.select();
 }
 
@@ -8086,6 +8099,7 @@ function dbSaveAsPA(){
 // ====== PRELIMINARY BUDGET ======
 let currentPBId = null;
 let pbLineItems = []; // [{isCategory,name,itemNum,description,qty,price,leadTime}]
+let pbGenNotes  = ''; // general notes printed after the line items
 let pbViewMode  = 'internal'; // 'internal' | 'client'
 
 // PA-category labels used in the PA/BT (mirrors PA structure)
@@ -8154,7 +8168,7 @@ function openNewPB(){
 function showPBEditor(pb){
   document.getElementById('pb-list-view').style.display='none';
   document.getElementById('pb-editor').style.display='block';
-  document.getElementById('topbar-actions').innerHTML='<button class="btn btn-primary" onclick="savePB()">Save</button><button class="btn" onclick="printPB()">Print / PDF</button><button class="btn" onclick="pbsSourceInHub()">🔍 Source</button><button class="btn" onclick="openPBtoPA()" style="color:var(--accent-ink);border-color:var(--accent-ink)">→ Convert to PA</button><button class="btn btn-sm" onclick="closePBEditor()">← Back</button>';
+  document.getElementById('topbar-actions').innerHTML='<button class="btn btn-primary" onclick="savePB()">Save</button><button class="btn" onclick="printPB()">Print / PDF</button><button class="btn" onclick="pbSortNow()" title="Order categories and lines by item number">⇅ Sort</button><button class="btn" onclick="pbRenumber()" title="Renumber every line onto its category band (100s Seating, 200s Tables, …)">№ Renumber</button><button class="btn" onclick="pbsSourceInHub()">🔍 Source</button><button class="btn" onclick="openPBtoPA()" style="color:var(--accent-ink);border-color:var(--accent-ink)">→ Convert to PA</button><button class="btn btn-sm" onclick="closePBEditor()">← Back</button>';
   const psel=document.getElementById('pb-project');
   psel.innerHTML='<option value="">Select project…</option>'+projects.map(p=>`<option ${pb&&pb.project===p.name?'selected':''}>${p.name}</option>`).join('');
   const today=new Date().toISOString().split('T')[0];
@@ -8164,6 +8178,7 @@ function showPBEditor(pb){
   document.getElementById('pb-cont-pct').value=pb?pb.contPct:5;
   document.getElementById('pb-freight-pct').value=pb?pb.freightPct:10;
   document.getElementById('pb-tax-pct').value=pb?pb.taxPct:8.9;
+  pbGenNotes = (pb && pb.genNotes) || '';
   document.getElementById('pb-editor-breadcrumb').textContent=pb?pb.pbNum:'New Budget';
   pbViewMode='internal';
   pbSetView('internal');
@@ -8276,7 +8291,7 @@ function pbRenderCategoriesForm(){
             oninput="pbUpdateItem(${ci},${ii},'vendor',this.value)" />
           <input value="${escHtml(item.leadTime||'')}" placeholder="Lead time" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
             oninput="pbUpdateItem(${ci},${ii},'leadTime',this.value)" />
-          <input value="${escHtml(item.location||'')}" placeholder="Location in project" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
+          <input value="${escHtml(item.location||'')}" placeholder="Location in project" list="pb-loc-list" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
             oninput="pbUpdateItem(${ci},${ii},'location',this.value)" />
         </div>
         <input value="${escHtml(item.notes||'')}" placeholder="Notes / remarks" style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
@@ -8287,8 +8302,14 @@ function pbRenderCategoriesForm(){
     html += `</div></div>`;
   });
 
+  // One shared list of the locations already used on this project, so every
+  // Location field offers them while still accepting a new one.
+  const _locs = (typeof pbLocations==='function') ? pbLocations() : [];
+  html += `<datalist id="pb-loc-list">${_locs.map(l=>`<option value="${escHtml(l)}"></option>`).join('')}</datalist>`;
+
   if(!cats.length){
-    html = `<div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text3)">Select a project to auto-populate categories, or click "+ Category" to add manually.</div>`;
+    html = `<div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text3)">Select a project to auto-populate categories, or click "+ Category" to add manually.</div>` +
+      `<datalist id="pb-loc-list">${_locs.map(l=>`<option value="${escHtml(l)}"></option>`).join('')}</datalist>`;
   }
 
   container.innerHTML = html;
@@ -8547,7 +8568,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
         <td style="padding:7px 8px;font-size:11px;text-align:right;white-space:nowrap">${priceCell}</td>
         <td style="padding:7px 8px;font-size:11px;text-align:right;font-weight:600;white-space:nowrap">${ext?'$'+fmtD(ext):''}</td>
         <td style="padding:7px 8px;font-size:10.5px;white-space:nowrap;color:#555;font-weight:500">${F(idx,'leadTime',item.leadTime,{placeholder:'Lead time'})}</td>
-        <td style="padding:7px 8px;font-size:10.5px;white-space:nowrap;color:#888">${editable?'📍 '+docField('pb',idx,'location',item.location,{placeholder:'Location'}):(item.location?'📍 '+escHtml(item.location):'')}</td>
+        <td style="padding:7px 8px;font-size:10.5px;white-space:nowrap;color:#888">${editable?'📍 '+docField('pb',idx,'location',item.location,{placeholder:'Location',list:(typeof pbLocations==='function'?pbLocations():[])}):(item.location?'📍 '+escHtml(item.location):'')}</td>
         ${editable?`<td style="padding:7px 6px;text-align:center;white-space:nowrap"><span class="bt-research-btn" style="display:inline-block;vertical-align:middle" onclick="event.stopPropagation();btResearchMenu(this,'pb','${escHtml(document.getElementById('pb-project')?document.getElementById('pb-project').value:'')}',${item.id})" title="Research this item"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>${(item.findings&&item.findings.length)?`<span class="rf-count">${item.findings.length}</span>`:''}</span> <span class="doc-rowx" onclick="pbRemoveByIdx(${idx})" title="Remove item">✕</span></td>`:''}
       </tr>`;
     });
@@ -8602,6 +8623,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
       <tr style="border-top:2px solid #1a1a1a"><td style="padding:7px 14px 7px 0;font-weight:700;font-size:13px">TOTAL</td><td style="padding:7px 0;text-align:right;font-weight:700;font-size:13px">$${fmtD(total)}</td></tr>
     </table>
   </div>
+  ${pbNotesBlock(editable)}
   <!-- Terms -->
   <div style="border-top:1px solid #ddd;padding-top:10px">
     <div style="font-size:9px;line-height:1.55;color:#999"><strong>Terms:</strong> Pricing is estimated and subject to change. ai3 is not responsible for discrepancies in pricing estimates, expired quotations, or variations in tax, freight, or installation charges. Contingency fee unused funds are fully refundable.</div>
@@ -8719,6 +8741,7 @@ function buildPBClientPreview({projName,proj,dateStr,feePct,contPct,freightPct,t
         </table>
       </div>
 
+      ${pbNotesBlock(false)}
       <!-- Terms -->
       <div style="border-top:1px solid #ddd;padding-top:14px">
         <div style="font-size:9.5px;line-height:1.6;color:#888">
@@ -8732,6 +8755,33 @@ function buildPBClientPreview({projName,proj,dateStr,feePct,contPct,freightPct,t
   </div>`;
 }
 
+// General notes sit under the totals on both the internal sheet and the client
+// copy. Blank notes show a prompt while editing and print nothing.
+function pbNotesBlock(editable){
+  const txt=String(pbGenNotes||'');
+  if(!editable && !txt.trim()) return '';
+  const body = editable
+    ? `<div id="pb-gennotes" contenteditable="true" onblur="pbSetGenNotes(this.innerText)"
+         style="font-size:11px;line-height:1.6;color:#333;white-space:pre-wrap;min-height:2.6em;outline:none;border:1px dashed #ddd;border-radius:3px;padding:6px 8px"
+         data-ph="Click to add general notes — exclusions, assumptions, schedule caveats…">${escHtml(txt)}</div>`
+    : `<div style="font-size:11px;line-height:1.6;color:#333;white-space:pre-wrap">${escHtml(txt)}</div>`;
+  return `<div style="border-top:1px solid #ddd;padding-top:12px;margin-bottom:18px">
+    <div style="font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#555;margin-bottom:6px">General Notes</div>
+    ${body}
+  </div>`;
+}
+function pbSetGenNotes(v){
+  const nv=String(v==null?'':v).replace(/\u00a0/g,' ').trimEnd();
+  if(nv===pbGenNotes) return;
+  pushUndo('Edit general notes');
+  pbGenNotes=nv;
+  if(currentPBId){
+    const rec=prelimBudgets.find(p=>p.id===currentPBId);
+    if(rec){ rec.genNotes=pbGenNotes; DB.save('fp11_pb',prelimBudgets); }
+  }
+  recalcPB();
+}
+
 function savePB(){
   const projName=document.getElementById('pb-project').value;if(!projName){alert('Please select a project.');return;}
   const proj=projects.find(p=>p.name===projName);
@@ -8741,6 +8791,7 @@ function savePB(){
     contPct:parseFloat(document.getElementById('pb-cont-pct').value)||5,
     freightPct:parseFloat(document.getElementById('pb-freight-pct').value)||10,
     taxPct:parseFloat(document.getElementById('pb-tax-pct').value)||8.9,
+    genNotes:pbGenNotes,
     items:JSON.parse(JSON.stringify(pbLineItems))};
   if(currentPBId){const idx=prelimBudgets.findIndex(p=>p.id===currentPBId);if(idx>=0)prelimBudgets[idx]={...prelimBudgets[idx],...data};}
   else{
@@ -18390,6 +18441,7 @@ document.addEventListener('wheel', function(e){
 <script src="templates.js"></script>
 <script src="po-window.js"></script>
 <script src="pb-sourcing.js"></script>
+<script src="budget-numbering.js"></script>
 <div id="ai3-toast-wrap"></div>
 </body>
 </html>
