@@ -19,6 +19,54 @@
     {k:'closeout',       label:'Close Out Date'},
   ];
 
+  // Snapshot from "STEVE Weekly Status - Week of September 14.pdf" — loaded via
+  // the Import button below so the overwrite goes through saveRows() and syncs
+  // to every user the normal way.
+  const WEEKLY_SEP14 = [
+    {project:'Local Lime Germantown', projectContact:'Caroline', procContact:'Sabrina and Mary Beth',
+     paDate:'October 2, 2025', firstPOs:'Completed', lastPOs:'Completed',
+     install:'Direct To Site, Completed', closeout:'Will Close Out With LL WLR'},
+    {project:'Local Lime West Little Rock', projectContact:'Caroline', procContact:'Sabrina and Mary Beth',
+     paDate:'PA1: June 27, 2025<br>PA2: October 2, 2025', firstPOs:'Completed', lastPOs:'Completed',
+     install:'Drapery: June 22-24<br>FF&E: June 30', closeout:'OUTSTANDING ITEMS<br>Pending Outstanding Items'},
+    {project:'The Well Raleigh', projectContact:'Brittany', procContact:'Mary Beth',
+     paDate:'November 26, 2025, Received Balance of Funds', firstPOs:'Completed',
+     lastPOs:'Completed - There are some "client hold items" remaining',
+     install:'FF&E and Partial Drapery as Install One: October 13<br>Remaining Drapery as Install Two: December 7-11', closeout:'December 2026'},
+    {project:'Local Lime Leawood', projectContact:'Ann-Marie', procContact:'Mary Beth and Sabrina',
+     paDate:'PA1: January 30, 2026<br>PA2 Reissued: March 3, 2026', firstPOs:'Completed',
+     lastPOs:'Short lead time items remaining', install:'FF&E: September 29<br>Drapery: Week of September 28-October 2', closeout:'October 2026'},
+    {project:'Local Lime St Louis', projectContact:'Caroline', procContact:'Sabrina and Mary Beth',
+     paDate:'February 24, 2026, ai3 re-issued PA<br>May 18, Received Funds', firstPOs:'Completed',
+     lastPOs:'TBD - Working on this now', install:'Week of December 28, 2026-January 1, 2027', closeout:'February 2027'},
+    {project:'Saint Alban’s Sporting Club', projectContact:'Caroline and Carolina', procContact:'Mary Beth and Sabrina',
+     paDate:'Barstool Samples: February 16, 2026, Received Funds<br>PA: April 13, 2026, Received Funds<br>PA2: May 5, Received Funds',
+     firstPOs:'Completed', lastPOs:'Completed',
+     install:'Barstool Samples: Completed<br>FF&E Install: November 5-6<br>Drapery Install: November 7-11<br>Art Install: November 7-11', closeout:'December 2026'},
+    {project:'One Alliance', projectContact:'Carolina', procContact:'Sabrina and Mary Beth',
+     paDate:'February 9, 2026', firstPOs:'Completed', lastPOs:'Short lead time items remaining',
+     install:'November 23-27, 2026', closeout:'December 2026'},
+    {project:'Great Waters Clubhouse at Reynolds Lake Oconee', projectContact:'Olivia', procContact:'Mary Beth',
+     paDate:'Furniture Sample PA: Issued, Need more freight funds<br>PA1: August 3, 2026, Received half of funds<br>PA2: August 19, 2026, No funds',
+     firstPOs:'PA1: October 23, 2026<br>PA2: TBD', lastPOs:'PA1: TBD<br>PA2: TBD',
+     install:'Late November/Early December 2026', closeout:'December 2026'},
+    {project:'Ansley On Call', projectContact:'Mary Beth', procContact:'Mary Beth',
+     paDate:'Drapery: Completed<br>Rugs: Outstanding', firstPOs:'TBD', lastPOs:'TBD',
+     install:'Drapery: Completed<br>Rugs: TBD', closeout:'TBD'},
+    {project:'The Brookwood Clubhouse', projectContact:'Brittany', procContact:'Mary Beth',
+     paDate:'In Process/Pending', firstPOs:'TBD', lastPOs:'TBD', install:'TBD', closeout:'TBD'},
+    {project:'Zaza Madre WLR - Upcoming', projectContact:'TBD', procContact:'TBD',
+     paDate:'PA: Currently In-Process', firstPOs:'TBD', lastPOs:'TBD', install:'TBD', closeout:'TBD'},
+  ];
+  window.statusImportSep14 = function(){
+    if(!confirm('Replace all rows with the September 14, 2026 weekly report? This overwrites the current table for everyone.')) return;
+    STATUS_ROWS = WEEKLY_SEP14.map(function(row){ row=Object.assign({},row); row.id='s'+Math.random().toString(36).slice(2,9); return row; });
+    saveRows(STATUS_ROWS);
+    const m=loadMeta(); saveMeta(Object.assign({},m,{weekOf:'September 14, 2026'}));
+    renderStatus();
+    if(typeof ai3Toast==='function') ai3Toast('Loaded the September 14 weekly report');
+  };
+
   const RED  = '#AE1A1D';   // needs attention
   const BLUE = '#2563A8';   // note / update
   const r = s => '<span style="color:'+RED+'">'+s+'</span>';
@@ -195,6 +243,7 @@
             '<span><span class="dot" style="background:'+RED+'"></span>Needs attention</span>'+
             '<span><span class="dot" style="background:'+BLUE+'"></span>Note / update</span>'+
           '</div>'+
+          '<button class="btn btn-sm" onclick="statusImportSep14()" style="margin-left:8px" title="Overwrite this table with the Sep 14, 2026 weekly report">Load Sep 14 report</button>'+
         '</div>'+
         '<div style="overflow-x:auto"><table>'+tableHTML(true)+'</table></div>'+
         '<div class="st-foot">'+STATUS_ROWS.length+' project'+(STATUS_ROWS.length!==1?'s':'')+' · Live projects sync automatically; edited cells stay locked to your text. Select text, then use Red / Blue above to flag it.</div>'+
