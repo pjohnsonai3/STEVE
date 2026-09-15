@@ -58,13 +58,18 @@
     ].map(function(row){ row.id = 's'+Math.random().toString(36).slice(2,9); return row; });
   }
 
+  // Rows and meta live in the shared cloud store (window.statusRows / statusMeta,
+  // synced via SB_STATE) so the weekly report updates for every signed-in user —
+  // not just the browser that edited it.
   function loadRows(){
-    try{ const raw = localStorage.getItem(LS_ROWS); if(raw){ const a=JSON.parse(raw); if(Array.isArray(a)) return a; } }catch(e){}
-    const s = seedRows(); saveRows(s); return s;
+    const a = (typeof window.statusRows !== 'undefined') ? window.statusRows : null;
+    const meta = loadMeta();
+    if(Array.isArray(a) && (a.length || meta.seeded)) return a;
+    const s = seedRows(); saveMeta(Object.assign({}, meta, {seeded:true})); saveRows(s); return s;
   }
-  function saveRows(rows){ try{ localStorage.setItem(LS_ROWS, JSON.stringify(rows)); }catch(e){} }
-  function loadMeta(){ try{ return JSON.parse(localStorage.getItem(LS_META)||'{}')||{}; }catch(e){ return {}; } }
-  function saveMeta(m){ try{ localStorage.setItem(LS_META, JSON.stringify(m)); }catch(e){} }
+  function saveRows(rows){ window.statusRows = rows; if(typeof DB!=='undefined') DB.save('statusrows', rows); }
+  function loadMeta(){ return (typeof window.statusMeta==='object' && window.statusMeta) ? window.statusMeta : {}; }
+  function saveMeta(m){ window.statusMeta = m; if(typeof DB!=='undefined') DB.save('statusmeta', m); }
 
   let STATUS_ROWS = null;
 

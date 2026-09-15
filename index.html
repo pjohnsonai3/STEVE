@@ -2473,7 +2473,7 @@
           <div id="vpo-alt-content" style="padding:12px 14px"></div>
         </div>
 
-        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:auto;max-height:calc(100vh - 230px);padding:8px">
+        <div id="vpo-preview-wrap" style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:8px">
           <div id="vpo-preview"></div>
         </div>
       </div>
@@ -3691,6 +3691,8 @@ let suppliers  = DB.load('fp11_suppliers',[]);
 let docTemplates   = DB.load('fp11_templates',[]);   // reusable PO / spec shells
 let ai3Team        = DB.load('fp11_ai3team',[]);
 let clientContacts = DB.load('fp11_clients',[]);
+let statusRows     = DB.load('fp11_status_rows',[]);
+let statusMeta     = DB.load('fp11_status_meta',{});
 let pos        = DB.load('fp11_pos',[]);
 let inventory  = DB.load('fp11_inventory',[]);
 let budgetCats = DB.load('fp11_budgetcats',[]);
@@ -14859,6 +14861,8 @@ const SB_STATE = [
   {k:'pos',        ls:'fp11_pos',        get:()=>pos,            set:v=>{pos=v;},            render:()=>{}},
   {k:'expenses',   ls:'fp11_expenses',   get:()=>expenses,       set:v=>{expenses=v;},       render:()=>{}},
   {k:'nextid',     ls:'fp11_nextid',     get:()=>nextId,         set:v=>{ const n=(typeof v==='number')?v:parseInt(v); if(!isNaN(n)) nextId=Math.max(nextId,n); }, render:()=>{}},
+  {k:'statusrows', ls:'fp11_status_rows',get:()=>statusRows,     set:v=>{statusRows=Array.isArray(v)?v:[];}, render:()=>{ const _p=document.getElementById('page-status'); if(_p&&_p.classList.contains('active')&&typeof renderStatus==='function') renderStatus(); }},
+  {k:'statusmeta', ls:'fp11_status_meta',get:()=>statusMeta,     set:v=>{statusMeta=v&&typeof v==='object'?v:{};}, render:()=>{ const _p=document.getElementById('page-status'); if(_p&&_p.classList.contains('active')&&typeof renderStatus==='function') renderStatus(); }},
 ];
 let _sbStateHash  = {};
 let _sbStateTimer = null;
