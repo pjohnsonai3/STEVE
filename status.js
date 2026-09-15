@@ -61,15 +61,19 @@
   // Rows and meta live in the shared cloud store (window.statusRows / statusMeta,
   // synced via SB_STATE) so the weekly report updates for every signed-in user —
   // not just the browser that edited it.
+  // statusRows/statusMeta are declared with `let` in STEVE.html, so they are NOT
+  // window.statusRows — they're bare identifiers in the shared classic-script
+  // scope. Reference them directly so this reads/writes the same binding
+  // SB_STATE's get()/set() use for cloud push/pull.
   function loadRows(){
-    const a = (typeof window.statusRows !== 'undefined') ? window.statusRows : null;
+    const a = (typeof statusRows !== 'undefined') ? statusRows : null;
     const meta = loadMeta();
     if(Array.isArray(a) && (a.length || meta.seeded)) return a;
     const s = seedRows(); saveMeta(Object.assign({}, meta, {seeded:true})); saveRows(s); return s;
   }
-  function saveRows(rows){ window.statusRows = rows; if(typeof DB!=='undefined') DB.save('statusrows', rows); }
-  function loadMeta(){ return (typeof window.statusMeta==='object' && window.statusMeta) ? window.statusMeta : {}; }
-  function saveMeta(m){ window.statusMeta = m; if(typeof DB!=='undefined') DB.save('statusmeta', m); }
+  function saveRows(rows){ statusRows = rows; if(typeof DB!=='undefined') DB.save('statusrows', rows); }
+  function loadMeta(){ return (typeof statusMeta==='object' && statusMeta) ? statusMeta : {}; }
+  function saveMeta(m){ statusMeta = m; if(typeof DB!=='undefined') DB.save('statusmeta', m); }
 
   let STATUS_ROWS = null;
 
