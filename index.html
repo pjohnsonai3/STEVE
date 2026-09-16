@@ -2451,17 +2451,15 @@
             <div id="vpo-img-product-strip" style="margin-top:8px;display:none;flex-wrap:wrap;gap:10px"></div>
           </div>
           <div>
-            <label style="font-weight:500;font-size:13px;color:var(--text2)">Fabric / Finish Swatch <span style="font-weight:400;color:var(--text3)">(optional)</span></label>
+            <label style="font-weight:500;font-size:13px;color:var(--text2)">Fabric / Finish Swatches <span style="font-weight:400;color:var(--text3)">(optional — add one per fabric/finish on this item)</span></label>
             <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
               <label style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:12px;cursor:pointer;color:var(--text2)">
-                Upload swatch&hellip;
-                <input type="file" accept="image/*" style="display:none" onchange="vpoLoadImage(this,'vpo-img-swatch','vpo-img-swatch-preview')" />
+                Upload swatch(es)&hellip;
+                <input type="file" accept="image/*" multiple style="display:none" onchange="vpoAddSwatches(this)" />
               </label>
-              <button onclick="vpoClearImage('vpo-img-swatch','vpo-img-swatch-preview')" style="font-size:11px;background:none;border:none;color:var(--text3);cursor:pointer;padding:4px">&#10005; Clear</button>
+              <button onclick="vpoClearSwatches()" style="font-size:11px;background:none;border:none;color:var(--text3);cursor:pointer;padding:4px">&#10005; Clear all</button>
             </div>
-            <div id="vpo-img-swatch-preview" style="margin-top:8px;display:none">
-              <img id="vpo-img-swatch-thumb" style="max-height:60px;max-width:100px;border:1px solid var(--border);border-radius:4px;object-fit:contain" />
-            </div>
+            <div id="vpo-img-swatch-strip" style="margin-top:8px;display:none;flex-wrap:wrap;gap:10px"></div>
           </div>
         </div>
 
@@ -10007,8 +10005,12 @@ function showVPOEditor(v){
     mfrContact:       v ? (v.mfrContact||'')        : '',
     mfrContactTel:    v ? (v.mfrContactTel||'')     : '',
     mfrContactEmail:  v ? (v.mfrContactEmail||'')   : '',
+    skuNum:           v ? (v.skuNum||'')            : '',
     srcName:          v ? (v.srcName||'')           : '',
     srcWeb:           v ? (v.srcWeb||'')            : '',
+    srcContact:       v ? (v.srcContact||'')        : '',
+    srcContactTel:    v ? (v.srcContactTel||'')     : '',
+    srcContactEmail:  v ? (v.srcContactEmail||'')   : '',
     shipName:         v ? (v.shipName||'')          : 'Caudelle Interior Installations',
     shipAttn:         v ? (v.shipAttn||'')          : '',
     shipAddr:         v ? (v.shipAddr||'')          : '101 Villanova Dr SW',
@@ -10066,12 +10068,10 @@ function showVPOEditor(v){
   if(v && Array.isArray(v.imgProducts) && v.imgProducts.length) vpoImages.products = v.imgProducts.slice();
   else if(v && v.imgProduct) vpoImages.products = [v.imgProduct]; // legacy single-image records
   else vpoImages.products = [];
-  vpoImages.swatch = (v && v.imgSwatch) ? v.imgSwatch : '';
+  vpoImages.swatches = (v && Array.isArray(v.imgSwatches) && v.imgSwatches.length) ? v.imgSwatches.slice() : (v && v.imgSwatch ? [v.imgSwatch] : []);
   vpoImages.layout = (v && v.imgLayout) ? Object.assign({}, v.imgLayout) : {};
   vpoRenderProductThumbs();
-  const sp = document.getElementById('vpo-img-swatch-preview');
-  const st = document.getElementById('vpo-img-swatch-thumb');
-  if(vpoImages.swatch && sp && st){ st.src=vpoImages.swatch; sp.style.display='block'; } else if(sp) sp.style.display='none';
+  vpoRenderSwatchThumbs();
   document.getElementById('vpo-editor-breadcrumb').textContent=v?v.poNum:'New Source PO';
   recalcVPO();
 }
@@ -10475,33 +10475,54 @@ function buildVPOExtraPages(d, editable){
 }
 
 // Swatch handling (single image).
-function vpoLoadImage(input, key, previewId){
-  const file = input.files[0];
-  if(!file) return;
+// Multiple fabric/finish swatches per item — same pattern as the product-image strip.
+async function vpoAddSwatches(input){
+  const files = Array.from(input.files||[]);
+  if(!files.length) return;
+  input.value = '';
   const folder = 'vpos/' + ((vpoForm && vpoForm.id) ? String(vpoForm.id).replace(/[^a-zA-Z0-9_-]/g,'_') : 'draft') + '/swatch';
-  const reader = new FileReader();
-  reader.onload = e => {
-    vpoDownscaleImage(e.target.result, 700, 0.82)
-      .catch(()=>e.target.result)
-      .then(b64 => sbUploadImage(b64, folder))
-      .then(urlOrB64=>{
-        sbDeleteImageByUrl(vpoImages.swatch); // remove the previous swatch from storage if any
-        vpoImages.swatch = urlOrB64;
-        const preview = document.getElementById(previewId);
-        const thumb   = document.getElementById(key+'-thumb');
-        if(preview && thumb){ thumb.src=urlOrB64; preview.style.display='block'; }
-        recalcVPO();
-      });
-  };
-  reader.readAsDataURL(file);
+  vpoImages.swatches = vpoImages.swatches || [];
+  for(const file of files){
+    try{
+      const dataUrl = await _vpoReadDataURL(file);
+      let scaled; try { scaled = await vpoDownscaleImage(dataUrl, 700, 0.82); } catch(e){ scaled = dataUrl; }
+      const out = await sbUploadImage(scaled, folder);
+      vpoImages.swatches.push(out);
+      vpoRenderSwatchThumbs();
+    }catch(err){ /* skip this file, keep going */ }
+  }
+  vpoImages.swatches = vpoImages.swatches.filter(Boolean);
+  vpoRenderSwatchThumbs();
+  recalcVPO();
 }
 
-function vpoClearImage(key, previewId){
-  sbDeleteImageByUrl(vpoImages.swatch);
-  vpoImages.swatch = '';
-  const preview = document.getElementById(previewId);
-  if(preview) preview.style.display='none';
+function vpoRemoveSwatch(idx){
+  const removed = (vpoImages.swatches||[])[idx];
+  vpoImages.swatches.splice(idx,1);
+  sbDeleteImageByUrl(removed);
+  vpoRenderSwatchThumbs();
   recalcVPO();
+}
+
+function vpoClearSwatches(){
+  const removed = (vpoImages.swatches||[]).slice();
+  vpoImages.swatches = [];
+  removed.forEach(sbDeleteImageByUrl);
+  vpoRenderSwatchThumbs();
+  recalcVPO();
+}
+
+function vpoRenderSwatchThumbs(){
+  const strip = document.getElementById('vpo-img-swatch-strip');
+  if(!strip) return;
+  const list = vpoImages.swatches||[];
+  if(!list.length){ strip.style.display='none'; strip.innerHTML=''; return; }
+  strip.style.display = 'flex';
+  strip.innerHTML = list.map((src,i)=>`
+    <div style="position:relative;display:inline-block">
+      <img ${sbImgAttrs(src)} style="max-height:60px;max-width:100px;border:1px solid var(--border);border-radius:4px;object-fit:contain;display:block" />
+      <button onclick="vpoRemoveSwatch(${i})" title="Remove" style="position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;border:none;background:#b3261e;color:#fff;font-size:11px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>`).join('');
 }
 
 function getVPOFormData(){
@@ -10560,7 +10581,8 @@ function getVPOFormData(){
     fmt:f.fmt||{},
     imgProducts: vpoImages.products.slice(),
     imgProduct: vpoImages.products[0] || '', // legacy: first image, for list thumbnails
-    imgSwatch:  vpoImages.swatch  || '',
+    imgSwatches: (vpoImages.swatches||[]).slice(),
+    imgSwatch:  (vpoImages.swatches||[])[0] || '', // legacy: first swatch, for older readers
     imgLayout: (function(){ var o={}; (vpoImages.products||[]).forEach(function(s){ var L=(vpoImages.layout||{})[s]; if(L && (L.w>0 || (L.align && L.align!=='center'))) o[s]=Object.assign({},L); }); return o; })(),
     ...extraFields
   };
@@ -10798,13 +10820,13 @@ function buildVPODoc(d, editable){
     <div style="margin-top:8px;font-weight:700">Tag item: ${escHtml(poNum)}</div>
   </div>
 
-  ${(prodImgs.length||d.imgSwatch)?`
+  ${(prodImgs.length||(d.imgSwatches&&d.imgSwatches.length)||d.imgSwatch)?`
   <div style="page-break-before:always;padding-top:16px;${editable?'border-top:3px dashed #cbd5d8;margin-top:26px;':''}">
     ${editable?`<div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#93A1A8;margin-bottom:10px">Page 2 &middot; Product Images</div>`:''}
     <div style="font-size:13px;font-weight:700;border-bottom:1px solid #ddd;padding-bottom:6px;margin-bottom:16px">Product Images &nbsp;<span style="font-weight:400;color:#777">${escHtml(d.itemNum||'')} ${escHtml(d.itemHeadline||'')}</span></div>
     ${prodImgsPageHtml}
     ${prodImgs.length?`<div style="font-size:8.5px;color:#888;font-style:italic;text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-top:2px">Product Image${prodImgs.length>1?'s':''} for Reference</div>`:''}
-    ${d.imgSwatch?`<div style="text-align:center;margin-top:22px"><img ${sbImgAttrs(d.imgSwatch)} style="max-width:220px;max-height:170px;object-fit:contain;border:0.5px solid #ddd;display:inline-block" /><div style="font-size:8.5px;color:#888;font-style:italic;margin-top:4px">Image — Graded in Fabric</div></div>`:''}
+    ${(function(){ var sw=(d.imgSwatches&&d.imgSwatches.length)?d.imgSwatches:(d.imgSwatch?[d.imgSwatch]:[]); return sw.length?('<div style="text-align:center;margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+sw.map(function(s){return '<img '+sbImgAttrs(s)+' style="max-width:220px;max-height:170px;object-fit:contain;border:0.5px solid #ddd;display:inline-block" />';}).join('')+'</div><div style="font-size:8.5px;color:#888;font-style:italic;margin-top:4px">Image — Graded in Fabric</div>'):''; })()}
   </div>`:''}
 
   ${buildVPOExtraPages(d, editable)}
@@ -15174,7 +15196,7 @@ function sbImageRefCount(url, exceptVpoId){
     (vendorPOs||[]).forEach(po=>{
       if(exceptVpoId!=null && po.id===exceptVpoId) return;
       (po.imgProducts||[]).forEach(hit);
-      hit(po.imgProduct); hit(po.imgSwatch);
+      hit(po.imgProduct); hit(po.imgSwatch); (po.imgSwatches||[]).forEach(hit);
       (po.extraPages||[]).forEach(pg=>(pg.images||[]).forEach(hit));
     });
   }catch(_){}
@@ -15182,7 +15204,7 @@ function sbImageRefCount(url, exceptVpoId){
   try{
     if(typeof vpoImages==='object' && vpoImages){
       (vpoImages.products||[]).forEach(hit);
-      hit(vpoImages.swatch);
+      (vpoImages.swatches||[]).forEach(hit);
     }
     (((typeof vpoForm==='object'&&vpoForm)?vpoForm.extraPages:[])||[]).forEach(pg=>(pg.images||[]).forEach(hit));
   }catch(_){}

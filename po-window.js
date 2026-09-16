@@ -75,6 +75,7 @@
         '<span id="vpo-float-title" style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:60px"></span>' +
         // Window controls never move and never shrink, so there is always a way out.
         '<span style="display:flex;align-items:center;gap:4px;flex:none;cursor:default">' +
+          '<button class="btn btn-sm" onclick="pwCloseFloat()" title="Save your place and return to the PO list">\u2190 Back to List</button>' +
           '<button class="btn btn-sm" onclick="pwRefPicker()" title="Open another PO beside this one, read-only">\u29c9 Reference</button>' +
           '<button class="btn btn-sm" id="vpo-float-max" title="Maximise / restore">\u2b1c</button>' +
           '<button class="btn btn-sm" onclick="pwDock()" title="Put it back in the page">\u21f2 Dock</button>' +
