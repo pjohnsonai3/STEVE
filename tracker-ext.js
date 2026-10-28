@@ -36,7 +36,7 @@
   }
   function paLabel(projName, paId) {
     var list = projectPAs(projName);
-    for (var i = 0; i < list.length; i++) if (list[i].id === paId) return 'PA' + (i + 1);
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(paId)) return 'PA' + (i + 1);
     return '';
   }
   window.btProjectPAs = projectPAs;
@@ -54,12 +54,17 @@
     save();
   }
 
-  var VIEW_KEY = 'steve_bt_pa_view';
+  // Held in memory first so the choice sticks even if storage is blocked or
+  // a sync re-render lands mid-change; localStorage only remembers it across reloads.
+  var VIEW_KEY = 'steve_bt_pa_view', _views = {};
+  window.TRACKER_EXT_VERSION = '2026-10-28b';
   function getView(projName) {
-    try { return (JSON.parse(localStorage.getItem(VIEW_KEY)) || {})[projName] || ''; } catch (e) { return ''; }
+    if (Object.prototype.hasOwnProperty.call(_views, projName)) return _views[projName];
+    try { return String((JSON.parse(localStorage.getItem(VIEW_KEY)) || {})[projName] || ''); } catch (e) { return ''; }
   }
   function setView(projName, v) {
-    try { var m = JSON.parse(localStorage.getItem(VIEW_KEY)) || {}; m[projName] = v; localStorage.setItem(VIEW_KEY, JSON.stringify(m)); } catch (e) {}
+    _views[projName] = String(v || '');
+    try { var m = JSON.parse(localStorage.getItem(VIEW_KEY)) || {}; m[projName] = _views[projName]; localStorage.setItem(VIEW_KEY, JSON.stringify(m)); } catch (e) {}
   }
 
   // Called at the top of renderBTTable: migrate, fill toolbar selects, return the active PA view.
@@ -67,12 +72,13 @@
     migrate(projName);
     var list = projectPAs(projName);
     var v = getView(projName);
-    if (v && !list.some(function (p) { return p.id === v; })) v = '';
+    if (v && !list.some(function (p) { return String(p.id) === v; })) v = '';
     var sel = document.getElementById('bt-pa-filter');
     if (sel) {
       sel.innerHTML = '<option value="">All PAs</option>' + list.map(function (p, i) {
-        return '<option value="' + escHtml(p.id) + '"' + (p.id === v ? ' selected' : '') + '>PA' + (i + 1) + ' \u00b7 ' + escHtml(p.paNum || '') + '</option>';
+        return '<option value="' + escHtml(String(p.id)) + '"' + (String(p.id) === v ? ' selected' : '') + '>PA' + (i + 1) + ' \u00b7 ' + escHtml(p.paNum || '') + '</option>';
       }).join('');
+      sel.value = v;
       sel.style.display = list.length ? '' : 'none';
     }
     var sf = document.getElementById('bt-status-filter');
@@ -92,15 +98,15 @@
   window.btViewTracker = function (projName, v) {
     var bt = budgetTrackers[projName];
     if (!v) return bt;
-    return Object.assign({}, bt, { items: bt.items.filter(function (i) { return (i.paId || '') === v; }) });
+    return Object.assign({}, bt, { items: bt.items.filter(function (i) { return String(i.paId == null ? '' : i.paId) === String(v); }) });
   };
   window.btSetPAView = function (v) {
     var p = btCurrentProject; if (!p) return;
-    setView(p, v);
+    setView(p, String(v || ''));
     renderBTTable();
   };
   window.btEmptyPAView = function (projName, v) {
-    var pa = (pas || []).find(function (p) { return p.id === v; });
+    var pa = (pas || []).find(function (p) { return String(p.id) === String(v); });
     return '<div class="empty-state" style="padding:40px 20px;text-align:center">' +
       '<p style="margin-bottom:12px">No tracker rows for <strong>' + escHtml(paLabel(projName, v)) + ' \u00b7 ' + escHtml(pa ? pa.paNum || '' : '') + '</strong> yet.</p>' +
       (pa && pa.items && pa.items.length
@@ -109,7 +115,8 @@
       '</div>';
   };
   window.btLoadPAItems = function (projName, paId) {
-    var bt = budgetTrackers[projName], pa = (pas || []).find(function (p) { return p.id === paId; });
+    var bt = budgetTrackers[projName], pa = (pas || []).find(function (p) { return String(p.id) === String(paId); });
+    if (pa) paId = pa.id;
     if (!bt || !pa) return;
     if (typeof pushUndo === 'function') pushUndo('Load PA items');
     var next = Math.max.apply(null, [0].concat(bt.items.map(function (i) { return i.id || 0; }))) + 1;
@@ -217,12 +224,12 @@
     var moved = bt.items.find(function (i) { return i.id === itemId; }); if (!moved) return;
     var groups = [], cur = null, origin = null;
     bt.items.forEach(function (it) {
-      if (it.isCategory) { cur = { head: it, lines: [], paId: it.paId || '' }; groups.push(cur); return; }
-      if (!cur) { cur = { head: null, lines: [], paId: it.paId || '' }; groups.push(cur); }
+      if (it.isCategory) { cur = { head: it, lines: [], paId: String(it.paId == null ? '' : it.paId) }; groups.push(cur); return; }
+      if (!cur) { cur = { head: null, lines: [], paId: String(it.paId == null ? '' : it.paId) }; groups.push(cur); }
       if (it === moved) { origin = cur; return; }
       cur.lines.push(it);
     });
-    var pid = moved.paId || '';
+    var pid = String(moved.paId == null ? '' : moved.paId);
     var band = bandOfNum(moved.itemNum), target = null;
     if (band) {
       var mine = groups.filter(function (g) { return g.head && g.paId === pid; });
@@ -231,7 +238,7 @@
       if (!target) {
         var nid = Math.max.apply(null, [0].concat(bt.items.map(function (i) { return i.id || 0; }))) + 1;
         var label = BANDS[band - 1].label.toUpperCase();
-        target = { head: { id: nid, isCategory: true, name: label, category: label, paId: pid }, lines: [], paId: pid };
+        target = { head: { id: nid, isCategory: true, name: label, category: label, paId: moved.paId }, lines: [], paId: pid };
         groups.push(target);
       }
     }
@@ -263,14 +270,16 @@
       var before = bt.items.length;
       var r = orig.apply(this, arguments);
       var added = bt.items.slice(before);
-      var v = getView(projName) || ((projectPAs(projName)[0] || {}).id) || '';
+      var vs = getView(projName);
+      var paObj = projectPAs(projName).find(function (p) { return String(p.id) === vs; }) || projectPAs(projName)[0];
+      var v = paObj ? paObj.id : '';
       added.forEach(function (i) { i.paId = v; });
       if (added.length && !isCat) {
         // Keep the new row inside its PA's block, at the end, until it gets a number.
         var it = added[0];
         bt.items.splice(bt.items.indexOf(it), 1);
         var last = -1;
-        bt.items.forEach(function (x, k) { if ((x.paId || '') === v) last = k; });
+        bt.items.forEach(function (x, k) { if (String(x.paId == null ? '' : x.paId) === String(v)) last = k; });
         bt.items.splice(last + 1, 0, it);
         save(); renderBTTable();
         window._btFocusRow = it.id; focusRow();
@@ -323,18 +332,19 @@
   window.vpoPAPopulate = function (projName) {
     var sel = document.getElementById('vpo-pa-filter'); if (!sel) return;
     var list = projName ? projectPAs(projName) : [];
-    var cur = sel.value;
-    if (!list.some(function (p) { return p.id === cur; })) cur = '';
+    var cur = String(sel.value || '');
+    if (!list.some(function (p) { return String(p.id) === cur; })) cur = '';
     sel.innerHTML = '<option value="">All PAs</option>' + list.map(function (p, i) {
-      return '<option value="' + escHtml(p.id) + '"' + (p.id === cur ? ' selected' : '') + '>PA' + (i + 1) + ' \u00b7 ' + escHtml(p.paNum || '') + '</option>';
+      return '<option value="' + escHtml(String(p.id)) + '"' + (String(p.id) === cur ? ' selected' : '') + '>PA' + (i + 1) + ' \u00b7 ' + escHtml(p.paNum || '') + '</option>';
     }).join('');
+    sel.value = cur;
     sel.style.display = list.length > 0 ? '' : 'none';
   };
   window.vpoPAMatch = function (v) {
     var sel = document.getElementById('vpo-pa-filter');
     var id = sel ? sel.value : ''; if (!id) return true;
-    if (v.paId) return v.paId === id;
-    var pa = (pas || []).find(function (p) { return p.id === id; }); if (!pa) return true;
+    if (v.paId) return String(v.paId) === id;
+    var pa = (pas || []).find(function (p) { return String(p.id) === id; }); if (!pa) return true;
     var n = String(v.itemNum || '').trim().toUpperCase(); if (!n) return false;
     return (pa.items || []).some(function (i) { return !i.isCategory && String(i.itemNum || '').trim().toUpperCase() === n; });
   };
