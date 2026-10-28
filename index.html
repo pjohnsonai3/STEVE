@@ -1887,11 +1887,6 @@
         </select>
         <select class="select-styled" id="bt-status-filter" onchange="renderBTTable()" style="width:140px">
           <option value="">All Statuses</option>
-          <option value="urgent">Urgent</option>
-          <option value="ordered">Ordered</option>
-          <option value="pending">Pending</option>
-          <option value="received">Received</option>
-          <option value="issue">Has Issue</option>
         </select>
         <button class="btn btn-sm btn-primary" onclick="btSyncToPOs()" title="Push payment data to Purchase Orders">⇄ Sync → POs</button>
         <button class="btn btn-sm" onclick="btImportFromPOs()" title="Pull payment data from Purchase Orders">⇄ Import ← POs</button>
@@ -1899,6 +1894,9 @@
         <button class="btn btn-sm" onclick="printBudgetTracker()">Print / PDF</button>
         <button class="btn btn-sm" onclick="exportBTcsv()">↓ CSV</button>
         <button class="btn btn-sm btn-danger" onclick="btResetTracker()" title="Clear and reseed this tracker">↺ Reset</button>
+        <select class="select-styled" id="bt-pa-filter" onchange="btSetPAView(this.value)" style="width:170px;display:none" title="Each Purchase Authorization has its own tracker"><option value="">All PAs</option></select>
+        <button class="btn btn-sm" onclick="btSaveNow()" title="Changes save automatically — this forces a save and cloud sync now">Save</button>
+        <span id="bt-save-state" style="font-size:11px;color:var(--text3);white-space:nowrap">Autosaves as you work</span>
         <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;user-select:none" title="Adds List Price and Discount % columns — the trade discount ai3 gets vs. list">
           <input type="checkbox" id="bt-show-discount" onchange="renderBTTable()" style="cursor:pointer" /> Show Discount %
         </label>
@@ -2386,6 +2384,7 @@
             <option>Lighting</option><option>Drapery</option><option>Carpet</option>
             <option>Art</option><option>Accessories</option><option>Installation</option>
           </select>
+          <select class="select-styled" id="vpo-pa-filter" onchange="renderVPOList()" style="display:none" title="Show POs for one Purchase Authorization"><option value="">All PAs</option></select>
           <span id="vpo-scope-label" style="font-size:11.5px;color:var(--accent-ink);font-style:italic;padding:0 4px;align-self:center"></span>
           <button class="btn btn-sm" onclick="vpoBulkRenumberOpen()" title="Reset every PO for the selected project to the standard {project number}-{item number} format" style="margin-left:auto">↻ Renumber POs</button>
         </div>
@@ -9457,6 +9456,7 @@ function renderVPOList(){
   const tf=document.getElementById('vpo-type-filter').value;
   const projFilter = activeProject ? activeProject.name : (document.getElementById('vpo-project-filter').value||'');
   const showProjCol = !activeProject;
+  if(typeof vpoPAPopulate==='function') vpoPAPopulate(projFilter);
 
   // Show active project scope label
   const scopeEl = document.getElementById('vpo-scope-label');
@@ -9473,6 +9473,7 @@ function renderVPOList(){
   const list=vendorPOs.filter(v=>{
     if(projFilter && v.project !== projFilter) return false;
     if(tf && v.type !== tf) return false;
+    if(typeof vpoPAMatch==='function' && !vpoPAMatch(v)) return false;
     if(q && !(v.poNum||'').toLowerCase().includes(q) && !(v.project||'').toLowerCase().includes(q) && !(v.mfrName||'').toLowerCase().includes(q) && !(v.itemHeadline||v.itemName||'').toLowerCase().includes(q)) return false;
     return true;
   });
@@ -11831,7 +11832,10 @@ function btResetTracker(){
 function renderBTTable(){
   const projName = btCurrentProject;
   if(!projName || !budgetTrackers[projName]) return;
-  const bt = budgetTrackers[projName];
+  const _btPAView = (typeof btPAPrepare==='function') ? btPAPrepare(projName) : '';
+  const bt = (typeof btViewTracker==='function') ? btViewTracker(projName, _btPAView) : budgetTrackers[projName];
+  if(_btPAView && !bt.items.length){ document.getElementById('bt-stats').innerHTML=''; document.getElementById('bt-table-wrap').innerHTML = btEmptyPAView(projName,_btPAView); return; }
+  const _btMultiPA = (typeof btProjectPAs==='function') && btProjectPAs(projName).length>1 && !_btPAView;
   const catFilter = document.getElementById('bt-category-filter').value;
   const statusFilter = document.getElementById('bt-status-filter').value;
   const proj = projects.find(p=>p.name===projName);
@@ -11958,11 +11962,54 @@ function renderBTTable(){
           onchange="btUpdateField('${projName}',${item.id},'${field}',this.value)"
           style="width:${w};padding:3px 5px;border:1px solid transparent;border-radius:3px;font-size:12px;font-family:inherit;background:transparent;box-sizing:border-box"
           onfocus="${_ieF}" onblur="${_ieB}" /></td>`;
+  // Money input: shows $1,234.00; focus reveals the raw number for editing.
+  const _mF = "this.value=this.value.replace(/[$,]/g,'');"+_ieF;
+  const _mB = (always)=>"var n=parseFloat(this.value.replace(/[$,]/g,''))||0;this.value=(n||"+(always?1:0)+")?'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'';"+_ieB;
+  const _mStyle = "padding:3px 4px;border:1px solid transparent;border-radius:3px;font-size:12px;font-family:inherit;background:transparent;text-align:right;max-width:100%;box-sizing:border-box";
+  const mInp = (val, call, w, always) => { const v=parseFloat(val)||0; return `<input value="${(v||always)?'$'+fmtD(v):''}" placeholder="$0.00" inputmode="decimal"
+          onchange="${call.replace('V',"parseFloat(this.value.replace(/[$,]/g,''))||0")}"
+          style="width:${w||'100%'};${_mStyle}" onfocus="${_mF}" onblur="${_mB(always)}" />`; };
+  const editMoney = (item, field, w, always) => `<td style="padding:6px 8px;text-align:right">${mInp(item[field], `btUpdateField('${projName}',${item.id},'${field}',V);renderBTTable()`, w+'px', always)}</td>`;
+
+  // Payments: one line per payment — # · amount · type · check # · freight · tax · date
+  const PG = 'display:grid;grid-template-columns:28px 84px 100px 70px 78px 72px 112px 14px;gap:4px;align-items:center';
+  const paymentsHead = `<div style="${PG}">${['Pmt','Amount','Type','Check #','Freight','Tax','Date Paid',''].map((l,k)=>`<span style="${k===1||k===4||k===5?'text-align:right;':''}">${l}</span>`).join('')}</div>`;
+  const paymentsCell = (item) => {
+    const num = (item.itemNum||'').trim();
+    if(pmCoveredBy[num]){
+      return `<td style="padding:6px 8px;vertical-align:top"><span onclick="btJumpToAnchor('${escHtml(pmCoveredBy[num])}')" title="Paid under item #${escHtml(pmCoveredBy[num])} — click to view"
+        style="display:inline-flex;align-items:center;gap:3px;font-size:11.5px;color:var(--pm);font-weight:600;cursor:pointer;white-space:nowrap">↑ Paid under #${escHtml(pmCoveredBy[num])}</span></td>`;
+    }
+    const ps = btEnsurePayments(item);
+    const sel = "width:100%;padding:3px 4px;border:1px solid transparent;border-radius:3px;font-size:12px;font-family:inherit;background:transparent;box-sizing:border-box;cursor:pointer";
+    const rows = ps.map((p,idx)=>{
+      const isPM = p.type==='Pay Multiple';
+      const opts = BT_PAY_TYPES.map(t=>`<option value="${t}" ${p.type===t?'selected':''}>${t||'\u2014'}</option>`).join('');
+      const amt = isPM
+        ? `<span onclick="btOpenPayMultiple('${projName}',${item.id},${idx})" title="Lump payment covering ${(p.members||[]).length} items — click to edit" style="font-weight:700;color:var(--pm);cursor:pointer;text-align:right">$${fmtD(pmAnchorInfo[num]?pmAnchorInfo[num].total:(parseFloat(p.amt)||0))}</span>`
+        : mInp(p.amt, `btSetPayment('${projName}',${item.id},${idx},'amt',V);renderBTTable()`);
+      const chk = p.type==='Check'
+        ? `<input value="${escHtml(p.checkNum||'')}" placeholder="Check #" onchange="btSetPayment('${projName}',${item.id},${idx},'checkNum',this.value)" style="width:100%;padding:3px 5px;border:1px solid var(--border2);border-radius:3px;font-size:11.5px;font-family:inherit;background:var(--surface);box-sizing:border-box" onfocus="${_ieF}" />`
+        : isPM ? `<span onclick="btOpenPayMultiple('${projName}',${item.id},${idx})" style="padding:2px 6px;border-radius:2px;background:var(--pm-bg);color:var(--pm);font-size:9.5px;font-weight:700;cursor:pointer;white-space:nowrap">PAYS ${(p.members||[]).length}</span>` : '<span></span>';
+      return `<div style="${PG};padding:2px 0;${idx?'border-top:1px dotted var(--border2);':''}">
+        <span style="font-size:10.5px;color:var(--text3);font-weight:700">${idx+1}</span>
+        ${amt}
+        <select onchange="btPayTypeChange('${projName}',${item.id},${idx},this.value)" style="${sel}" onfocus="${_ieF}" onblur="${_ieB}">${opts}</select>
+        ${chk}
+        ${mInp(p.freight, `btSetPayment('${projName}',${item.id},${idx},'freight',V);renderBTTable()`)}
+        ${mInp(p.tax, `btSetPayment('${projName}',${item.id},${idx},'tax',V);renderBTTable()`)}
+        <input type="date" value="${p.date||''}" onchange="btSetPayment('${projName}',${item.id},${idx},'date',this.value)" style="width:100%;padding:3px 4px;border:1px solid transparent;border-radius:3px;font-size:11px;font-family:inherit;background:transparent;box-sizing:border-box" onfocus="${_ieF}" onblur="${_ieB}" />
+        ${idx>=2?`<button onclick="btRemovePayment('${projName}',${item.id},${idx})" title="Remove payment" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:0">✕</button>`:'<span></span>'}
+      </div>`;
+    }).join('');
+    return `<td style="padding:4px 8px;vertical-align:top">${rows}<span onclick="btAddPayment('${projName}',${item.id})" style="font-size:10.5px;color:var(--accent-ink);cursor:pointer;margin-left:32px">+ payment</span></td>`;
+  };
+
   // List Price + computed Discount % (ai3's trade discount off list) — view-only toggle
   const discCell = (item) => {
     const lp = parseFloat(item.listPrice)||0, ap = parseFloat(item.estPrice)||0;
     const pct = (lp>0) ? ((lp-ap)/lp*100) : null;
-    return `${editNum(item,'listPrice','56')}
+    return `${editMoney(item,'listPrice','76')}
       <td style="padding:6px 8px;text-align:right;font-weight:500;color:${pct==null?'var(--text3)':pct>=0?'var(--green)':'var(--red)'}">${pct==null?'—':fmtD(pct)+'%'}</td>`;
   };
 
@@ -12043,14 +12090,7 @@ function renderBTTable(){
     return `<td style="padding:6px 6px;vertical-align:top">${inp(0)}${inp(1)}</td>`;
   };
 
-  const STATUS_COLORS = {
-    'Urgent':         { bg:'rgba(174,26,29,0.09)',  border:'rgba(174,26,29,0.4)',  badge:'#AE1A1D', badgeBg:'rgba(174,26,29,0.12)' },
-    'PO Sent':        { bg:'rgba(255,210,0,0.13)',  border:'rgba(200,160,0,0.4)',  badge:'#b8860b', badgeBg:'rgba(255,210,0,0.2)'  },
-    'Funds Received': { bg:'rgba(30,100,200,0.09)', border:'rgba(30,100,200,0.3)', badge:'#1a5db5', badgeBg:'rgba(30,100,200,0.12)' },
-    'Item Received':  { bg:'rgba(40,140,70,0.1)',   border:'rgba(40,140,70,0.35)', badge:'#27ae60', badgeBg:'rgba(40,140,70,0.13)'  },
-    'Revised':        { bg:'rgba(220,100,0,0.09)',  border:'rgba(220,100,0,0.3)',  badge:'#c0631a', badgeBg:'rgba(220,100,0,0.12)'  },
-    'Not Used':       { bg:'rgba(220,100,0,0.09)',  border:'rgba(220,100,0,0.3)',  badge:'#c0631a', badgeBg:'rgba(220,100,0,0.12)'  },
-  };
+  const STATUS_COLORS = BT_STATUS_COLORS;
 
   const showDisc = !!(document.getElementById('bt-show-discount') && document.getElementById('bt-show-discount').checked);
   // Header column styles
@@ -12070,12 +12110,8 @@ function renderBTTable(){
         ${showDisc?`<th style="${THR};width:60px">List Price</th><th style="${THR};width:56px">Discount %</th>`:''}
         <th style="${THR};width:68px">Extension</th>
         <th style="${THL};width:92px">Order No.<div style="font-weight:400;font-size:9px;color:var(--text3)">+ lead time</div></th>
-        <th style="${THR};width:64px">Amt. Paid<div style="font-weight:400;font-size:9px;color:var(--text3)">up to 2</div></th>
-        <th style="${THR};width:58px">Balance Due</th>
-        <th style="${THL};width:96px">Payment Type</th>
-        <th style="${THR};width:48px">Tax Paid</th>
-        <th style="${THR};width:52px">Freight Paid</th>
-        <th style="${THL};width:84px">Date Ord./Paid</th>
+        <th style="${THR};width:80px">Balance Due</th>
+        <th style="${THL};padding:7px 8px">${paymentsHead}</th>
         <th style="${THR};width:38px">PA Qty</th>
         <th style="${THR};width:60px">PA Price</th>
         <th style="${THR};width:70px">PA Ext.</th>
@@ -12101,12 +12137,11 @@ function renderBTTable(){
   if(statusFilter){
     visibleItems = visibleItems.filter(item=>{
       if(item.isCategory) return true;
-      if(statusFilter==='urgent') return item.itemStatus==='Urgent';
       if(statusFilter==='ordered') return item.orderNo || item.amtPaid>0;
       if(statusFilter==='pending') return !item.orderNo && !(item.amtPaid>0) && item.estPrice>0;
-      if(statusFilter==='received') return item.statusRemarks && item.statusRemarks.toUpperCase().includes('RECEIVED');
-      if(statusFilter==='issue') return item.statusRemarks && /pending|need|issue|awaiting|approve/i.test(item.statusRemarks);
-      return true;
+      if(statusFilter==='none') return !item.itemStatus;
+      if(statusFilter==='urgent') return item.itemStatus==='Urgent';
+      return item.itemStatus===statusFilter;
     });
   }
 
@@ -12118,16 +12153,16 @@ function renderBTTable(){
     if(item.isCategory){
       if(currentCat){
         html += `<tr style="background:var(--surface2);border-top:1px solid var(--border)">
-          <td colspan="4" style="padding:5px 10px;font-size:11px;color:var(--text3);font-style:italic">Subtotal — ${escHtml(currentCat)}</td>
+          <td colspan="${4+(showDisc?2:0)}" style="padding:5px 10px;font-size:11px;color:var(--text3);font-style:italic">Subtotal — ${escHtml(currentCat)}</td>
           <td style="padding:5px 10px;text-align:right;font-weight:600;font-size:12px">$${fmtD(catSubtotal)}</td>
-          <td></td>
-          <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--green)">$${fmtD(catPaid)}</td>
-          <td colspan="${11+(showDisc?2:0)}"></td>
+          <td></td><td></td>
+          <td style="padding:5px 8px"><div style="${PG}"><span></span><span style="text-align:right;font-size:12px;color:var(--green)">$${fmtD(catPaid)}</span></div></td>
+          <td colspan="6"></td>
         </tr>`;
       }
       currentCat = item.name; catSubtotal = 0; catPaid = 0;
       html += `<tr style="background:#f0ede8;border-top:2px solid var(--border2)">
-        <td colspan="${18+(showDisc?2:0)}" style="padding:8px 10px;font-weight:700;font-size:12px;letter-spacing:0.04em;color:var(--accent-ink)">${escHtml(item.name)}</td>
+        <td colspan="${14+(showDisc?2:0)}" style="padding:8px 10px;font-weight:700;font-size:12px;letter-spacing:0.04em;color:var(--accent-ink)">${escHtml(item.name)}${_btMultiPA&&item.paId?`<span style="margin-left:8px;font-size:10.5px;font-weight:600;color:var(--text3)">${escHtml(btPALabel(projName,item.paId))}</span>`:''}</td>
       </tr>`;
       continue;
     }
@@ -12149,13 +12184,13 @@ function renderBTTable(){
     const inPMGroup  = isPMAnchor || isPMMember;
     let rowStyle = 'border-bottom:1px solid var(--border);';
     if(inPMGroup){ rowStyle += `background:${sc?sc.bg:'var(--pm-bg)'};border-left:3px solid var(--pm);`; }
-    else if(sc){ rowStyle += `background:${sc.bg};border-left:3px solid ${sc.border};`; }
+    else if(sc){ rowStyle += `background:${sc.bg};border-left:4px solid ${sc.badge};`; }
     const rowAttr = isPMAnchor ? ` data-pm-anchor="${escHtml(_pmNum)}"` : '';
 
-    html += `<tr style="${rowStyle}"${rowAttr}>
+    html += `<tr style="${rowStyle}"${rowAttr} data-bt-id="${item.id}">
       <td style="padding:6px 8px;white-space:nowrap">
         <input value="${escHtml(item.itemNum||'')}" placeholder="#"
-          onchange="btUpdateField('${projName}',${item.id},'itemNum',this.value);renderBTTable()"
+          onchange="btUpdateField('${projName}',${item.id},'itemNum',this.value);if(typeof btPlaceItem==='function')btPlaceItem('${projName}',${item.id});renderBTTable();if(typeof btFocusPlacedRow==='function')btFocusPlacedRow()"
           style="width:50px;padding:3px 4px;border:1px solid transparent;border-radius:3px;font-size:12px;font-family:inherit;background:transparent;font-weight:600;color:var(--accent-ink)"
           onfocus="${_ieF}" onblur="${_ieB}" /></td>
       <td style="padding:6px 8px">
@@ -12176,23 +12211,19 @@ function renderBTTable(){
           onchange="btUpdateField('${projName}',${item.id},'qty',parseFloat(this.value)||0);renderBTTable()"
           style="width:40px;padding:3px 4px;border:1px solid transparent;border-radius:3px;font-size:12px;font-family:inherit;background:transparent;text-align:center"
           onfocus="${_ieF}" onblur="${_ieB}" /></td>
-      ${editNum(item,'estPrice','56')}
+      ${editMoney(item,'estPrice','78',true)}
       ${showDisc?discCell(item):''}
-      <td style="padding:6px 8px;text-align:right;font-weight:500">${ext?'$'+fmtD(ext):'<span style="color:var(--text3)">—</span>'}${ext?`<div style="font-weight:400;font-size:10px;line-height:1.4;margin-top:3px;border-top:1px dotted var(--border2);padding-top:2px"><div style="color:var(--text3)">Paid <span style="color:var(--green);font-weight:600">$${fmtD(paidToDate)}</span></div><div style="color:var(--text3)">Owed <span style="color:${stillOwed>0.005?'var(--accent-ink)':'var(--text3)'};font-weight:600">$${fmtD(stillOwed)}</span></div></div>`:''}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:500">${ext?'$'+fmtD(ext):'<span style="color:var(--text3)">—</span>'}</td>
       ${leadTimeCell(item)}
-      ${payAmtCell(item)}
-      ${editNum(item,'balanceDue','60')}
-      ${payTypeCell(item)}
-      ${editNum(item,'taxPaid','50')}
-      ${editNum(item,'freightPaid','54')}
-      ${payDateCell(item)}
+      ${editMoney(item,'balanceDue','76',true)}
+      ${paymentsCell(item)}
       <td style="padding:6px 8px;text-align:right;color:var(--text2)">${(parseFloat(item.budgetQty)||0)?item.budgetQty:'<span style="color:var(--text3)">—</span>'}</td>
       <td style="padding:6px 8px;text-align:right;color:var(--text2)">${(parseFloat(item.budgetPrice)||0)?'$'+fmtD(item.budgetPrice):'<span style="color:var(--text3)">—</span>'}</td>
       <td style="padding:6px 8px;text-align:right;font-weight:500">${budgetedExt?'$'+fmtD(budgetedExt):'<span style="color:var(--text3)">—</span>'}</td>
       <td style="padding:6px 8px;text-align:right;font-weight:500">${(ext||budgetedExt)?`<span style="color:${cu>0.005?'var(--red)':cu<-0.005?'var(--green)':'var(--text3)'}">${cu<0?'−':''}$${fmtD(Math.abs(cu))}</span>`:'<span style="color:var(--text3)">—</span>'}${item.contingencyApplied?`<div style="font-size:10px;color:var(--green);margin-top:2px;white-space:nowrap" title="${escHtml(item.contingencyReason||'')}">✓ Contingency $${fmtD(item.contingencyAmt||0)}</div>`:(cu>0.005?`<div style="margin-top:2px"><span onclick="btUseContingency('${projName}',${item.id},${cu})" style="font-size:10px;color:var(--accent-ink);cursor:pointer;text-decoration:underline;white-space:nowrap">Apply contingency</span></div>`:'')}</td>
       <td style="padding:5px 8px;min-width:150px">
         <div class="bt-status-wrap" style="position:relative;display:inline-block;margin-bottom:4px">
-          ${sc ? `<span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:10.5px;font-weight:600;background:${sc.badgeBg};color:${sc.badge};cursor:pointer;white-space:nowrap" onclick="btToggleStatusMenu(this,'${projName}',${item.id})">${escHtml(item.itemStatus)}</span>`
+          ${sc ? `<span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:10.5px;font-weight:600;background:${sc.badge};color:#fff;cursor:pointer;white-space:nowrap" onclick="btToggleStatusMenu(this,'${projName}',${item.id})">${escHtml(item.itemStatus)}</span>`
                : `<span style="display:inline-block;padding:3px 8px;border-radius:10px;font-size:10.5px;color:var(--text3);cursor:pointer;border:1px dashed var(--border2);white-space:nowrap" onclick="btToggleStatusMenu(this,'${projName}',${item.id})">Set status</span>`}
         </div>
         <div onclick="btOpenNotes('${projName}',${item.id})" style="cursor:pointer" title="Click to edit notes">
@@ -12208,30 +12239,30 @@ function renderBTTable(){
   // Final category subtotal
   if(currentCat){
     html += `<tr style="background:var(--surface2);border-top:1px solid var(--border)">
-      <td colspan="4" style="padding:5px 10px;font-size:11px;color:var(--text3);font-style:italic">Subtotal — ${escHtml(currentCat)}</td>
-      <td style="padding:5px 10px;text-align:right;font-weight:600;font-size:12px">$${fmtD(catSubtotal)}</td>
-      <td></td>
-      <td style="padding:5px 10px;text-align:right;font-size:12px;color:var(--green)">$${fmtD(catPaid)}</td>
-      <td colspan="11"></td>
-    </tr>`;
+          <td colspan="${4+(showDisc?2:0)}" style="padding:5px 10px;font-size:11px;color:var(--text3);font-style:italic">Subtotal — ${escHtml(currentCat)}</td>
+          <td style="padding:5px 10px;text-align:right;font-weight:600;font-size:12px">$${fmtD(catSubtotal)}</td>
+          <td></td><td></td>
+          <td style="padding:5px 8px"><div style="${PG}"><span></span><span style="text-align:right;font-size:12px;color:var(--green)">$${fmtD(catPaid)}</span></div></td>
+          <td colspan="6"></td>
+        </tr>`;
   }
 
   // Grand totals block (mirrors spreadsheet page-3 footer)
   html += `<tr style="background:var(--surface2);border-top:2px solid var(--border2)">
-    <td colspan="4" style="padding:8px 10px;font-weight:700;font-size:12px">ALL AREAS Subtotal</td>
+    <td colspan="${4+(showDisc?2:0)}" style="padding:8px 10px;font-weight:700;font-size:12px">ALL AREAS Subtotal</td>
     <td style="padding:8px 10px;text-align:right;font-weight:700;font-size:13px">$${fmtD(paSubtotal)}</td>
-    <td colspan="13"></td>
+    <td colspan="9"></td>
   </tr>
-  ${installSubtotal>0?`<tr style="background:var(--surface2)"><td colspan="4" style="padding:3px 10px 3px 20px;font-size:11px;color:var(--text3)">Cost of goods (fee base)</td><td style="padding:3px 10px;text-align:right;font-size:11px;color:var(--text3)">$${fmtD(goodsSubtotal)}</td><td colspan="13"></td></tr><tr style="background:var(--surface2)"><td colspan="4" style="padding:3px 10px 3px 20px;font-size:11px;color:var(--text3)">Installation — excluded from fees</td><td style="padding:3px 10px;text-align:right;font-size:11px;color:var(--text3)">$${fmtD(installSubtotal)}</td><td colspan="13"></td></tr>`:''}
-  <tr style="background:var(--surface2)"><td colspan="4" style="padding:4px 10px;font-size:12px;color:var(--text2)">Procurement Fee (${bt.feePct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(feeAmt)}</td><td colspan="13"></td></tr>
-  <tr style="background:var(--surface2)"><td colspan="4" style="padding:4px 10px;font-size:12px;color:var(--text2)">Contingency Fee (${bt.contPct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(contAmt)}</td><td colspan="13"></td></tr>
-  <tr style="background:var(--surface2)"><td colspan="4" style="padding:4px 10px;font-size:12px;color:var(--text2)">Estimated Freight (${bt.freightPct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(freightAmt)}</td><td colspan="13"></td></tr>
-  ${bt.tariffPct?`<tr style="background:var(--surface2)"><td colspan="4" style="padding:4px 10px;font-size:12px;color:var(--text2)">Tariff Surcharge (${bt.tariffPct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(tariffAmt)}</td><td colspan="13"></td></tr>`:''}
-  <tr style="background:var(--surface2)"><td colspan="4" style="padding:4px 10px;font-size:12px;color:var(--text2)">Estimated Tax (${bt.taxPct}% on goods + freight${proj&&proj.location?' — '+escHtml(proj.location):''})</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(taxAmt)}</td><td colspan="13"></td></tr>
+  ${installSubtotal>0?`<tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:3px 10px 3px 20px;font-size:11px;color:var(--text3)">Cost of goods (fee base)</td><td style="padding:3px 10px;text-align:right;font-size:11px;color:var(--text3)">$${fmtD(goodsSubtotal)}</td><td colspan="9"></td></tr><tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:3px 10px 3px 20px;font-size:11px;color:var(--text3)">Installation — excluded from fees</td><td style="padding:3px 10px;text-align:right;font-size:11px;color:var(--text3)">$${fmtD(installSubtotal)}</td><td colspan="9"></td></tr>`:''}
+  <tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:4px 10px;font-size:12px;color:var(--text2)">Procurement Fee (${bt.feePct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(feeAmt)}</td><td colspan="9"></td></tr>
+  <tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:4px 10px;font-size:12px;color:var(--text2)">Contingency Fee (${bt.contPct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(contAmt)}</td><td colspan="9"></td></tr>
+  <tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:4px 10px;font-size:12px;color:var(--text2)">Estimated Freight (${bt.freightPct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(freightAmt)}</td><td colspan="9"></td></tr>
+  ${bt.tariffPct?`<tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:4px 10px;font-size:12px;color:var(--text2)">Tariff Surcharge (${bt.tariffPct}%)</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(tariffAmt)}</td><td colspan="9"></td></tr>`:''}
+  <tr style="background:var(--surface2)"><td colspan="${4+(showDisc?2:0)}" style="padding:4px 10px;font-size:12px;color:var(--text2)">Estimated Tax (${bt.taxPct}% on goods + freight${proj&&proj.location?' — '+escHtml(proj.location):''})</td><td style="padding:4px 10px;text-align:right;font-size:12px">$${fmtD(taxAmt)}</td><td colspan="9"></td></tr>
   <tr style="background:var(--accent-bg);border-top:2px solid var(--accent)">
-    <td colspan="4" style="padding:10px;font-weight:700;font-size:14px;color:var(--accent-ink)">Customer Area Total</td>
+    <td colspan="${4+(showDisc?2:0)}" style="padding:10px;font-weight:700;font-size:14px;color:var(--accent-ink)">Customer Area Total</td>
     <td style="padding:10px;text-align:right;font-weight:700;font-size:15px;color:var(--accent-ink)">$${fmtD(paTotal)}</td>
-    <td colspan="13"></td>
+    <td colspan="9"></td>
   </tr>`;
 
   // Column totals row — sums aligned under each money column
@@ -12242,14 +12273,15 @@ function renderBTTable(){
     <td style="${_ftCell};font-weight:700;font-size:11.5px;letter-spacing:0.05em;text-transform:uppercase">Column Totals</td>
     <td style="${_ftCell};text-align:center;font-weight:700">${totalQtySum||''}</td>
     <td style="${_ftCell}"></td>
+    ${showDisc?`<td style="${_ftCell}"></td><td style="${_ftCell}"></td>`:''}
     <td style="${_ftCell};text-align:right;font-weight:700">$${fmtD(paSubtotal)}</td>
     <td style="${_ftCell}"></td>
-    <td style="${_ftCell};text-align:right;font-weight:700">$${fmtD(totalAmtPaid)}</td>
     <td style="${_ftCell};text-align:right;font-weight:700">$${fmtD(totalBalanceDue)}</td>
-    <td style="${_ftCell}"></td>
-    <td style="padding:9px 6px;color:#fff;text-align:right;font-weight:700">$${fmtD(totalTaxPaid)}<div style="font-size:9.5px;font-weight:600;margin-top:1px;color:${taxOwedState>0.005?'#FFD2CC':'#CFF3D8'}">owed $${fmtD(Math.max(0,taxOwedState))}</div></td>
-    <td style="padding:9px 6px;color:#fff;text-align:right;font-weight:700">$${fmtD(totalFreightPaid)}</td>
-    <td style="${_ftCell}"></td>
+    <td style="padding:9px 8px;color:#fff;font-weight:700"><div style="${PG};align-items:start">
+      <span></span><span style="text-align:right">$${fmtD(totalAmtPaid)}</span><span style="font-size:10px;font-weight:600">paid</span><span></span>
+      <span style="text-align:right">$${fmtD(totalFreightPaid)}</span>
+      <span style="text-align:right">$${fmtD(totalTaxPaid)}<div style="font-size:9.5px;font-weight:600;margin-top:1px;color:${taxOwedState>0.005?'#FFD2CC':'#CFF3D8'}">owed $${fmtD(Math.max(0,taxOwedState))}</div></span>
+    </div></td>
     <td style="${_ftCell}"></td>
     <td style="${_ftCell}"></td>
     <td style="${_ftCell};text-align:right;font-weight:700">$${fmtD(totalBudgetedExt)}</td>
@@ -12259,7 +12291,7 @@ function renderBTTable(){
   </tr>`;
 
   // Add row button
-  html += `<tr><td colspan="18" style="padding:8px 10px">
+  html += `<tr><td colspan="${14+(showDisc?2:0)}" style="padding:8px 10px">
     <button class="btn btn-sm" onclick="btAddItem('${projName}')">+ Add Row</button>
     <button class="btn btn-sm" style="margin-left:8px" onclick="btAddCategory('${projName}')">+ Add Category</button>
   </td></tr>`;
@@ -12292,14 +12324,18 @@ function renderBTTable(){
   document.getElementById('bt-table-wrap').innerHTML = html;
 }
 
-const BT_STATUSES = ['Urgent','PO Sent','Funds Received','Item Received','Revised'];
+const BT_STATUSES = ['Urgent','HOLD','Awaiting COM','PO Sent','Bundled Order','Funds Received','Item Received','Revised'];
+// One color per status: the row tint, its left band, and the badge all share it.
 const BT_STATUS_COLORS = {
-  'Urgent':         {bg:'rgba(174,26,29,0.09)',  border:'rgba(174,26,29,0.4)',  badge:'#AE1A1D', badgeBg:'rgba(174,26,29,0.12)'},
-  'PO Sent':        {bg:'rgba(255,210,0,0.13)',  border:'rgba(200,160,0,0.4)',  badge:'#b8860b', badgeBg:'rgba(255,210,0,0.2)'},
-  'Funds Received': {bg:'rgba(30,100,200,0.09)', border:'rgba(30,100,200,0.3)', badge:'#1a5db5', badgeBg:'rgba(30,100,200,0.12)'},
-  'Item Received':  {bg:'rgba(40,140,70,0.1)',   border:'rgba(40,140,70,0.35)', badge:'#27ae60', badgeBg:'rgba(40,140,70,0.13)'},
-  'Revised':        {bg:'rgba(220,100,0,0.09)',  border:'rgba(220,100,0,0.3)',  badge:'#c0631a', badgeBg:'rgba(220,100,0,0.12)'},
-  'Not Used':       {bg:'rgba(220,100,0,0.09)',  border:'rgba(220,100,0,0.3)',  badge:'#c0631a', badgeBg:'rgba(220,100,0,0.12)'},
+  'Urgent':         {bg:'rgba(198,40,40,0.14)',  border:'#C62828', badge:'#C62828', badgeBg:'rgba(198,40,40,0.14)'},
+  'HOLD':           {bg:'rgba(106,27,154,0.13)', border:'#6A1B9A', badge:'#6A1B9A', badgeBg:'rgba(106,27,154,0.13)'},
+  'Awaiting COM':   {bg:'rgba(0,131,143,0.13)',  border:'#00838F', badge:'#00838F', badgeBg:'rgba(0,131,143,0.13)'},
+  'PO Sent':        {bg:'rgba(255,179,0,0.22)',  border:'#A86400', badge:'#A86400', badgeBg:'rgba(255,179,0,0.22)'},
+  'Bundled Order':  {bg:'rgba(55,71,79,0.13)',   border:'#37474F', badge:'#37474F', badgeBg:'rgba(55,71,79,0.13)'},
+  'Funds Received': {bg:'rgba(21,101,192,0.13)', border:'#1565C0', badge:'#1565C0', badgeBg:'rgba(21,101,192,0.13)'},
+  'Item Received':  {bg:'rgba(46,125,50,0.14)',  border:'#2E7D32', badge:'#2E7D32', badgeBg:'rgba(46,125,50,0.14)'},
+  'Revised':        {bg:'rgba(216,67,21,0.13)',  border:'#D84315', badge:'#D84315', badgeBg:'rgba(216,67,21,0.13)'},
+  'Not Used':       {bg:'rgba(216,67,21,0.13)',  border:'#D84315', badge:'#D84315', badgeBg:'rgba(216,67,21,0.13)'},
 };
 
 let _btNotesProjectName = '';
@@ -18576,6 +18612,7 @@ document.addEventListener('wheel', function(e){
 <script src="po-window.js?v=1789494623914"></script>
 <script src="pb-sourcing.js?v=1789494623914"></script>
 <script src="budget-numbering.js?v=1789494623914"></script>
+<script src="tracker-ext.js?v=1793219870499"></script>
 <div id="ai3-toast-wrap"></div>
 </body>
 </html>
