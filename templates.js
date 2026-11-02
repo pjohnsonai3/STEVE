@@ -689,6 +689,12 @@
               sel.kind === 'spec' && sel.key === String(t.id), 'tplSelectSpec(\'' + t.id + '\')', '');
           }).join('')
         : '<div style="padding:9px 11px;font-size:11.5px;color:var(--text3)">None yet</div>') +
+      (typeof sfTemplateDetail === 'function'
+        ? '<div style="padding:9px 11px;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">' +
+            '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)">Budget setups</div></div>' +
+          libraryRow('Split-Fee Budget', (projects || []).filter(function (p) { return p.feeSplit && p.feeSplit.on; }).length + ' project(s) \u00b7 low / high qty fee',
+            sel.kind === 'budget', 'tplSelectBudget()', '')
+        : '') +
       '</div>';
   }
 
@@ -734,6 +740,8 @@
         'Set one up once and every new PO of that type starts from it. Specification templates work the same way for a project\u2019s areas and cover.' +
         '</div>';
     }
+
+    if (sel.kind === 'budget' && typeof sfTemplateDetail === 'function') return sfTemplateDetail(projectSelect('tpl-dep-p'));
 
     if (sel.kind === 'spec') {
       var t = list().find(function (x) { return String(x.id) === sel.key; });
@@ -868,6 +876,7 @@
   window.tplCancelEdit = cancelEdit;
   window.tplSelectType = selectType;
   window.tplSelectSpec = selectSpec;
+  window.tplSelectBudget = function () { sel = { kind: 'budget', key: 'split' }; render(); };
   window.tplDeploy = deploy;
   window.tplEditType = editType;
   window.tplEstablishType = establishType;

@@ -2228,9 +2228,9 @@
           <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Upload a furniture plan, FF&E schedule, or spec sheet — AI will read it and generate a categorized budget with quantities and price estimates.</div>
           <div id="db-drop-zone" style="border:2px dashed var(--border2);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:default;transition:border-color .15s,background .15s;background:var(--surface2)">
             <div style="font-size:32px;margin-bottom:8px">📄</div>
-            <div style="font-size:13px;font-weight:500;color:var(--text)">Drop PDF here or <label for="db-file-input" style="color:var(--accent-ink);text-decoration:underline;cursor:pointer">click to browse</label></div>
-            <div style="font-size:11.5px;color:var(--text3);margin-top:4px">Furniture plans, FF&amp;E schedules, spec sheets — any PDF works</div>
-            <input type="file" id="db-file-input" accept=".pdf" style="display:none" />
+            <div style="font-size:13px;font-weight:500;color:var(--text)">Drop a PDF or Excel budget here or <label for="db-file-input" style="color:var(--accent-ink);text-decoration:underline;cursor:pointer">click to browse</label></div>
+            <div style="font-size:11.5px;color:var(--text3);margin-top:4px">Furniture plans, FF&amp;E schedules and spec sheets (PDF), or an existing budget spreadsheet (.xlsx). Spreadsheets import directly, without AI.</div>
+            <input type="file" id="db-file-input" accept=".pdf,.xlsx,.xls,.csv" style="display:none" />
           </div>
           <div id="db-file-status" style="margin-top:10px;font-size:12px;color:var(--text2);display:none"></div>
           <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
@@ -2359,6 +2359,8 @@
                   style="padding:5px 12px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Client View</button>
                 <button id="pb-view-area" onclick="pbSetView('area')"
                   style="padding:5px 12px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button>
+                <button id="pb-view-byarea" onclick="pbSetView('byarea')" title="Edit the budget grouped by project area, like an area-by-area budget sheet"
+                  style="padding:5px 12px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button>
               </div>
             </div>
             <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:auto;max-height:calc(100vh - 140px)">
@@ -2501,12 +2503,12 @@
 
 <!-- Project Modal -->
 <div class="modal-overlay" id="project-modal">
-  <div class="modal" style="width:600px">
+  <div class="modal" style="width:600px;max-height:92vh;display:flex;flex-direction:column">
     <div class="modal-header">
       <div class="modal-title" id="proj-modal-title">New Project</div>
       <button class="modal-close" onclick="closeModal('project-modal')">✕</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="overflow-y:auto;flex:1;min-height:0">
       <div id="proj-clone-section" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
         <label style="font-weight:600;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;display:block;color:var(--text2)">Start from an existing project <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">— optional, copies its item list</span></label>
         <select id="proj-clone-source" onchange="projCloneSourceChanged()" style="width:100%">
@@ -2571,7 +2573,7 @@
         <div class="form-row"><label>Location / Site</label><input id="proj-location" placeholder="e.g. Atlanta, GA" /></div>
       </div>
       <div class="form-row"><label>Scope / Description</label><textarea id="proj-notes" placeholder="Key deliverables, rooms, floors, special requirements…"></textarea></div>
-      <div class="form-row"><label>Bill To <span style="font-weight:400;color:var(--text3)">(appears on this project's POs)</span></label><textarea id="proj-billto" rows="4" placeholder="Local Lime&#10;c/o ai3, Inc.&#10;916 Joseph E. Lowery Blvd.&#10;Suite 1, Atlanta, GA 30318"></textarea></div>
+      <div class="form-row"><label>Bill To <span style="font-weight:400;color:var(--text3)">(appears on this project's POs)</span></label><textarea id="proj-billto" rows="4" placeholder="Type the bill-to block, or click Fill from client" style="position:relative;z-index:2;pointer-events:auto;resize:vertical;width:100%;box-sizing:border-box"></textarea><div style="display:flex;gap:8px;margin-top:6px"><button type="button" class="btn btn-sm" onclick="projFillBillTo()">Fill from client</button><span style="font-size:11px;color:var(--text3);align-self:center">Uses the client's saved bill-to, or "Client c/o ai3, Inc." with the ai3 address.</span></div></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('project-modal')">Cancel</button>
@@ -4961,7 +4963,7 @@ const pageConfig={
   'submittal-log':{title:'Submittal Log',actions:'<button class="btn btn-primary" onclick="slOpen()">+ Log submittal</button>'},
   'closeout-binder':{title:'Owner Close-Out Binder',actions:'<button class="btn btn-primary" onclick="cbCompile()">⤓ Compile binder</button>'},
   'doc-budget':{title:'AI Budget Generator',actions:'<button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
-  'prelim-budget':{title:'Preliminary Budgets',actions:'<button class="btn btn-primary" onclick="openNewPB()">+ New Budget</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
+  'prelim-budget':{title:'Preliminary Budgets',actions:'<button class="btn btn-primary" onclick="openNewPB()">+ New Budget</button> <button class="btn btn-sm" onclick="nav(document.querySelector(\'a[data-page=doc-budget]\'))" title="Build a budget from a PDF or an Excel budget">↑ Import PDF / Excel</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'purchase-auth':{title:'Purchase Authorizations',actions:'<button class="btn btn-primary" onclick="openNewPA()">+ New Authorization</button> <button class="btn btn-sm" onclick="openPAImport()">↑ Import PDF</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'vendor-pos':{title:'Purchase Orders',actions:'<button class="btn btn-primary" onclick="openNewVPO()">+ New Source PO</button> <button class="btn btn-sm" onclick="openVPOImport()" title="Read an existing PO PDF and create a Source PO">↑ Import from PDF</button> <button class="btn btn-sm" onclick="openGeneratePOsFromPA()" title="Create a PO for every line item in a PA">⚡ Generate from PA</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
   'credit-card-auth':{title:'Credit Card Authorizations',actions:'<button class="btn btn-primary" onclick="openNewCCA()">+ New Authorization</button> <button class="btn btn-sm" onclick="editCurrentProject()">✎ Edit Project</button>'},
@@ -5785,6 +5787,14 @@ function _projectHasData(p){
   return false;
 }
 
+function projFillBillTo(){
+  const ta=document.getElementById('proj-billto');
+  const client=document.getElementById('proj-client').value.trim();
+  if(ta.value.trim() && !confirm('Replace the current Bill To text?')) return;
+  const rec=(typeof clientContacts!=='undefined'?clientContacts:[]).find(c=>(c.name||'').trim().toLowerCase()===client.toLowerCase());
+  ta.value = (rec&&rec.billTo) ? rec.billTo : [client||'Client name','c/o ai3, Inc.','916 Joseph E. Lowery Blvd.','Suite 1, Atlanta, GA 30318'].join('\n');
+  ta.focus();
+}
 function saveProject(){
   const name=document.getElementById('proj-name').value.trim();
   const client=document.getElementById('proj-client').value.trim();
@@ -6697,7 +6707,7 @@ function calcPATotal(pa){
   const sub=allItems.reduce((a,i)=>a+((i.qty||0)*(i.price||0)),0);
   const goodsSub=splitGoodsInstall(pa.items,'price').goods;  // installation excluded from % add-ons
   const feePct=(pa.feePct??25)/100, contPct=(pa.contPct??5)/100, freightPct=(pa.freightPct??10)/100, tariffPct=(pa.tariffPct??5)/100, taxPct=(pa.taxPct??8.9)/100;
-  const fee=goodsSub*feePct, cont=sub*contPct, freight=goodsSub*freightPct, tariff=goodsSub*tariffPct;
+  const fee=(typeof sfFee==='function')?sfFee(pa.project,pa.items,goodsSub,feePct*100).fee:goodsSub*feePct, cont=sub*contPct, freight=goodsSub*freightPct, tariff=goodsSub*tariffPct;
   const tax=(goodsSub+freight)*taxPct;
   return sub+fee+cont+freight+tariff+tax;
 }
@@ -7336,7 +7346,7 @@ function recalcPA(){
   const projName=document.getElementById('pa-project').value;
   const proj=projects.find(p=>p.name===projName);
   const date=document.getElementById('pa-date').value;
-  const feePct=paPct('pa-fee-pct',25);
+  let feePct=paPct('pa-fee-pct',25);
   const contPct=paPct('pa-cont-pct',5);
   const freightPct=paPct('pa-freight-pct',10);
   const tariffPct=paPct('pa-tariff-pct',5);
@@ -7347,7 +7357,9 @@ function recalcPA(){
   const _gi=splitGoodsInstall(paLineItems,'price'); const goodsSub=_gi.goods, installSub=_gi.install;
   // Use saved override amounts when present (e.g. signed PA with exact PDF figures)
   const curPA=currentPAId?pas.find(p=>p.id===currentPAId):null;
-  const fee    =curPA&&curPA.feeOverride    ?curPA.feeOverride    :goodsSub*feePct/100;
+  const _sfPA=(typeof sfFee==='function')?sfFee(projName,paLineItems,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
+  const fee    =curPA&&curPA.feeOverride    ?curPA.feeOverride    :_sfPA.fee;
+  if(!(curPA&&curPA.feeOverride)) feePct=_sfPA.label;
   const cont   =curPA&&curPA.contOverride   ?curPA.contOverride   :(goodsSub+installSub)*contPct/100;
   const freight=curPA&&curPA.freightOverride?curPA.freightOverride:goodsSub*freightPct/100;
   const tariff =curPA&&curPA.tariffOverride ?curPA.tariffOverride :goodsSub*tariffPct/100;
@@ -7841,8 +7853,9 @@ function dbHandleDrop(e){
 
 function dbHandleFile(file){
   if(!file){ return; }
+  if(/\.(xlsx|xls|csv)$/i.test(file.name) && typeof sfImportBudgetFile==='function'){ sfImportBudgetFile(file); return; }
   const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-  if(!isPDF){ alert('Please upload a PDF file.'); return; }
+  if(!isPDF){ alert('Please upload a PDF or Excel file.'); return; }
   dbFileName = file.name;
   const reader = new FileReader();
   reader.onload = e => {
@@ -7896,7 +7909,8 @@ Your task:
 1. Identify ALL furniture items, quantities, and locations mentioned or shown
 2. Organize them into standard FF&E categories: Seating, Tables & Casegoods, Decorative Lighting, Soft Goods & Textiles, Art & Accessories, Window Treatments, Rugs & Carpet, Wallcovering, Custom / Millwork, Installation
 3. Estimate realistic unit prices in USD for commercial/hospitality grade furniture (NOT residential pricing)
-4. Assign sequential item numbers starting at 100
+4. Use the document's own item numbers when it has them; otherwise assign sequential item numbers starting at 100
+5. If the document has separate totals columns for low-quantity and high-quantity items (each with its own procurement fee), add "feeTier":"high" to every item priced in the high-quantity column, and add a top-level "feeSplit":{"low":25,"high":10} using the fee percentages the document shows
 ${context ? `\nAdditional context: ${context}` : ''}
 ${projName ? `Project: ${projName}` : ''}
 ${projType ? `Project type: ${projType}` : ''}
@@ -8023,9 +8037,11 @@ function dbBuildResults(parsed){
         location: item.location||'',
         qty: parseFloat(item.qty)||1,
         price: parseFloat(item.price)||0,
+        feeTier: item.feeTier==='high'?'high':(item.feeTier||''),
       });
     });
   });
+  window._dbFeeSplit = (parsed.feeSplit && parsed.feeSplit.high!=null) ? Object.assign({on:true},parsed.feeSplit) : null;
 
   document.getElementById('db-loading').style.display  = 'none';
   document.getElementById('db-results').style.display  = '';
@@ -8110,7 +8126,8 @@ function dbRecalc(){
   const taxPct     = parseFloat(document.getElementById('db-tax-pct').value)||8.9;
   const freight = goodsSub*freightPct/100;
   const tax = (goodsSub+freight)*taxPct/100;
-  const total = sub + goodsSub*feePct/100 + sub*contPct/100 + freight + tax;
+  const _dbFee = (window._dbFeeSplit&&typeof sfFeeWith==='function') ? sfFeeWith(window._dbFeeSplit,dbItems,goodsSub,feePct).fee : goodsSub*feePct/100;
+  const total = sub + _dbFee + sub*contPct/100 + freight + tax;
   const el = document.getElementById('db-grand-total');
   if(el) el.textContent = '$'+fmtD(total);
 }
@@ -8121,6 +8138,7 @@ function dbSaveAsPB(){
   if(!dbItems.length){ alert('No items to save.'); return; }
 
   const proj = projects.find(p=>p.name===projName);
+  if(window._dbFeeSplit&&proj){ proj.feeSplit=Object.assign({},window._dbFeeSplit); DB.save('fp11_projects',projects); }
   const feePct     = parseFloat(document.getElementById('db-fee-pct').value)||20;
   const contPct    = parseFloat(document.getElementById('db-cont-pct').value)||5;
   const freightPct = parseFloat(document.getElementById('db-freight-pct').value)||10;
@@ -8144,6 +8162,7 @@ function dbSaveAsPA(){
   if(!dbItems.length){ alert('No items to save.'); return; }
 
   const proj = projects.find(p=>p.name===projName);
+  if(window._dbFeeSplit&&proj){ proj.feeSplit=Object.assign({},window._dbFeeSplit); DB.save('fp11_projects',projects); }
   const feePct     = parseFloat(document.getElementById('db-fee-pct').value)||20;
   const contPct    = parseFloat(document.getElementById('db-cont-pct').value)||5;
   const freightPct = parseFloat(document.getElementById('db-freight-pct').value)||10;
@@ -8233,7 +8252,8 @@ function calcDocTotal(doc, hasTariff){
   const tar=hasTariff?(doc.tariffPct??5)/100:0;
   const freight=sub*fr;
   const tax=(sub+freight)*tx;
-  return sub + sub*f + sub*c + freight + sub*tar + tax;
+  const _fee=(typeof sfFee==='function'&&doc.project&&sfSplit(doc.project))?sfFee(doc.project,doc.items,splitGoodsInstall(doc.items,'price').goods,f*100).fee:sub*f;
+  return sub + _fee + sub*c + freight + sub*tar + tax;
 }
 
 function openPBEditor(id){
@@ -8264,7 +8284,7 @@ function showPBEditor(pb){
   pbGenNotes = (pb && pb.genNotes) || '';
   document.getElementById('pb-editor-breadcrumb').textContent=pb?pb.pbNum:'New Budget';
   pbViewMode='internal';
-  pbSetView('internal');
+  pbSetView(window.pbGroupByArea?'byarea':'internal');
   pbRenderCategoriesForm();
   recalcPB();
 }
@@ -8310,8 +8330,18 @@ function pbEnsureInstallCategory(){
 }
 
 function pbSetView(mode){
-  pbViewMode=mode;
-  [['pb-view-internal','internal'],['pb-view-client','client'],['pb-view-area','area']].forEach(function(pair){
+  window.pbGroupByArea = (mode==='byarea');
+  pbViewMode = mode==='byarea' ? 'internal' : mode;
+  [['pb-view-internal','internal'],['pb-view-client','client'],['pb-view-area','area'],['pb-view-byarea','byarea']].forEach(function(pair){
+    const _act = pair[1]==='byarea' ? window.pbGroupByArea : (pair[1]===pbViewMode && !(window.pbGroupByArea && pair[1]==='internal'));
+    const b=document.getElementById(pair[0]); if(!b) return;
+    b.style.background = _act ? 'var(--accent)' : 'var(--surface)';
+    b.style.color      = _act ? '#fff' : 'var(--text2)';
+  });
+  recalcPB();
+}
+function _pbSetViewOld(mode){
+  [].forEach(function(pair){
     const b=document.getElementById(pair[0]); if(!b) return;
     b.style.background = mode===pair[1] ? 'var(--accent)' : 'var(--surface)';
     b.style.color      = mode===pair[1] ? '#fff' : 'var(--text2)';
@@ -8456,6 +8486,23 @@ function pbRemoveCategory(catIdx){
 }
 
 // ── On-sheet (inline) add / remove, keyed by absolute index into pbLineItems ──
+function pbAddToArea(area){
+  pushUndo('Add budget item');
+  const newItem={id:Date.now()+Math.random(),isCategory:false,itemNum:'',name:'',description:'',vendor:'',qty:1,price:0,leadTime:'',location:area,notes:'',bold:false};
+  let at=-1; pbLineItems.forEach((it,i)=>{ if(!it.isCategory && (it.location||'').trim()===area) at=i; });
+  if(at<0) pbLineItems.push(newItem); else pbLineItems.splice(at+1,0,newItem);
+  pbRenderCategoriesForm(); recalcPB();
+}
+function pbAddArea(){
+  const a=prompt('Area name (e.g. Lobby and Member Check-In):'); if(!a||!a.trim()) return;
+  pbAddToArea(a.trim());
+}
+function pbRenameArea(area){
+  const n=prompt('Rename area "'+area+'" on every line to:', area); if(n==null||!n.trim()||n.trim()===area) return;
+  pushUndo('Rename area');
+  pbLineItems.forEach(it=>{ if(!it.isCategory && (it.location||'').trim()===area) it.location=n.trim(); });
+  recalcPB();
+}
 function pbAddByIdx(catIdx){
   pushUndo('Add budget item');
   const newItem={id:Date.now()+Math.random(),isCategory:false,itemNum:'',name:'',description:'',vendor:'',qty:1,price:0,leadTime:'',location:'',notes:'',bold:false};
@@ -8500,14 +8547,16 @@ function recalcPB(){
   const projName=document.getElementById('pb-project').value;
   const proj=projects.find(p=>p.name===projName);
   const date=document.getElementById('pb-date').value;
-  const feePct=parseFloat(document.getElementById('pb-fee-pct').value)||20;
+  let feePct=parseFloat(document.getElementById('pb-fee-pct').value)||20;
   const contPct=parseFloat(document.getElementById('pb-cont-pct').value)||5;
   const freightPct=parseFloat(document.getElementById('pb-freight-pct').value)||10;
   const taxPct=parseFloat(document.getElementById('pb-tax-pct').value)||8.9;
   const items=pbLineItems;
   const sub=items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
   const _gi=splitGoodsInstall(items,'price'); const goodsSub=_gi.goods, installSub=_gi.install;  // installation excluded from % add-ons
-  const fee=goodsSub*feePct/100, cont=sub*contPct/100, freight=goodsSub*freightPct/100, tax=(goodsSub+freight)*taxPct/100, total=sub+fee+cont+freight+tax;
+  const _sf=(typeof sfFee==='function')?sfFee(projName,items,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
+  const fee=_sf.fee, cont=sub*contPct/100, freight=goodsSub*freightPct/100, tax=(goodsSub+freight)*taxPct/100, total=sub+fee+cont+freight+tax;
+  feePct=_sf.label;
   let dateStr='';
   if(date){const d=new Date(date+'T12:00:00');dateStr=d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});}
 
@@ -8608,9 +8657,19 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
   const _pbShowDisc0 = !!(document.getElementById('pb-show-discount') && document.getElementById('pb-show-discount').checked);
   const NCOL = (editable ? 9 : 8) + (_pbShowDisc0?2:0);
 
-  // Group by category, preserving original index into pbLineItems
+  // Group by category (or by project area), preserving original index into pbLineItems
   const cats=[];
-  items.forEach((item,idx)=>{
+  const _byArea = !!window.pbGroupByArea;
+  if(_byArea){
+    const m={};
+    items.forEach((item,idx)=>{
+      if(item.isCategory) return;
+      const a=(item.location||'').trim()||'No area assigned';
+      if(!m[a]){ m[a]={name:a,idx:-1,area:a,items:[]}; cats.push(m[a]); }
+      m[a].items.push({item,idx});
+    });
+    const na=cats.findIndex(c=>c.area==='No area assigned'); if(na>=0) cats.push(cats.splice(na,1)[0]);
+  } else items.forEach((item,idx)=>{
     if(item.isCategory){cats.push({name:item.name,idx,items:[]});}
     else if(cats.length){cats[cats.length-1].items.push({item,idx});}
     else{cats.push({name:'Uncategorized',idx:-1,items:[{item,idx}]});}
@@ -8629,10 +8688,13 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
   let allRows='';
   cats.forEach(cat=>{
     const catSub=cat.items.reduce((a,o)=>a+(o.item.qty||0)*(o.item.price||0),0);
-    const catNameCell = editable
+    const _aj = cat.area ? JSON.stringify(cat.area).replace(/"/g,'&quot;') : '';
+    const catNameCell = cat.area
+      ? (editable && cat.area!=='No area assigned' ? `<span onclick="pbRenameArea(${_aj})" style="cursor:pointer" title="Rename this area on every line">${escHtml(cat.name)}</span>` : escHtml(cat.name))
+      : editable
       ? docField('pb',cat.idx,'name',cat.name,{placeholder:'Category'})
       : escHtml(cat.name);
-    const catX = (editable && cat.idx>=0) ? ` <span class="doc-rowx" onclick="pbRemoveByIdx(${cat.idx})" title="Remove category">✕</span>` : '';
+    const catX = (editable && cat.idx>=0 && !cat.area) ? ` <span class="doc-rowx" onclick="pbRemoveByIdx(${cat.idx})" title="Remove category">✕</span>` : '';
     allRows+=`<tr><td colspan="${NCOL}" style="padding:8px 10px 4px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;background:#f2f2f2;border-top:1.5px solid #999;border-bottom:1px solid #ccc">${catNameCell}${catX}<span style="float:right;font-weight:400;font-size:10.5px;color:#666">Subtotal: $${fmtD(catSub)}</span></td></tr>`;
     cat.items.forEach(o=>{
       const item=o.item, idx=o.idx;
@@ -8655,7 +8717,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
           ${notesCell}
         </td>
         <td style="padding:7px 8px;font-size:11px;color:#444;white-space:nowrap;max-width:120px">${vendorCell}</td>
-        <td style="padding:7px 8px;font-size:11px;text-align:center">${F(idx,'qty',item.qty,{type:'number'})}</td>
+        <td style="padding:7px 8px;font-size:11px;text-align:center">${F(idx,'qty',item.qty,{type:'number'})}${typeof sfTierChip==='function'?sfTierChip('pb',idx,item,editable):''}</td>
         <td style="padding:7px 8px;font-size:11px;text-align:right;white-space:nowrap">${priceCell}</td>
         ${showDiscB?discCellB(idx,item):''}
         <td style="padding:7px 8px;font-size:11px;text-align:right;font-weight:600;white-space:nowrap">${ext?'$'+fmtD(ext):''}</td>
@@ -8665,12 +8727,14 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
       </tr>`;
     });
     if(editable){
-      allRows+=`<tr><td colspan="${NCOL}" style="padding:3px 10px 6px"><span class="doc-additem" onclick="pbAddByIdx(${cat.idx})">+ add item${cat.name&&cat.name!=='Uncategorized'?' to '+escHtml(cat.name):''}</span></td></tr>`;
+      allRows+=`<tr><td colspan="${NCOL}" style="padding:3px 10px 6px"><span class="doc-additem" onclick="${cat.area?`pbAddToArea(${_aj})`:`pbAddByIdx(${cat.idx})`}">+ add item${cat.name&&cat.name!=='Uncategorized'&&cat.name!=='No area assigned'?' to '+escHtml(cat.name):''}</span></td></tr>`;
     }
   });
 
   if(editable){
-    allRows+=`<tr><td colspan="${NCOL}" style="padding:10px"><button class="btn btn-sm btn-primary" onclick="pbAddCategoryInline()">+ Add Category</button></td></tr>`;
+    allRows+= _byArea
+      ? `<tr><td colspan="${NCOL}" style="padding:10px"><button class="btn btn-sm btn-primary" onclick="pbAddArea()">+ Add Area</button></td></tr>`
+      : `<tr><td colspan="${NCOL}" style="padding:10px"><button class="btn btn-sm btn-primary" onclick="pbAddCategoryInline()">+ Add Category</button></td></tr>`;
   }
   if(!cats.length && !editable){
     allRows=`<tr><td colspan="${NCOL}" style="padding:18px;text-align:center;color:#aaa;font-size:11px">No line items.</td></tr>`;
@@ -8938,7 +9002,7 @@ function executePBtoPA(){
         newItems.push({id:Date.now()+Math.random(),isCategory:false,
           itemNum:item.itemNum||'',name:item.name||'',vendor:copyVendors?(item.vendor||''):'',
           description:desc,qty:copyPrices?(item.qty||1):1,price:copyPrices?(item.price||0):0,
-          leadTime:copyLeads?(item.leadTime||''):'',bold:false});
+          leadTime:copyLeads?(item.leadTime||''):'',feeTier:item.feeTier||'',bold:false});
       }
     });
   }
@@ -18613,6 +18677,7 @@ document.addEventListener('wheel', function(e){
 <script src="pb-sourcing.js?v=1789494623914"></script>
 <script src="budget-numbering.js?v=1789494623914"></script>
 <script src="tracker-ext.js?v=1793220591927"></script>
+<script src="split-fee.js?v=1793653963843"></script>
 <div id="ai3-toast-wrap"></div>
 </body>
 </html>
