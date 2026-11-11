@@ -93,8 +93,16 @@
     var before = lines().map(function (i) { return i.id; }).join('|');
 
     gs.forEach(function (g) {
+      // Room-coded numbers (L-100, MLR-100, PD-100…) stay grouped by their code,
+      // in the order the codes first appear; numbers sort within each code.
+      var rank = {}, nr = 0;
+      g.items.forEach(function (it) { var p = parseNum(it.itemNum); var k = p ? p.prefix.toUpperCase() : ''; if (p && !(k in rank)) rank[k] = nr++; });
       var stable = g.items.map(function (it, i) { return { it: it, i: i }; });
-      stable.sort(function (x, y) { return cmpItems(x.it, y.it) || x.i - y.i; });
+      stable.sort(function (x, y) {
+        var px = parseNum(x.it.itemNum), py = parseNum(y.it.itemNum);
+        if (px && py) { var rx = rank[px.prefix.toUpperCase()], ry = rank[py.prefix.toUpperCase()]; if (rx !== ry) return rx - ry; }
+        return cmpItems(x.it, y.it) || x.i - y.i;
+      });
       g.items = stable.map(function (x) { return x.it; });
     });
 
@@ -166,12 +174,18 @@
 
   // ── Renumber a whole budget onto the bands ────────────────────────────────
   // Suffix lines follow their parent, so C-101 → C-105 takes C-101A → C-105A.
+  function multiPrefix(g) {
+    var seen = {};
+    g.items.forEach(function (it) { var p = parseNum(it.itemNum); if (p) seen[p.prefix.toUpperCase()] = 1; });
+    return Object.keys(seen).length > 1;
+  }
   function renumber() {
-    var gs = groups(), changed = 0;
+    var gs = groups(), changed = 0, skipped = 0;
     gs.forEach(function (g) {
       if (!g.head) return;
       var band = bandOfCategory(g.head.name);
       if (band > 9) return;                       // installation / unrecognised: leave alone
+      if (multiPrefix(g)) { skipped++; return; }  // room-coded numbers from an imported budget: never overwrite
       var prefix = '';
       g.items.forEach(function (it) { var p = parseNum(it.itemNum); if (p && p.prefix && !prefix) prefix = p.prefix; });
       var next = band * 100 + 1, map = {};
@@ -192,11 +206,11 @@
         if (it.itemNum !== want) { it.itemNum = want; changed++; }
       });
     });
-    if (!changed) { sortBudget(); redraw(); toast('Already numbered by category'); return; }
+    if (!changed) { sortBudget(); redraw(); toast(skipped ? 'Room-coded item numbers were left as they are' : 'Already numbered by category', 4200); return; }
     persist('Renumber by category');
     sortBudget({ quiet: true });
     redraw();
-    toast('\u2713 Renumbered ' + changed + ' line' + (changed === 1 ? '' : 's') + ' onto their category bands', 4200);
+    toast('\u2713 Renumbered ' + changed + ' line' + (changed === 1 ? '' : 's') + ' onto their category bands' + (skipped ? ' \u00b7 ' + skipped + ' room-coded categor' + (skipped === 1 ? 'y' : 'ies') + ' left as imported' : ''), 4200);
   }
 
   function sortNow() {

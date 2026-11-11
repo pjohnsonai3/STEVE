@@ -8059,7 +8059,9 @@ Your task:
 1. Identify ALL furniture items, quantities, and locations mentioned or shown
 2. Organize them into standard FF&E categories: Seating, Tables & Casegoods, Decorative Lighting, Soft Goods & Textiles, Art & Accessories, Window Treatments, Rugs & Carpet, Wallcovering, Custom / Millwork, Installation
 3. Estimate realistic unit prices in USD for commercial/hospitality grade furniture (NOT residential pricing)
-4. Use the document's own item numbers when it has them; otherwise assign sequential item numbers starting at 100
+4. Item numbers: copy each item number EXACTLY as printed in the document (e.g. "L-100", "PD-201", "MLR-800", "800"), character for character. Never renumber, re-prefix or re-sequence them. Only if an item has no number at all, leave itemNum as "".
+4a. Location: set "location" to the room/area heading the item sits under in the document, exactly as written (e.g. "Lobby and Member Check-In", "Pool Deck - 324 seats"). Lines such as Installation, Art packages or allowances that sit under their own heading get that heading as their location (e.g. "Installation"). Never leave location blank when the document shows an area.
+4b. Quantity: use the exact quantity shown, including 0. Do not change a 0 quantity to 1. Use 1 only when no quantity is shown at all.
 5. If the document has separate totals columns for low-quantity and high-quantity items (each with its own procurement fee), add "feeTier":"high" to every item priced in the high-quantity column, and add a top-level "feeSplit":{"low":25,"high":10} using the fee percentages the document shows
 ${context ? `\nAdditional context: ${context}` : ''}
 ${projName ? `Project: ${projName}` : ''}
@@ -8181,11 +8183,12 @@ function dbBuildResults(parsed){
     (cat.items||[]).forEach(item=>{
       dbItems.push({
         isCategory:false,
-        itemNum: item.itemNum || String(itemNum++),
+        id: Date.now()+Math.random(),
+        itemNum: item.itemNum!=null ? String(item.itemNum).trim() : '',
         name: item.name||'',
         description: item.description||'',
         location: item.location||'',
-        qty: parseFloat(item.qty)||1,
+        qty: (item.qty===''||item.qty==null||isNaN(parseFloat(item.qty))) ? 1 : parseFloat(item.qty),
         price: parseFloat(item.price)||0,
         feeTier: item.feeTier==='high'?'high':(item.feeTier||''),
       });
@@ -8233,7 +8236,7 @@ function dbRenderTable(){
       const ext = (item.qty||0)*(item.price||0);
       html += `<tr style="border-bottom:1px solid var(--border);vertical-align:top">
         <td style="padding:6px 10px">
-          <input value="${escHtml(item.itemNum||'')}" style="width:42px;border:none;border-bottom:1px dashed var(--border2);background:transparent;font-family:inherit;font-size:11px;outline:none;padding:1px 2px;color:var(--text2)"
+          <input value="${escHtml(item.itemNum||'')}" style="width:78px;border:none;border-bottom:1px dashed var(--border2);background:transparent;font-family:inherit;font-size:11px;outline:none;padding:1px 2px;color:var(--text2)"
             oninput="dbItems[${i}].itemNum=this.value" />
         </td>
         <td style="padding:6px 10px">

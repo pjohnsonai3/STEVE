@@ -154,13 +154,18 @@
       var row = rows[i], a = cellStr(row[col.num]), b = cellStr(row[col.desc]);
       var joined = row.map(cellStr).join(' ');
       if (/^(all areas|subtotal)\b/i.test(b) || /^subtotal$/i.test(cellStr(row[col.qty]))) { end = i; break; }
-      var qty = num(row[col.qty]), price = num(row[col.price]);
+      var qCell = cellStr(row[col.qty]), pCell = cellStr(row[col.price]);
+      var qty = num(qCell), price = num(pCell);
       if (/^not in scope/i.test(a)) { last = null; continue; }
-      if (qty || price) {
+      // A row is a line item when it has a quantity or price cell filled in — a "0" counts.
+      if ((qCell !== '' && !isNaN(parseFloat(String(qCell).replace(/[$,\s]/g, '')))) || (pCell !== '' && price)) {
+        // Text without digits in the item # column (e.g. "Installation") names the area, not a number.
+        var isLabel = a && !/\d/.test(a);
+        var lineArea = isLabel ? a : area;
         var tier = '';
         if (col.high >= 0 && num(row[col.high])) tier = 'high';
         else if (col.low >= 0 && num(row[col.low])) tier = 'low';
-        last = { itemNum: a, name: b, description: '', location: col.loc >= 0 ? cellStr(row[col.loc]) || area : area, qty: qty || 1, price: price, feeTier: tier, _area: area };
+        last = { itemNum: isLabel ? '' : a, name: b || a, description: '', location: col.loc >= 0 ? cellStr(row[col.loc]) || lineArea : lineArea, qty: qCell === '' ? 1 : qty, price: price, feeTier: tier, _area: lineArea };
         items.push(last);
       } else if (a && !b) { area = a; last = null; }
       else if (a && b) { area = a; last = null; }  // "Admin. Offices — No scope included"
