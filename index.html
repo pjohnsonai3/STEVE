@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>STEVE — an ai3 product</title>
 <!-- UI + spec fallbacks. Source Sans 3 is the closest free stand-in for Whitney. -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@200..900&display=swap" rel="stylesheet" />
 <!-- WHITNEY (brand font): paste your Hoefler / cloud.typography kit <link> below, then uncomment it.
      Until then the app uses locally-installed Whitney on ai3 machines, else falls back to Source Sans 3.
 <link rel="stylesheet" href="https://cloud.typography.com/XXXXXXX/XXXXXXX/css/fonts.css" />
@@ -7666,7 +7666,7 @@ function printPreview(previewId, title, extraCss, filename){
 <head>
   <meta charset="utf-8">
   <title>${printTitle}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@200..900&display=swap" rel="stylesheet">
   <style>
     @page { margin: 0.6in 0.7in; }
     * { box-sizing: border-box; }
@@ -7674,6 +7674,9 @@ function printPreview(previewId, title, extraCss, filename){
     table { border-collapse: collapse; }
     img { max-width: 100%; height: auto; }
     input, select, textarea { border: none !important; background: transparent !important; padding: 1px 2px !important; font-family: inherit !important; font-size: inherit !important; color: inherit !important; }
+    .bt-research-btn, .rf-count, .doc-rowx, .doc-additem, .no-print { display: none !important; }
+    body, body * { font-synthesis: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    b, strong, th { font-weight: 600; }
     ${extraCss||''}
   </style>
 </head>
@@ -8173,7 +8176,8 @@ Your task:
 2. Organize them into standard FF&E categories: Seating, Tables & Casegoods, Decorative Lighting, Soft Goods & Textiles, Art & Accessories, Window Treatments, Rugs & Carpet, Wallcovering, Custom / Millwork, Installation
 3. Estimate realistic unit prices in USD for commercial/hospitality grade furniture (NOT residential pricing)
 4. Item numbers: copy each item number EXACTLY as printed in the document (e.g. "L-100", "PD-201", "MLR-800", "800"), character for character. Never renumber, re-prefix or re-sequence them. Only if an item has no number at all, leave itemNum as "".
-4a. Location: set "location" to the room/area heading the item sits under in the document, exactly as written (e.g. "Lobby and Member Check-In", "Pool Deck - 324 seats"). Lines such as Installation, Art packages or allowances that sit under their own heading get that heading as their location (e.g. "Installation"). Never leave location blank when the document shows an area.
+4a. Location: set "location" to the room/area heading the item sits under in the document, exactly as written (e.g. "Lobby and Member Check-In", "Pool Deck - 324 seats"). Lines such as Installation, Art packages or allowances that sit under their own heading get that heading as their location (e.g. "Installation"). Never leave location blank when the document shows an area. A location is a room or area, never a category: if the document is organized by category (Seating, Tables, Lighting…) with no rooms, use the item's room only when it is stated, otherwise leave location "".
+4d. Installation: always include installation / receiving / warehousing / delivery-and-install lines (e.g. "Caudelle's Receipt, Storage & Installation") even though they are not furniture. Put every such line in a category named exactly "Installation", with location "Installation", the exact quantity and price shown, and itemNum "" unless the document numbers it. Also include allowances and art packages; they are line items too.
 4c. Lead time: if the document shows a lead time for an item, copy it exactly into "leadTime" (e.g. "12-14 weeks"); otherwise use "".
 4b. Quantity: use the exact quantity shown, including 0. Do not change a 0 quantity to 1. Use 1 only when no quantity is shown at all.
 5. If the document has separate totals columns for low-quantity and high-quantity items (each with its own procurement fee), add "feeTier":"high" to every item priced in the high-quantity column, and add a top-level "feeSplit":{"low":25,"high":10} using the fee percentages the document shows
@@ -18571,7 +18575,7 @@ function _specOpenPrintTab(html, title){
   <title>${escHtml(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=DM+Mono&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=DM+Mono&family=Source+Sans+3:wght@200..900&display=swap" rel="stylesheet">
   <style>${SPEC_PRINT_CSS}</style>
 </head>
 <body>${html}<script>window.onload=function(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},500);};<\/script></body></html>`;
@@ -18958,7 +18962,7 @@ document.addEventListener('wheel', function(e){
 <script src="pb-sourcing.js?v=1789494623914"></script>
 <script src="budget-numbering.js?v=1794433288558"></script>
 <script src="tracker-ext.js?v=1793220591927"></script>
-<script src="split-fee.js?v=1794433288558"></script>
+<script src="split-fee.js?v=1794433920232"></script>
 <div id="ai3-toast-wrap"></div>
 <script>
 // Keep the page where it is while the PA / Preliminary Budget redraws after an edit.
