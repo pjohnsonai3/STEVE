@@ -2274,7 +2274,7 @@
           </label>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2);cursor:pointer;user-select:none" title="Show or hide the In Cost of Goods / Installation / Excluded tag on each line">
-            <input type="checkbox" id="pa-show-costtags" onchange="localStorage.setItem('steve_pa_costtags',this.checked?'1':'0');recalcPA()" style="cursor:pointer" /> Cost tags
+            <input type="checkbox" id="pa-show-costtags" checked onchange="localStorage.setItem('steve_pa_costtags',this.checked?'1':'0');recalcPA()" style="cursor:pointer" /> Cost tags
           </label>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <div id="pa-view-toggle" style="display:flex;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden"><button id="pa-view-internal" onclick="paSetView('internal')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Internal</button><button id="pa-view-client" onclick="paSetView('client')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Client View</button><button id="pa-view-area" onclick="paSetView('area')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button><button id="pa-view-byarea" onclick="paSetView('byarea')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button></div>
@@ -7625,7 +7625,11 @@ function recalcPA(){
   }
 }
 let paViewMode='internal';
-function paCostTagsOn(){ const cb=document.getElementById('pa-show-costtags'); return cb?cb.checked:localStorage.getItem('steve_pa_costtags')!=='0'; }
+function paCostTagsOn(){
+  const on=localStorage.getItem('steve_pa_costtags')!=='0';
+  const cb=document.getElementById('pa-show-costtags'); if(cb&&cb.checked!==on) cb.checked=on;
+  return on;
+}
 setTimeout(function(){ const cb=document.getElementById('pa-show-costtags'); if(cb) cb.checked=localStorage.getItem('steve_pa_costtags')!=='0'; },800);
 // Areas already used on this PA, its project's budgets and other PAs — offered as suggestions.
 function paLocations(){
