@@ -2448,6 +2448,7 @@
               <div class="form-row"><label>Procurement Fee %</label><input type="number" id="pb-fee-pct" value="20" step="0.1" oninput="recalcPB()" /></div>
               <div class="form-row"><label>Contingency %</label><input type="number" id="pb-cont-pct" value="5" step="0.1" oninput="recalcPB()" /></div>
               <div class="form-row"><label>Freight %</label><input type="number" id="pb-freight-pct" value="10" step="0.1" oninput="recalcPB()" /></div>
+              <div class="form-row"><label>Tariff %</label><input type="number" id="pb-tariff-pct" value="5" step="0.1" oninput="recalcPB()" /></div>
               <div class="form-row"><label>Tax %</label><input type="number" id="pb-tax-pct" value="8.9" step="0.01" oninput="recalcPB()" /></div>
               <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none;margin-top:6px" title="Adds List Price and Discount % columns — the trade discount ai3 gets vs. list">
                 <input type="checkbox" id="pb-show-discount" onchange="recalcPB()" style="cursor:pointer" /> Show Discount %
@@ -8504,7 +8505,7 @@ function renderPBList(){
     ?[...list].reverse().map(p=>{
         const sub=p.items?p.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0):0;
         const proj=projects.find(x=>x.name===p.project);
-        const total=calcDocTotal(p,false);
+        const total=calcDocTotal(p,!!p.tariffPct);
         return`<tr>
           <td style="font-weight:500;color:var(--accent-ink)">${p.pbNum||'—'}</td>
           ${showProjCol?`<td>${p.project||'—'}</td><td style="color:var(--text2);font-size:13px">${p.client||'—'}</td>`:''}
@@ -8558,6 +8559,7 @@ function showPBEditor(pb){
   document.getElementById('pb-cont-pct').value=pb?pb.contPct:5;
   document.getElementById('pb-freight-pct').value=pb?pb.freightPct:10;
   document.getElementById('pb-tax-pct').value=pb?pb.taxPct:8.9;
+  document.getElementById('pb-tariff-pct').value=pb?(pb.tariffPct??0):5;
   pbGenNotes = (pb && pb.genNotes) || '';
   document.getElementById('pb-editor-breadcrumb').textContent=pb?pb.pbNum:'New Budget';
   pbViewMode='internal';
@@ -8833,7 +8835,9 @@ function recalcPB(){
   const _gi=splitGoodsInstall(items,'price'); const goodsSub=_gi.goods, installSub=_gi.install;  // installation excluded from % add-ons
   const _sf=(typeof sfFee==='function')?sfFee(projName,items,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
   const _ftPB=feeRules(projName).artNoFT?_gi.ft:goodsSub;
-  const fee=_sf.fee, cont=contBaseOf(projName,goodsSub,installSub)*contPct/100, freight=_ftPB*freightPct/100, tax=(_ftPB+freight)*taxPct/100, total=sub+fee+cont+freight+tax;
+  const tariffPct=parseFloat((document.getElementById('pb-tariff-pct')||{}).value)||0;
+  const tariff=goodsSub*tariffPct/100;
+  const fee=_sf.fee, cont=contBaseOf(projName,goodsSub,installSub)*contPct/100, freight=_ftPB*freightPct/100, tax=(_ftPB+freight)*taxPct/100, total=sub+fee+cont+freight+tariff+tax;
   feePct=_sf.label;
   let dateStr='';
   if(date){const d=new Date(date+'T12:00:00');dateStr=d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});}
@@ -8844,6 +8848,14 @@ function recalcPB(){
     document.getElementById('pb-preview').innerHTML=buildPBAreaPreview({projName,proj,dateStr,feePct,contPct,freightPct,taxPct,sub,fee,cont,freight,tax,total,goodsSub,installSub,items});
   } else {
     document.getElementById('pb-preview').innerHTML=buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct,taxPct,sub,fee,cont,freight,tax,total,goodsSub,installSub,items}, !_pbPrintMode);
+  }
+  if(tariffPct){
+    // Add the tariff line under freight in every layout so the lines add up to the total.
+    [].slice.call(document.getElementById('pb-preview').querySelectorAll('tr')).some(tr=>{
+      const c=tr.children; if(!c.length || !/^Estimated Freight/i.test(c[0].textContent.trim())) return false;
+      const r=tr.cloneNode(true); r.children[0].textContent='Tariff Surcharge ('+tariffPct+'%)'; r.children[r.children.length-1].textContent='$'+fmtD(tariff);
+      tr.parentNode.insertBefore(r, tr.nextSibling); return true;
+    });
   }
 }
 let _pbPrintMode = false;
@@ -9225,6 +9237,7 @@ function savePB(){
     contPct:parseFloat(document.getElementById('pb-cont-pct').value)||5,
     freightPct:parseFloat(document.getElementById('pb-freight-pct').value)||10,
     taxPct:parseFloat(document.getElementById('pb-tax-pct').value)||8.9,
+    tariffPct:parseFloat(document.getElementById('pb-tariff-pct').value)||0,
     genNotes:pbGenNotes,
     items:JSON.parse(JSON.stringify(pbLineItems))};
   if(currentPBId){const idx=prelimBudgets.findIndex(p=>p.id===currentPBId);if(idx>=0)prelimBudgets[idx]={...prelimBudgets[idx],...data};}
@@ -9301,7 +9314,7 @@ function executePBtoPA(){
   const paNum='PA-'+new Date().getFullYear()+'-'+String(pas.length+1).padStart(3,'0');
   const newPA={id:paId,paNum,project:projName,client:proj.client||'',location:proj.location||'',
     date:new Date().toISOString().split('T')[0],status:'Draft',
-    feePct,contPct,freightPct,taxPct,tariffPct:5,items:newItems,notes:paNotesList};
+    feePct,contPct,freightPct,taxPct,tariffPct:copyFees?(parseFloat((document.getElementById('pb-tariff-pct')||{}).value)||0):5,items:newItems,notes:paNotesList};
 
   pas.push(newPA);
   saveAll();
@@ -9327,10 +9340,97 @@ function printPB(){
   const projName=document.getElementById('pb-project').value||'Preliminary Budget';
   const pbNum=currentPBId?(prelimBudgets.find(p=>p.id===currentPBId)||{pbNum:''}).pbNum:'';
   const filename=pbNum||projName;
-  // Render a clean (non-editable) version for print, then restore the editable view
-  _pbPrintMode = true; recalcPB();
-  printPreview('pb-preview','Preliminary Budget','@page{margin:0.6in 0.7in}',filename);
-  _pbPrintMode = false; recalcPB();
+  // Print a clean, client-ready sheet laid out like ai3's budget: grouped by area
+  // (or by category), name with source lines beneath, area subtotals, then the fees.
+  const box=document.createElement('div'); box.id='pb-print-doc'; box.style.display='none';
+  box.innerHTML=buildPBPrintDoc(); document.body.appendChild(box);
+  printPreview('pb-print-doc','Preliminary Budget','@page{margin:0.55in 0.6in}',filename);
+  setTimeout(()=>box.remove(),500);
+}
+function buildPBPrintDoc(){
+  const projName=document.getElementById('pb-project').value||'';
+  const proj=projects.find(p=>p.name===projName);
+  const date=document.getElementById('pb-date').value;
+  const num=id=>parseFloat((document.getElementById(id)||{}).value)||0;
+  let feePct=num('pb-fee-pct')||20; const contPct=num('pb-cont-pct'), freightPct=num('pb-freight-pct'), taxPct=num('pb-tax-pct'), tariffPct=num('pb-tariff-pct');
+  const items=pbLineItems;
+  const ext=i=>i.costType==='excluded'?0:(parseFloat(i.qty)||0)*(parseFloat(i.price)||0);
+  const sub=items.filter(i=>!i.isCategory).reduce((a,i)=>a+ext(i),0);
+  const _gi=splitGoodsInstall(items,'price'), goodsSub=_gi.goods, installSub=_gi.install;
+  const _sf=(typeof sfFee==='function')?sfFee(projName,items,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
+  const _ft=feeRules(projName).artNoFT?_gi.ft:goodsSub;
+  const fee=_sf.fee, cont=contBaseOf(projName,goodsSub,installSub)*contPct/100, freight=_ft*freightPct/100, tariff=goodsSub*tariffPct/100, tax=(_ft+freight)*taxPct/100;
+  const total=sub+fee+cont+freight+tariff+tax;
+  const dateStr=date?new Date(date+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):'';
+  const rec=currentPBId?prelimBudgets.find(p=>p.id===currentPBId):null;
+  const revised=rec&&rec.status&&/revis/i.test(rec.status);
+  // Grouping
+  const byCat = pbViewMode==='area' || !items.some(i=>!i.isCategory&&String(i.location||'').trim());
+  const groups=[], m={}; let cat='';
+  items.forEach(it=>{
+    if(it.isCategory){ cat=it.name||''; if(byCat&&!m[cat]){ m[cat]={name:cat,list:[]}; groups.push(m[cat]); } return; }
+    const k=byCat?cat:(String(it.location||'').trim()||'Other');
+    if(!m[k]){ m[k]={name:k,list:[]}; groups.push(m[k]); }
+    m[k].list.push(it);
+  });
+  if(!byCat){ const o=groups.findIndex(g=>g.name==='Other'); if(o>=0) groups.push(groups.splice(o,1)[0]); }
+  const E=s=>escHtml(s==null?'':String(s));
+  const money=v=>'$'+fmtD(v||0);
+  const td='padding:5px 8px;vertical-align:top;font-size:10.5pt';
+  let rows='';
+  groups.forEach(g=>{
+    const list=g.list; if(!list.length) return;
+    rows+=`<tr><td colspan="6" style="padding:14px 8px 4px;font-size:11pt;font-weight:600;border-bottom:1px solid #1a1a1a">${E(g.name)}</td></tr>`;
+    list.forEach(it=>{
+      const lines=[it.vendor,it.description].filter(Boolean).join('\n').split('\n').map(s=>s.trim()).filter(Boolean);
+      const lt=String(it.leadTime||'').trim();
+      rows+=`<tr style="page-break-inside:avoid">
+        <td style="${td};white-space:nowrap;width:70px">${E(it.itemNum)}</td>
+        <td style="${td}"><div style="font-weight:600">${E(it.name)}</div>${lines.map(l=>`<div style="color:#444">${E(l)}</div>`).join('')}${it.notes?`<div style="color:#666;font-style:italic">${E(it.notes)}</div>`:''}</td>
+        <td style="${td};text-align:center;width:62px">${it.qty==null||it.qty===''?'':E(it.qty)}</td>
+        <td style="${td};text-align:right;width:86px">${it.price?money(it.price):''}</td>
+        <td style="${td};text-align:right;width:92px">${it.costType==='excluded'?'Excluded':money(ext(it))}</td>
+        <td style="${td};width:120px">${E(lt)}</td>
+      </tr>`;
+    });
+    const gs=list.reduce((a,i)=>a+ext(i),0);
+    rows+=`<tr><td colspan="4"></td><td style="padding:4px 8px 8px;text-align:right;font-size:10.5pt;font-weight:600;border-top:1px solid #999">${money(gs)}</td><td></td></tr>`;
+  });
+  const tr=(l,v,st)=>`<tr><td style="padding:3px 16px 3px 0;${st||''}">${l}</td><td style="padding:3px 0;text-align:right;${st||''}">${v}</td></tr>`;
+  const splitInfo=(typeof sfSplit==='function'&&sfSplit(projName)&&_sf.split)?_sf.split:null;
+  const feeRows=splitInfo
+    ? tr('Procurement Fee — Low qty ('+splitInfo.low+'%)',money(splitInfo.lo*splitInfo.low/100))+tr('Procurement Fee — High qty ('+splitInfo.high+'%)',money(splitInfo.hi*splitInfo.high/100))
+    : tr('Procurement Fee ('+feePct+'%)',money(fee));
+  const totals=`<table style="margin-left:auto;margin-top:18px;border-collapse:collapse;font-size:10.5pt;min-width:330px;page-break-inside:avoid">
+    ${tr('Subtotal',money(sub),'font-weight:600')}
+    ${installSub>0?tr('Cost of goods (fee base)',money(goodsSub),'color:#666'):''}
+    ${feeRows}
+    ${tr('Contingency ('+contPct+'%)',money(cont))}
+    ${tr('Estimated Freight ('+freightPct+'%)',money(freight))}
+    ${tariffPct?tr('Tariff Surcharge ('+tariffPct+'%)',money(tariff)):''}
+    ${tr('Estimated Tax ('+taxPct+'%)',money(tax))}
+    <tr><td style="padding:7px 16px 3px 0;font-weight:700;font-size:11.5pt;border-top:1.5px solid #1a1a1a">Total</td><td style="padding:7px 0 3px;text-align:right;font-weight:700;font-size:11.5pt;border-top:1.5px solid #1a1a1a">${money(total)}</td></tr>
+  </table>`;
+  const notes=(typeof pbGenNotes!=='undefined'&&String(pbGenNotes||'').trim())?`<div style="margin-top:22px;font-size:10pt;page-break-inside:avoid"><div style="font-weight:600;margin-bottom:4px">General Notes</div><div style="white-space:pre-line;color:#333">${E(pbGenNotes)}</div></div>`:'';
+  return `<div style="font-family:'Source Sans 3','Helvetica Neue',Arial,sans-serif;font-weight:400;color:#1a1a1a;line-height:1.35">
+    <div style="margin-bottom:16px">
+      <div style="font-size:15pt;font-weight:600">${E(projName)}</div>
+      <div style="font-size:11.5pt">FF&amp;E Preliminary Budget</div>
+      <div style="font-size:10.5pt;color:#444">${revised?'REVISED - ':''}${E(dateStr)}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr style="font-size:10pt;font-weight:600;text-align:left">
+        <th style="padding:5px 8px;border-bottom:1.5px solid #1a1a1a;font-weight:600">Item No.</th>
+        <th style="padding:5px 8px;border-bottom:1.5px solid #1a1a1a;font-weight:600">Description</th>
+        <th style="padding:5px 8px;border-bottom:1.5px solid #1a1a1a;font-weight:600;text-align:center">Quantity</th>
+        <th style="padding:5px 8px;border-bottom:1.5px solid #1a1a1a;font-weight:600;text-align:right">Est. Price</th>
+        <th style="padding:5px 8px;border-bottom:1.5px solid #1a1a1a;font-weight:600;text-align:right">Extension</th>
+        <th style="padding:5px 8px;border-bottom:1.5px solid #1a1a1a;font-weight:600">Lead Time</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${totals}${notes}
+  </div>`;
 }
 
 
@@ -19000,7 +19100,7 @@ document.addEventListener('wheel', function(e){
 </script>
 <script>
 // Version stamp: when this copy of STEVE was last updated, plus a nudge when a newer one is online.
-var STEVE_BUILD='2026-11-11T21:57:04.060Z';
+var STEVE_BUILD='2026-11-11T22:14:26.750Z';
 (function(){
   function fmt(iso){ var d=new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
   function show(newer){
