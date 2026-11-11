@@ -4703,14 +4703,29 @@ function _docArr(store){
   if(store==='paNote') return typeof paNotes!=='undefined'?paNotes:[];
   return [];
 }
+function _docCatOf(arr, idx){ for(let k=idx;k>=0;k--){ if(arr[k]&&arr[k].isCategory) return arr[k].name||''; } return ''; }
+function _docCatNames(store){ const seen={}, out=[]; _docArr(store).forEach(it=>{ if(it.isCategory&&it.name&&!seen[it.name.toLowerCase()]){ seen[it.name.toLowerCase()]=1; out.push(it.name); } }); return out; }
+// Move a line under another category (created at the end if it doesn't exist yet).
+function _docMoveToCat(store, idx, name){
+  const arr=_docArr(store), it=arr[idx]; name=String(name||'').trim();
+  if(!it||it.isCategory||!name||name.toLowerCase()===_docCatOf(arr,idx).toLowerCase()) return;
+  arr.splice(idx,1);
+  let h=arr.findIndex(x=>x.isCategory&&String(x.name||'').toLowerCase()===name.toLowerCase());
+  if(h<0){ arr.push({id:Date.now()+Math.random(),isCategory:true,name:name,bold:true}); h=arr.length-1; }
+  let end=h+1; while(end<arr.length&&!arr[end].isCategory) end++;
+  arr.splice(end,0,it);
+  if(typeof ai3Toast==='function') ai3Toast('Moved to '+name);
+}
 function _docGet(store, idx, field){
   const arr=_docArr(store); const it=arr[idx];
   if(it==null) return '';
+  if(field==='__cat') return _docCatOf(arr, idx);
   if(store==='paNote') return it;
   return it[field]!=null?it[field]:'';
 }
 function _docSet(store, idx, field, val){
   const arr=_docArr(store); if(arr[idx]==null) return;
+  if(field==='__cat'){ _docMoveToCat(store, idx, val); return; }
   if(store==='paNote') arr[idx]=val; else arr[idx][field]=val;
 }
 // Per-line cost status: counted in cost of goods, counted as installation, or left out of the totals.
@@ -4790,7 +4805,7 @@ function docEditField(span){
     if(type==='date') el.onchange=commit;
   }
   const keepList = span.querySelector('datalist');
-  span.innerHTML=''; if(keepList) span.appendChild(keepList); span.appendChild(el); el.focus();
+  span.innerHTML=''; if(keepList) span.appendChild(keepList); span.appendChild(el); el.focus({preventScroll:true});
   if(el.select && type!=='date' && !span.dataset.sel) el.select();
 }
 
@@ -7454,7 +7469,7 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
         <td style="padding:5px 8px;font-size:11.5px">
           <div style="font-weight:${item.bold?'700':'400'};margin-bottom:2px">${cell(i,'name',item.name,{placeholder:'Item name'})}</div>
           ${editable?`<div style="font-size:10.5px;color:#555">${descC}</div>`:(item.description?`<div style="font-size:10.5px;color:#555">${descC}</div>`:'')}
-          ${editable?`<div style="font-size:10.5px;color:#888;margin-top:2px">📍 ${docField('pa',i,'location',item.location,{placeholder:'Area',list:paLocations()})}</div>`:''}
+          ${editable?`<div style="font-size:10.5px;color:#888;margin-top:2px">📍 ${docField('pa',i,'location',item.location,{placeholder:'Area',list:paLocations()})} &nbsp;▸ ${docField('pa',i,'__cat',catName,{placeholder:'Category',list:_docCatNames('pa')})}</div>`:''}
           ${window.paGroupByArea&&catName?`<div style="font-size:9.5px;color:#999;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">${escHtml(catName)}</div>`:''}
         </td>
         <td style="padding:5px 8px;font-size:11.5px;text-align:right">${cell(i,'qty',item.qty,{type:'number'})}${costChip('pa',i,item,editable,catName)}</td>
@@ -8967,7 +8982,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
         ${showDiscB?discCellB(idx,item):''}
         <td style="padding:7px 8px;font-size:11px;text-align:right;font-weight:600;white-space:nowrap">${ext?'$'+fmtD(ext):''}</td>
         <td style="padding:7px 8px;font-size:10.5px;white-space:nowrap;color:#555;font-weight:500">${F(idx,'leadTime',item.leadTime,{placeholder:'Lead time'})}</td>
-        <td style="padding:7px 8px;font-size:10.5px;white-space:nowrap;color:#888">${editable?'📍 '+docField('pb',idx,'location',item.location,{placeholder:'Location',list:(typeof pbLocations==='function'?pbLocations():[])}):(item.location?'📍 '+escHtml(item.location):'')}</td>
+        <td style="padding:7px 8px;font-size:10.5px;white-space:nowrap;color:#888">${editable?'📍 '+docField('pb',idx,'location',item.location,{placeholder:'Location',list:(typeof pbLocations==='function'?pbLocations():[])})+'<div style="margin-top:3px" title="Move this line to another category">▸ '+docField('pb',idx,'__cat',_docCatOf(pbLineItems,idx),{placeholder:'Category',list:_docCatNames('pb')})+'</div>':(item.location?'📍 '+escHtml(item.location):'')}</td>
         ${editable?`<td style="padding:7px 6px;text-align:center;white-space:nowrap"><span class="bt-research-btn" style="display:inline-block;vertical-align:middle" onclick="event.stopPropagation();btResearchMenu(this,'pb','${escHtml(document.getElementById('pb-project')?document.getElementById('pb-project').value:'')}',${item.id})" title="Research this item"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>${(item.findings&&item.findings.length)?`<span class="rf-count">${item.findings.length}</span>`:''}</span> <span class="doc-rowx" onclick="pbRemoveByIdx(${idx})" title="Remove item">✕</span></td>`:''}
       </tr>`;
     });
@@ -18932,5 +18947,38 @@ document.addEventListener('wheel', function(e){
 <script src="tracker-ext.js?v=1793220591927"></script>
 <script src="split-fee.js?v=1793653963843"></script>
 <div id="ai3-toast-wrap"></div>
+<script>
+// Keep the page where it is while the PA / Preliminary Budget redraws after an edit.
+(function(){
+  function scrollers(ids){
+    var out=[], seen=new Set();
+    ids.forEach(function(id){
+      var el=document.getElementById(id);
+      while(el){ if(!seen.has(el)){ seen.add(el); if(el.scrollHeight>el.clientHeight+1||el.scrollTop) out.push(el); } el=el.parentElement; }
+    });
+    var se=document.scrollingElement||document.documentElement; if(!seen.has(se)) out.push(se);
+    return out;
+  }
+  function keep(name, ids){
+    var o=window[name]; if(typeof o!=='function'||o.__keepScroll) return false;
+    var w=function(){
+      var els=scrollers(ids), pos=els.map(function(e){ return [e.scrollTop,e.scrollLeft]; });
+      var r=o.apply(this, arguments);
+      var put=function(){ els.forEach(function(e,i){ if(e.scrollTop!==pos[i][0]) e.scrollTop=pos[i][0]; if(e.scrollLeft!==pos[i][1]) e.scrollLeft=pos[i][1]; }); };
+      put(); requestAnimationFrame(put);
+      return r;
+    };
+    w.__keepScroll=true; window[name]=w; return true;
+  }
+  function boot(){
+    keep('recalcPB',['pb-preview','pb-categories-form']);
+    keep('pbRenderCategoriesForm',['pb-categories-form','pb-preview']);
+    keep('recalcPA',['pa-preview']);
+    keep('paRenderLineItems',['pa-preview']);
+  }
+  // Wrap last, so this sits outside the other add-ons that also wrap these.
+  setTimeout(boot,3000); setTimeout(boot,9000);
+})();
+</script>
 </body>
 </html>
