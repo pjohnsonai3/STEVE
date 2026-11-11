@@ -2273,6 +2273,8 @@
             <input type="checkbox" id="pa-show-discount" onchange="recalcPA()" style="cursor:pointer" /> Show Discount %
           </label>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
+          <div id="pa-view-toggle" style="display:flex;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden"><button id="pa-view-internal" onclick="paSetView('internal')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Internal</button><button id="pa-view-client" onclick="paSetView('client')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Client View</button><button id="pa-view-area" onclick="paSetView('area')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button><button id="pa-view-byarea" onclick="paSetView('byarea')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button></div>
+          <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <button class="btn btn-sm btn-primary" onclick="addPALineItem()">+ Item</button>
           <button class="btn btn-sm" onclick="addPACategory()">+ Category</button>
           <button class="btn btn-sm" onclick="addPANote()">+ Note</button>
@@ -4711,6 +4713,28 @@ function _docSet(store, idx, field, val){
   const arr=_docArr(store); if(arr[idx]==null) return;
   if(store==='paNote') arr[idx]=val; else arr[idx][field]=val;
 }
+// Per-line cost status: counted in cost of goods, counted as installation, or left out of the totals.
+function costState(item, catName){
+  if(item.costType==='excluded') return 'excluded';
+  if(item.costType==='goods') return 'goods';
+  if(item.costType==='install') return 'install';
+  return (isInstallCat(catName)||item.isInstallation===true)?'install':'goods';
+}
+function costChip(store, idx, item, editable, catName){
+  const st=costState(item, catName);
+  const lbl={goods:'IN COST OF GOODS',install:'INSTALLATION',excluded:'EXCLUDED'}[st];
+  if(!editable) return st==='excluded'?'<div style="font-size:9px;font-weight:700;letter-spacing:.04em;color:#999;margin-top:3px">EXCLUDED</div>':'';
+  const sty=st==='excluded'?'background:#fff;color:#999;border:1px dashed #bbb;text-decoration:line-through':st==='install'?'background:#f2f2f2;color:#444;border:1px solid #bbb':'background:#fff;color:#555;border:1px solid #bbb';
+  return '<div style="margin-top:4px"><span onclick="event.stopPropagation();costCycle(\''+store+'\','+idx+')" title="Click to switch: cost of goods → installation → excluded" style="display:inline-block;cursor:pointer;font-size:9px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border-radius:2px;white-space:nowrap;'+sty+'">'+lbl+'</span></div>';
+}
+function costCycle(store, idx){
+  const arr=_docArr(store), it=arr[idx]; if(!it) return;
+  let cat=''; for(let k=idx;k>=0;k--){ if(arr[k]&&arr[k].isCategory){ cat=arr[k].name; break; } }
+  const next={goods:'install',install:'excluded',excluded:'goods'}[costState(it,cat)];
+  if(typeof pushUndo==='function') pushUndo('Change cost status');
+  it.costType=next;
+  _docAfter(store);
+}
 function _docAfter(store){
   if(store==='pb'){ recalcPB(); }
   else if(store==='pa'||store==='paNote'){ recalcPA(); if(typeof paPersist==='function') paPersist(); }
@@ -6844,7 +6868,9 @@ function splitGoodsInstall(items, priceKey){
     const price = (it[priceKey]!=null ? it[priceKey] : (it.price!=null?it.price:it.estPrice)) || 0;
     const ext = (parseFloat(it.qty)||0) * (parseFloat(price)||0);
     const _c = it._cat!=null ? it._cat : cat;
-    if(isInstallCat(_c) || isInstallCat(it.category) || it.isInstallation===true) install += ext;
+    if(it.costType==='excluded') return;
+    if(it.costType==='goods'){ goods += ext; if(isArtLine(it, _c)) art += ext; return; }
+    if(it.costType==='install' || isInstallCat(_c) || isInstallCat(it.category) || it.isInstallation===true) install += ext;
     else { goods += ext; if(isArtLine(it, _c)) art += ext; }
   });
   return { goods, install, art, ft: goods-art, sub: goods+install };
@@ -6853,7 +6879,7 @@ function splitGoodsInstall(items, priceKey){
 function calcPATotal(pa){
   if(pa.totalOverride) return pa.totalOverride;
   const allItems=pa.items?pa.items.filter(i=>!i.isCategory):[];
-  const sub=allItems.reduce((a,i)=>a+((i.qty||0)*(i.price||0)),0);
+  const sub=allItems.reduce((a,i)=>a+((i.costType==='excluded'?0:(i.qty||0)*(i.price||0))),0);
   const goodsSub=splitGoodsInstall(pa.items,'price').goods;  // installation excluded from % add-ons
   const feePct=(pa.feePct??25)/100, contPct=(pa.contPct??5)/100, freightPct=(pa.freightPct??10)/100, tariffPct=(pa.tariffPct??5)/100, taxPct=(pa.taxPct??8.9)/100;
   const fee=(typeof sfFee==='function')?sfFee(pa.project,pa.items,goodsSub,feePct*100).fee:goodsSub*feePct, cont=contBaseOf(pa.project,goodsSub,sub-goodsSub)*contPct, freight=ftBaseOf(pa.items,'price',pa.project)*freightPct, tariff=goodsSub*tariffPct;
@@ -7228,7 +7254,7 @@ function renderDocLineItemsForm(prefix, items, recalcFn){
           style="padding:2px 4px;border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);font-family:inherit;width:100%;box-sizing:border-box"
           oninput="paLineItems[${i}].description=this.value;${recalcFn}()" />
       </div>
-      <input type="number" value="${item.qty||1}" min="1"
+      <input type="number" value="${item.qty==null||item.qty===''?1:item.qty}" min="0"
         style="padding:3px 4px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box;text-align:center"
         oninput="paLineItems[${i}].qty=+this.value;${recalcFn}()" />
       <input type="number" value="${item.price||''}" placeholder="0.00" min="0" step="0.01"
@@ -7358,7 +7384,7 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
       if(item.isCategory){
         rows+=`<tr><td colspan="6" style="padding:8px 10px 4px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;background:#f2f2f2;border-top:1.5px solid #999;border-bottom:1px solid #ccc">${escHtml(item.name||'')}</td></tr>`;
       } else {
-        const ext=(item.qty||0)*(item.price||0);
+        const ext=item.costType==='excluded'?0:(item.qty||0)*(item.price||0);
         const nameCell=item.bold?`<strong>${escHtml(item.name||'')}</strong>`:escHtml(item.name||'');
         const descLines=[item.vendor,item.description].filter(Boolean).map(l=>l.split('\n').map(s=>`<div style="font-size:10.5px;color:#555">${escHtml(s)}</div>`).join('')).join('');
         rows+=`<tr style="vertical-align:top;border-bottom:1px solid #eee">
@@ -7416,27 +7442,22 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
     const lpC = editable ? '$'+docField('pa',i,'listPrice',item.listPrice,{type:'number'}) : (lp?'$'+fmtD(lp):'');
     return `<td style="padding:5px 8px;font-size:11.5px;text-align:right">${lpC}</td><td style="padding:5px 8px;font-size:11.5px;text-align:right;color:${pct==null?'#999':pct>=0?'#1a7a3a':'#b02a2a'}">${pct==null?'—':fmtD(pct)+'%'}</td>`;
   };
-  let rows='';
-  items.forEach((item,i)=>{
-    if(item.isCategory){
-      const nameC = editable ? docField('pa',i,'name',item.name,{placeholder:'Category'}) : escHtml(item.name||'');
-      rows+=`<tr><td colspan="${7+(showDiscA?2:0)}" style="padding:8px 10px 4px;border-top:1.5px solid #999;border-bottom:1px solid #ccc;background:#f2f2f2">
-        <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase">
-          <span style="flex:1">${nameC}</span>
-          ${editable?`<span class="doc-rowx" onclick="pushUndo('Remove category');paLineItems.splice(${i},1);recalcPA();paPersist()" title="Remove category">✕</span>`:''}
-        </div>
-      </td></tr>`;
-    } else {
-      const ext=(parseFloat(item.qty)||0)*(parseFloat(item.price)||0);
+  let rows='', _paCat='';
+  const _ncol=7+(showDiscA?2:0);
+  const paRow=(item,i,catName)=>{
+      _paCat=catName;
+      const ext=item.costType==='excluded'?0:(parseFloat(item.qty)||0)*(parseFloat(item.price)||0);
       const priceC = editable ? '$'+docField('pa',i,'price',item.price,{type:'number'}) : (item.price?'$'+fmtD(item.price):'');
       const descC  = editable ? docField('pa',i,'description',item.description,{placeholder:'Source / description',multi:true}) : (item.description?escHtml(item.description):'');
-      rows+=`<tr style="vertical-align:top;border-bottom:1px solid #eee">
+      return `<tr style="vertical-align:top;border-bottom:1px solid #eee">
         <td style="padding:5px 8px;font-size:11px">${cell(i,'itemNum',item.itemNum,{placeholder:'#'})}</td>
         <td style="padding:5px 8px;font-size:11.5px">
           <div style="font-weight:${item.bold?'700':'400'};margin-bottom:2px">${cell(i,'name',item.name,{placeholder:'Item name'})}</div>
           ${editable?`<div style="font-size:10.5px;color:#555">${descC}</div>`:(item.description?`<div style="font-size:10.5px;color:#555">${descC}</div>`:'')}
+          ${editable?`<div style="font-size:10.5px;color:#888;margin-top:2px">📍 ${docField('pa',i,'location',item.location,{placeholder:'Area',list:paLocations()})}</div>`:''}
+          ${window.paGroupByArea&&catName?`<div style="font-size:9.5px;color:#999;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">${escHtml(catName)}</div>`:''}
         </td>
-        <td style="padding:5px 8px;font-size:11.5px;text-align:right">${cell(i,'qty',item.qty,{type:'number'})}</td>
+        <td style="padding:5px 8px;font-size:11.5px;text-align:right">${cell(i,'qty',item.qty,{type:'number'})}${costChip('pa',i,item,editable,catName)}</td>
         <td style="padding:5px 8px;font-size:11.5px;text-align:right">${priceC}</td>
         ${showDiscA?discCellA(i,item):''}
         <td style="padding:5px 8px;font-size:11.5px;text-align:right;font-weight:600">${ext?'$'+fmtD(ext):'—'}</td>
@@ -7445,6 +7466,35 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
           ${editable?`<span class="doc-rowx" onclick="pushUndo('Remove PA item');paLineItems.splice(${i},1);recalcPA();paPersist()" title="Remove">✕</span>`:''}
         </td>
       </tr>`;
+  };
+  if(window.paGroupByArea){
+    // Same lines, regrouped by project area (Location). Edits write straight back to the line.
+    const groups=[], m={}; let cat='';
+    items.forEach((item,i)=>{
+      if(item.isCategory){ cat=item.name||''; return; }
+      const a=String(item.location||'').trim()||'No area assigned';
+      if(!m[a]){ m[a]={area:a,list:[]}; groups.push(m[a]); }
+      m[a].list.push({item,i,cat});
+    });
+    const na=groups.findIndex(g=>g.area==='No area assigned'); if(na>=0) groups.push(groups.splice(na,1)[0]);
+    groups.forEach(g=>{
+      const gsub=g.list.reduce((a,o)=>a+(o.item.costType==='excluded'?0:(parseFloat(o.item.qty)||0)*(parseFloat(o.item.price)||0)),0);
+      rows+=`<tr><td colspan="${_ncol}" style="padding:8px 10px 4px;border-top:1.5px solid #999;border-bottom:1px solid #ccc;background:#f2f2f2"><div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase"><span style="flex:1">${escHtml(g.area)}</span><span style="font-weight:600;letter-spacing:0">$${fmtD(gsub)}</span></div></td></tr>`;
+      g.list.forEach(o=>{ rows+=paRow(o.item,o.i,o.cat); });
+    });
+  } else
+  items.forEach((item,i)=>{
+    if(item.isCategory){
+      _paCat=item.name||'';
+      const nameC = editable ? docField('pa',i,'name',item.name,{placeholder:'Category'}) : escHtml(item.name||'');
+      rows+=`<tr><td colspan="${7+(showDiscA?2:0)}" style="padding:8px 10px 4px;border-top:1.5px solid #999;border-bottom:1px solid #ccc;background:#f2f2f2">
+        <div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase">
+          <span style="flex:1">${nameC}</span>
+          ${editable?`<span class="doc-rowx" onclick="pushUndo('Remove category');paLineItems.splice(${i},1);recalcPA();paPersist()" title="Remove category">✕</span>`:''}
+        </div>
+      </td></tr>`;
+    } else {
+      rows+=paRow(item,i,_paCat);
     }
   });
 
@@ -7501,7 +7551,7 @@ function recalcPA(){
   const tariffPct=paPct('pa-tariff-pct',5);
   const taxPct=paPct('pa-tax-pct',8.9);
   const allItems=paLineItems.filter(i=>!i.isCategory);
-  const sub=allItems.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+  const sub=allItems.reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
   // Installation/labor lines are excluded from the percentage add-ons
   const _gi=splitGoodsInstall(paLineItems,'price'); const goodsSub=_gi.goods, installSub=_gi.install;
   // Use saved override amounts when present (e.g. signed PA with exact PDF figures)
@@ -7539,8 +7589,45 @@ function recalcPA(){
       <div style="font-size:9.5px;line-height:1.55;color:#333"><strong>TERMS AND CONDITIONS:</strong> Make check payable to ai3, Inc. Payment will serve as authorization for ai3, Inc. to purchase the above-referenced goods, services, or materials on your behalf. The balance of this order plus applicable shipping charges, receipt and installation fees, contingency fee, and all applicable sales tax are due IN FULL prior to purchasing. Any discrepancies or differences in pricing estimates must be balanced/paid in full prior to order shipment. Caudelle's Furniture Specialists will act as the Owner's agent in receipt and storage of all goods. The Owner has the right to inspect all goods in conjunction with Caudelle's inspection. ai3 is not responsible for any damages incurred in transit. ai3 is not responsible for charges incurred due to Owner revisions or reselections, source price increases, or variances in freight and sales tax.</div>
     </div>
   </div>`;
-  document.getElementById('pa-preview').innerHTML=paBody+authBlock;
+  let _paBodyV=paBody;
+  if(paViewMode==='client'||paViewMode==='area'){
+    const args={projName,proj,dateStr,feePct,contPct,freightPct,taxPct,sub,fee,cont,freight,tax,total,goodsSub,installSub,items:paLineItems};
+    _paBodyV=(paViewMode==='client'?buildPBClientPreview(args):buildPBAreaPreview(args)).split('Preliminary Budget').join('Purchase Authorization');
+  }
+  const _pv=document.getElementById('pa-preview');
+  _pv.innerHTML=_paBodyV+authBlock;
+  if((paViewMode==='client'||paViewMode==='area') && tariffPct){
+    // Those layouts have no tariff line; add one under freight so the lines add up to the total.
+    [].slice.call(_pv.querySelectorAll('tr')).some(tr=>{
+      const c=tr.children; if(!c.length || !/^Estimated Freight/i.test(c[0].textContent.trim())) return false;
+      const r=tr.cloneNode(true); r.children[0].textContent='Tariff Surcharge ('+tariffPct+'%)'; r.children[r.children.length-1].textContent='$'+fmtD(tariff||0);
+      tr.parentNode.insertBefore(r, tr.nextSibling); return true;
+    });
+  }
 }
+let paViewMode='internal';
+// Areas already used on this PA, its project's budgets and other PAs — offered as suggestions.
+function paLocations(){
+  const seen={}, out=[]; const add=v=>{ const s=String(v==null?'':v).trim(); if(s&&!seen[s.toLowerCase()]){ seen[s.toLowerCase()]=1; out.push(s); } };
+  (paLineItems||[]).forEach(it=>add(it.location));
+  const el=document.getElementById('pa-project'), pn=el&&el.value;
+  if(pn){
+    try{ (prelimBudgets||[]).forEach(p=>{ if(p.project===pn) (p.items||[]).forEach(it=>add(it.location)); }); }catch(e){}
+    try{ (pas||[]).forEach(p=>{ if(p.project===pn) (p.items||[]).forEach(it=>add(it.location)); }); }catch(e){}
+  }
+  return out.sort((x,y)=>x.localeCompare(y,undefined,{numeric:true}));
+}
+function paSetView(mode){
+  window.paGroupByArea=(mode==='byarea');
+  paViewMode=(mode==='byarea')?'internal':mode;
+  [['pa-view-internal','internal'],['pa-view-client','client'],['pa-view-area','area'],['pa-view-byarea','byarea']].forEach(function(p){
+    const act=p[1]==='byarea'?window.paGroupByArea:(p[1]===paViewMode&&!window.paGroupByArea);
+    const b=document.getElementById(p[0]); if(!b) return;
+    b.style.background=act?'var(--accent)':'var(--surface)'; b.style.color=act?'#fff':'var(--text2)';
+  });
+  recalcPA();
+}
+setTimeout(function(){ const b=document.getElementById('pa-view-internal'); if(b){ b.style.background='var(--accent)'; b.style.color='#fff'; } },1200);
 
 // --- Print ---
 // ── Shared print helper — works in file:// without popups ──────────────────
@@ -8250,7 +8337,7 @@ function dbRenderTable(){
             oninput="dbItems[${i}].location=this.value" />
         </td>
         <td style="padding:6px 10px;text-align:center">
-          <input type="number" value="${item.qty||1}" min="1" style="width:44px;border:none;border-bottom:1px dashed var(--border2);background:transparent;font-family:inherit;font-size:12px;outline:none;padding:1px 2px;text-align:center;color:var(--text)"
+          <input type="number" value="${item.qty==null||item.qty===''?1:item.qty}" min="0" style="width:44px;border:none;border-bottom:1px dashed var(--border2);background:transparent;font-family:inherit;font-size:12px;outline:none;padding:1px 2px;text-align:center;color:var(--text)"
             oninput="dbItems[${i}].qty=+this.value;dbRecalc()" />
         </td>
         <td style="padding:6px 10px;text-align:right">
@@ -8271,7 +8358,7 @@ function dbRenderTable(){
 
 function dbRecalc(){
   // Update extension cells without full re-render
-  const sub = dbItems.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+  const sub = dbItems.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
   const goodsSub = splitGoodsInstall(dbItems,'price').goods;  // installation excluded from % add-ons
   const feePct     = parseFloat(document.getElementById('db-fee-pct').value)||20;
   const contPct    = parseFloat(document.getElementById('db-cont-pct').value)||5;
@@ -8382,7 +8469,7 @@ function renderPBList(){
 
   document.getElementById('pb-tbody').innerHTML=list.length
     ?[...list].reverse().map(p=>{
-        const sub=p.items?p.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0):0;
+        const sub=p.items?p.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0):0;
         const proj=projects.find(x=>x.name===p.project);
         const total=calcDocTotal(p,false);
         return`<tr>
@@ -8402,7 +8489,7 @@ function renderPBList(){
 }
 
 function calcDocTotal(doc, hasTariff){
-  const sub=doc.items?doc.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0):0;
+  const sub=doc.items?doc.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0):0;
   const f=(doc.feePct??20)/100,c=(doc.contPct??5)/100,fr=(doc.freightPct??10)/100,tx=(doc.taxPct??8.9)/100;
   const tar=hasTariff?(doc.tariffPct??5)/100:0;
   const _gi=splitGoodsInstall(doc.items||[],'price'), _R=feeRules(doc.project);
@@ -8531,7 +8618,7 @@ function pbRenderCategoriesForm(){
   });
 
   cats.forEach((cat,ci)=>{
-    const catSub = cat.items.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+    const catSub = cat.items.reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
     html += `<div style="border-bottom:1px solid var(--border)">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surface2);cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">
         <div style="font-size:12px;font-weight:600;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.05em">${escHtml(cat.name)}</div>
@@ -8550,7 +8637,7 @@ function pbRenderCategoriesForm(){
             oninput="pbUpdateItem(${ci},${ii},'itemNum',this.value)" />
           <input value="${escHtml(item.name||'')}" placeholder="Item name" style="padding:4px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box"
             oninput="pbUpdateItem(${ci},${ii},'name',this.value)" />
-          <input type="number" value="${item.qty||1}" min="1" style="padding:4px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box;text-align:center"
+          <input type="number" value="${item.qty==null||item.qty===''?1:item.qty}" min="0" style="padding:4px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box;text-align:center"
             oninput="pbUpdateItem(${ci},${ii},'qty',+this.value)" />
           <input type="number" value="${item.price||''}" placeholder="0.00" min="0" step="0.01" style="padding:4px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;width:100%;box-sizing:border-box;text-align:right"
             oninput="pbUpdateItem(${ci},${ii},'price',+this.value)" />
@@ -8709,7 +8796,7 @@ function recalcPB(){
   const freightPct=parseFloat(document.getElementById('pb-freight-pct').value)||10;
   const taxPct=parseFloat(document.getElementById('pb-tax-pct').value)||8.9;
   const items=pbLineItems;
-  const sub=items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+  const sub=items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
   const _gi=splitGoodsInstall(items,'price'); const goodsSub=_gi.goods, installSub=_gi.install;  // installation excluded from % add-ons
   const _sf=(typeof sfFee==='function')?sfFee(projName,items,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
   const _ftPB=feeRules(projName).artNoFT?_gi.ft:goodsSub;
@@ -8748,10 +8835,10 @@ function buildPBAreaPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
   }
   order.forEach(area=>{
     const list=groups[area];
-    const areaSub=list.reduce((s,i)=>s+(i.qty||0)*(i.price||0),0);
+    const areaSub=list.reduce((s,i)=>s+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
     allRows+=`<tr><td colspan="7" style="padding:8px 10px 4px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;background:#f2f2f2;border-top:1.5px solid #999;border-bottom:1px solid #ccc">${escHtml(area)}<span style="float:right;font-weight:400;font-size:10.5px;color:#666">Subtotal: $${fmtD(areaSub)}</span></td></tr>`;
     list.forEach(item=>{
-      const ext=(item.qty||0)*(item.price||0);
+      const ext=item.costType==='excluded'?0:(item.qty||0)*(item.price||0);
       const notesCell=item.notes?`<div style="font-size:10.5px;color:#B07800;font-style:italic;margin-top:3px;padding:2px 5px;background:#FFFBF0;border-left:2px solid #E8C060;display:inline-block">&#8627; ${escHtml(item.notes)}</div>`:'';
       const descCell=item.description?`<div style="font-size:10.5px;color:#555;margin-top:2px">${escHtml(item.description)}</div>`:'';
       const vendorCell=item.vendor?`<div style="font-weight:500">${escHtml(item.vendor)}</div>`:'<span style="color:#bbb">&mdash;</span>';
@@ -8856,7 +8943,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
     allRows+=`<tr><td colspan="${NCOL}" style="padding:8px 10px 4px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;background:#f2f2f2;border-top:1.5px solid #999;border-bottom:1px solid #ccc">${catNameCell}${catX}<span style="float:right;font-weight:400;font-size:10.5px;color:#666">Subtotal: $${fmtD(catSub)}</span></td></tr>`;
     cat.items.forEach(o=>{
       const item=o.item, idx=o.idx;
-      const ext=(item.qty||0)*(item.price||0);
+      const ext=item.costType==='excluded'?0:(item.qty||0)*(item.price||0);
       // Notes line
       let notesCell='';
       if(editable){
@@ -8875,7 +8962,7 @@ function buildPBInternalPreview({projName,proj,dateStr,feePct,contPct,freightPct
           ${notesCell}
         </td>
         <td style="padding:7px 8px;font-size:11px;color:#444;white-space:nowrap;max-width:120px">${vendorCell}</td>
-        <td style="padding:7px 8px;font-size:11px;text-align:center">${F(idx,'qty',item.qty,{type:'number'})}${typeof sfTierChip==='function'?sfTierChip('pb',idx,item,editable):''}</td>
+        <td style="padding:7px 8px;font-size:11px;text-align:center">${F(idx,'qty',item.qty,{type:'number'})}${typeof sfTierChip==='function'?sfTierChip('pb',idx,item,editable):''}${costChip('pb',idx,item,editable,cat.name)}</td>
         <td style="padding:7px 8px;font-size:11px;text-align:right;white-space:nowrap">${priceCell}</td>
         ${showDiscB?discCellB(idx,item):''}
         <td style="padding:7px 8px;font-size:11px;text-align:right;font-weight:600;white-space:nowrap">${ext?'$'+fmtD(ext):''}</td>
@@ -8963,7 +9050,7 @@ function buildPBClientPreview({projName,proj,dateStr,feePct,contPct,freightPct,t
 
   // Summary page
   let summaryRows = cats.map(cat=>{
-    const catSub=cat.items.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+    const catSub=cat.items.reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
     return catSub>0?`<tr>
       <td style="padding:9px 12px;font-size:12px;border-bottom:1px solid #eee">${escHtml(cat.name)}</td>
       <td style="padding:9px 12px;font-size:12px;text-align:right;border-bottom:1px solid #eee;font-weight:500">${fmtMoney(catSub)}</td>
@@ -8973,7 +9060,7 @@ function buildPBClientPreview({projName,proj,dateStr,feePct,contPct,freightPct,t
   // Per-category detail pages
   let detailPages = cats.map(cat=>{
     if(!cat.items.length) return '';
-    const catSub=cat.items.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+    const catSub=cat.items.reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
     const rows=cat.items.map(item=>{
       const ext=(item.qty||0)*(item.price||0);
       return`<tr style="border-bottom:1px solid #eee">
@@ -9159,7 +9246,8 @@ function executePBtoPA(){
         const desc=[copyVendors&&item.vendor?item.vendor:'',copyNotes&&item.notes?item.notes:''].filter(Boolean).join(' — ');
         newItems.push({id:Date.now()+Math.random(),isCategory:false,
           itemNum:item.itemNum||'',name:item.name||'',vendor:copyVendors?(item.vendor||''):'',
-          description:desc,qty:copyPrices?(item.qty||1):1,price:copyPrices?(item.price||0):0,
+          description:desc,qty:copyPrices?(item.qty==null||item.qty===''?1:item.qty):(item.qty===0?0:1),price:copyPrices?(item.price||0):0,
+          location:item.location||'',costType:item.costType||'',
           leadTime:copyLeads?(item.leadTime||''):'',feeTier:item.feeTier||'',bold:false});
       }
     });
@@ -11285,9 +11373,9 @@ function loadCloseOut(){
     return{...i,_cat};
   }).filter(Boolean);
   const goodsItems=paItemsWithCat.filter(i=>!isInstallCat(i._cat));
-  const paSub=goodsItems.reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
-  const _ftCO=feeRules(projName).artNoFT ? goodsItems.filter(i=>!isArtLine(i,i._cat)).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0) : paSub;
-  const installSub=paItemsWithCat.filter(i=>isInstallCat(i._cat)).reduce((a,i)=>a+(i.qty||0)*(i.price||0),0);
+  const paSub=goodsItems.reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
+  const _ftCO=feeRules(projName).artNoFT ? goodsItems.filter(i=>!isArtLine(i,i._cat)).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0) : paSub;
+  const installSub=paItemsWithCat.filter(i=>isInstallCat(i._cat)).reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
 
   const taxRate=pa?(pa.taxPct??8.9)/100:0.089;
   const freightRate=pa?(pa.freightPct??10)/100:0.10;
@@ -13397,7 +13485,7 @@ function generateIIF(){
   let _cat = '';
   const lineItems = items.map(i => {
     if(i.isCategory){ _cat = i.name; return null; }
-    return {...i, _cat, ext:(i.qty||0)*(i.price||0)};
+    return {...i, _cat, ext:(i.costType==='excluded'?0:(i.qty||0)*(i.price||0))};
   }).filter(Boolean);
 
   const goodsItems   = lineItems.filter(i => !isInstallCat(i._cat));
