@@ -140,6 +140,7 @@
         col.num = cells.findIndex(function (c) { return /item\s*(#|num|no)/.test(c); });
         col.desc = cells.findIndex(function (c) { return /descr|item name/.test(c); });
         col.loc = cells.findIndex(function (c) { return /location|area|room/.test(c); });
+        col.lead = cells.findIndex(function (c) { return /lead\s*time|^lead|leadtime|ship\s*time|weeks/.test(c); });
         col.high = cells.findIndex(function (c) { return /high/.test(c) && /qty|quant|total|item/.test(c); });
         col.low = cells.findIndex(function (c) { return /low/.test(c) && /qty|quant|total|item/.test(c); });
         if (col.num < 0) col.num = 0;
@@ -165,11 +166,13 @@
         var tier = '';
         if (col.high >= 0 && num(row[col.high])) tier = 'high';
         else if (col.low >= 0 && num(row[col.low])) tier = 'low';
-        last = { itemNum: isLabel ? '' : a, name: b || a, description: '', location: col.loc >= 0 ? cellStr(row[col.loc]) || lineArea : lineArea, qty: qCell === '' ? 1 : qty, price: price, feeTier: tier, _area: lineArea };
+        last = { itemNum: isLabel ? '' : a, name: b || a, description: '', location: col.loc >= 0 ? cellStr(row[col.loc]) || lineArea : lineArea, qty: qCell === '' ? 1 : qty, price: price, leadTime: col.lead >= 0 ? cellStr(row[col.lead]) : '', feeTier: tier, _area: lineArea };
         items.push(last);
       } else if (a && !b) { area = a; last = null; }
       else if (a && b) { area = a; last = null; }  // "Admin. Offices — No scope included"
       else if (!a && b && last) { last.description += (last.description ? '\n' : '') + b; }
+      // Lead time that wraps onto the next row ("8 Weeks from" / "COM Receipt"), or sits only on the description row.
+      if (!a && last && col.lead >= 0) { var lt = cellStr(row[col.lead]); if (lt) last.leadTime = last.leadTime ? last.leadTime + ' ' + lt : lt; }
       else if (!a && !b && !joined.trim()) { /* blank */ }
     }
 
