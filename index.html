@@ -379,6 +379,7 @@
       <div class="company-name">ai3, Inc.</div>
       <div class="company-plan">Atlanta, GA · FFE Procurement</div>
     </div>
+    <div id="steve-build" style="margin-top:8px;font-size:10.5px;line-height:1.4;color:var(--text3)" title="When this version of STEVE was last updated"></div>
   </div>
 </aside>
 
@@ -18995,6 +18996,26 @@ document.addEventListener('wheel', function(e){
   }
   // Wrap last, so this sits outside the other add-ons that also wrap these.
   setTimeout(boot,3000); setTimeout(boot,9000);
+})();
+</script>
+<script>
+// Version stamp: when this copy of STEVE was last updated, plus a nudge when a newer one is online.
+var STEVE_BUILD='2026-11-11T21:57:04.060Z';
+(function(){
+  function fmt(iso){ var d=new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
+  function show(newer){
+    var el=document.getElementById('steve-build'); if(!el) return;
+    el.innerHTML='Last updated '+fmt(STEVE_BUILD)+(newer?'<div style="margin-top:4px;color:var(--accent-ink);font-weight:600;cursor:pointer" onclick="location.reload()">Newer version online ('+fmt(newer)+') — click to refresh</div>':'');
+  }
+  function check(){
+    if(!/^https?:/.test(location.protocol)) return;
+    fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok?r.text():''; }).then(function(t){
+      var m=t&&t.match(/var STEVE_BUILD='([^']+)'/);
+      if(m && new Date(m[1])>new Date(STEVE_BUILD)) show(m[1]);
+    }).catch(function(){});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ show(); }); else show();
+  setTimeout(check,5000); setInterval(check,10*60*1000);
 })();
 </script>
 </body>

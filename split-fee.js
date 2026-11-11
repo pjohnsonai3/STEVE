@@ -159,14 +159,27 @@
       var qty = num(qCell), price = num(pCell);
       if (/^not in scope/i.test(a)) { last = null; continue; }
       // A row is a line item when it has a quantity or price cell filled in — a "0" counts.
-      if ((qCell !== '' && !isNaN(parseFloat(String(qCell).replace(/[$,\s]/g, '')))) || (pCell !== '' && price)) {
+      var hasQP = (qCell !== '' && !isNaN(parseFloat(String(qCell).replace(/[$,\s]/g, '')))) || (pCell !== '' && price);
+      // An item whose quantity and price sit on the row below its name ("A7 Furniture Covers" / "DUCKCOVERS… 12 83").
+      if (hasQP && !a && last && last._pending) {
+        last.qty = qCell === '' ? 1 : qty; last.price = price; delete last._pending;
+        if (b) last.description += (last.description ? '\n' : '') + b;
+        if (col.lead >= 0 && cellStr(row[col.lead])) last.leadTime = cellStr(row[col.lead]);
+        continue;
+      }
+      if (!hasQP && a && b && /\d/.test(a) && /^[A-Za-z]{0,5}[\s._-]*\d+[A-Za-z0-9.\-]*$/.test(a)) {
+        last = { itemNum: a, name: b, description: '', _hdr: area, _locCol: col.loc >= 0 ? cellStr(row[col.loc]) : '', location: area, qty: 0, price: 0, leadTime: '', feeTier: '', _area: area, _pending: true };
+        items.push(last); continue;
+      }
+      if (hasQP) {
         // Text without digits in the item # column (e.g. "Installation") names the area, not a number.
         var isLabel = a && !/\d/.test(a);
         var lineArea = isLabel ? a : area;
         var tier = '';
         if (col.high >= 0 && num(row[col.high])) tier = 'high';
         else if (col.low >= 0 && num(row[col.low])) tier = 'low';
-        last = { itemNum: isLabel ? '' : a, name: b || a, description: '', location: col.loc >= 0 ? cellStr(row[col.loc]) || lineArea : lineArea, qty: qCell === '' ? 1 : qty, price: price, leadTime: col.lead >= 0 ? cellStr(row[col.lead]) : '', feeTier: tier, _area: lineArea };
+        var locCol = col.loc >= 0 ? cellStr(row[col.loc]) : '';
+        last = { itemNum: isLabel ? '' : a, name: b || a, description: '', _hdr: lineArea, _locCol: locCol, location: locCol || lineArea, qty: qCell === '' ? 1 : qty, price: price, leadTime: col.lead >= 0 ? cellStr(row[col.lead]) : '', feeTier: tier, _area: lineArea };
         items.push(last);
       } else if (a && !b) { area = a; last = null; }
       else if (a && b) { area = a; last = null; }  // "Admin. Offices — No scope included"
@@ -193,11 +206,22 @@
     var hasHigh = items.some(function (i) { return i.feeTier === 'high'; });
     var split = (col.high >= 0 && hasHigh) ? { on: true, low: fees.low || fees.single || DEF.low, high: fees.high || DEF.high } : null;
 
+    // Section headers can be rooms ("Lobby", "Pool Deck") or categories ("Seating", "Tables").
+    // If every header reads as a category, treat them as categories: they are not areas.
+    var CATRE = /^(ff&?e\s+)?(seating|tables?|casegoods?|lighting|decorative lighting|drapery|draperies|window|soft goods|rugs?|carpet|floor ?cover|misc|miscellaneous|mirrors?|art|artwork|accessor|planters?|upholstery|fabrics?|com|installation|install|wallcover|bedding|signage|equipment|outdoor|furniture|millwork)/i;
+    var hdrs = {}; items.forEach(function (it) { if (it._hdr) hdrs[it._hdr] = 1; });
+    var hk = Object.keys(hdrs), catMode = hk.length > 0 && hk.every(function (x) { return CATRE.test(x.trim()); });
+    items.forEach(function (it) {
+      if (it._pending) { it.qty = 0; delete it._pending; }
+      if (catMode) { it._cat = it._hdr; it.location = it._locCol || ''; it._area = it._hdr; }
+      delete it._hdr; delete it._locCol;
+    });
     // Group by the item number's hundreds band; installation and unnumbered lines by their area.
     var groups = {}, order = [];
     items.forEach(function (it) {
       var m = String(it.itemNum).match(/(\d+)/), band = m ? Math.floor(parseInt(m[1], 10) / 100) : 0;
-      var key = /install/i.test(it._area + ' ' + it.name) ? 'Installation' : /mirror/i.test(it.name) ? 'Mirrors' : (band >= 1 && band <= 9 ? BANDS[band] : (it._area || 'Miscellaneous'));
+      var key = /install/i.test(it._area + ' ' + it.name) ? 'Installation' : /mirror/i.test(it.name) ? 'Mirrors' : (band >= 1 && band <= 9 ? BANDS[band] : (it._cat || it._area || 'Miscellaneous'));
+      delete it._cat;
       if (!groups[key]) { groups[key] = []; order.push(key); }
       if (!it.itemNum && key === 'Installation') it.itemNum = '';
       delete it._area; groups[key].push(it);
