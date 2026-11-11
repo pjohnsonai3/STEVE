@@ -7666,6 +7666,7 @@ function printPreview(previewId, title, extraCss, filename){
 <head>
   <meta charset="utf-8">
   <title>${printTitle}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     @page { margin: 0.6in 0.7in; }
     * { box-sizing: border-box; }
@@ -7676,7 +7677,7 @@ function printPreview(previewId, title, extraCss, filename){
     ${extraCss||''}
   </style>
 </head>
-<body>${el.innerHTML}<script>window.onload=function(){setTimeout(function(){window.print();},300);};<\/script>
+<body>${el.innerHTML}<script>window.onload=function(){var go=function(){setTimeout(function(){window.print();},200);};if(document.fonts&&document.fonts.ready){Promise.race([document.fonts.ready,new Promise(function(r){setTimeout(r,2500);})]).then(go);}else go();};<\/script>
 </body></html>`;
 
   const blob = new Blob([html], {type:'text/html'});
@@ -8173,6 +8174,7 @@ Your task:
 3. Estimate realistic unit prices in USD for commercial/hospitality grade furniture (NOT residential pricing)
 4. Item numbers: copy each item number EXACTLY as printed in the document (e.g. "L-100", "PD-201", "MLR-800", "800"), character for character. Never renumber, re-prefix or re-sequence them. Only if an item has no number at all, leave itemNum as "".
 4a. Location: set "location" to the room/area heading the item sits under in the document, exactly as written (e.g. "Lobby and Member Check-In", "Pool Deck - 324 seats"). Lines such as Installation, Art packages or allowances that sit under their own heading get that heading as their location (e.g. "Installation"). Never leave location blank when the document shows an area.
+4c. Lead time: if the document shows a lead time for an item, copy it exactly into "leadTime" (e.g. "12-14 weeks"); otherwise use "".
 4b. Quantity: use the exact quantity shown, including 0. Do not change a 0 quantity to 1. Use 1 only when no quantity is shown at all.
 5. If the document has separate totals columns for low-quantity and high-quantity items (each with its own procurement fee), add "feeTier":"high" to every item priced in the high-quantity column, and add a top-level "feeSplit":{"low":25,"high":10} using the fee percentages the document shows
 ${context ? `\nAdditional context: ${context}` : ''}
@@ -8180,7 +8182,7 @@ ${projName ? `Project: ${projName}` : ''}
 ${projType ? `Project type: ${projType}` : ''}
 
 Return ONLY a valid JSON object with no other text, no markdown code fences, no explanation before or after. Your entire response must be parseable by JSON.parse(). Start your response with { and end with }.
-{"summary":"Brief 1-sentence description","categories":[{"name":"Category Name","items":[{"itemNum":"100","name":"Item name","description":"Brief spec","location":"Room or area","qty":4,"price":850.00}]}]}
+{"summary":"Brief 1-sentence description","categories":[{"name":"Category Name","items":[{"itemNum":"100","name":"Item name","description":"Brief spec","location":"Room or area","qty":4,"price":850.00,"leadTime":"12-14 weeks"}]}]}
 
 Only include categories that have items. Capture every furniture item. Use commercial/contract pricing.`;
 
@@ -8302,6 +8304,7 @@ function dbBuildResults(parsed){
         location: item.location||'',
         qty: (item.qty===''||item.qty==null||isNaN(parseFloat(item.qty))) ? 1 : parseFloat(item.qty),
         price: parseFloat(item.price)||0,
+        leadTime: item.leadTime!=null ? String(item.leadTime).trim() : '',
         feeTier: item.feeTier==='high'?'high':(item.feeTier||''),
       });
     });
