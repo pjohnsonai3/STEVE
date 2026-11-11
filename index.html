@@ -2273,6 +2273,10 @@
             <input type="checkbox" id="pa-show-discount" onchange="recalcPA()" style="cursor:pointer" /> Show Discount %
           </label>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
+          <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2);cursor:pointer;user-select:none" title="Show or hide the In Cost of Goods / Installation / Excluded tag on each line">
+            <input type="checkbox" id="pa-show-costtags" onchange="localStorage.setItem('steve_pa_costtags',this.checked?'1':'0');recalcPA()" style="cursor:pointer" /> Cost tags
+          </label>
+          <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <div id="pa-view-toggle" style="display:flex;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden"><button id="pa-view-internal" onclick="paSetView('internal')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Internal</button><button id="pa-view-client" onclick="paSetView('client')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Client View</button><button id="pa-view-area" onclick="paSetView('area')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button><button id="pa-view-byarea" onclick="paSetView('byarea')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button></div>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <button class="btn btn-sm btn-primary" onclick="addPALineItem()">+ Item</button>
@@ -7472,7 +7476,7 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
           ${editable?`<div style="font-size:10.5px;color:#888;margin-top:2px">📍 ${docField('pa',i,'location',item.location,{placeholder:'Area',list:paLocations()})} &nbsp;▸ ${docField('pa',i,'__cat',catName,{placeholder:'Category',list:_docCatNames('pa')})}</div>`:''}
           ${window.paGroupByArea&&catName?`<div style="font-size:9.5px;color:#999;margin-top:2px;text-transform:uppercase;letter-spacing:.04em">${escHtml(catName)}</div>`:''}
         </td>
-        <td style="padding:5px 8px;font-size:11.5px;text-align:right">${cell(i,'qty',item.qty,{type:'number'})}${costChip('pa',i,item,editable,catName)}</td>
+        <td style="padding:5px 8px;font-size:11.5px;text-align:right">${cell(i,'qty',item.qty,{type:'number'})}${paCostTagsOn()?costChip('pa',i,item,editable,catName):''}</td>
         <td style="padding:5px 8px;font-size:11.5px;text-align:right">${priceC}</td>
         ${showDiscA?discCellA(i,item):''}
         <td style="padding:5px 8px;font-size:11.5px;text-align:right;font-weight:600">${ext?'$'+fmtD(ext):'—'}</td>
@@ -7621,6 +7625,8 @@ function recalcPA(){
   }
 }
 let paViewMode='internal';
+function paCostTagsOn(){ const cb=document.getElementById('pa-show-costtags'); return cb?cb.checked:localStorage.getItem('steve_pa_costtags')!=='0'; }
+setTimeout(function(){ const cb=document.getElementById('pa-show-costtags'); if(cb) cb.checked=localStorage.getItem('steve_pa_costtags')!=='0'; },800);
 // Areas already used on this PA, its project's budgets and other PAs — offered as suggestions.
 function paLocations(){
   const seen={}, out=[]; const add=v=>{ const s=String(v==null?'':v).trim(); if(s&&!seen[s.toLowerCase()]){ seen[s.toLowerCase()]=1; out.push(s); } };
