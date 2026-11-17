@@ -2278,11 +2278,13 @@
             <input type="checkbox" id="pa-show-costtags" checked onchange="localStorage.setItem('steve_pa_costtags',this.checked?'1':'0');recalcPA()" style="cursor:pointer" /> Cost tags
           </label>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
-          <div id="pa-view-toggle" style="display:flex;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden"><button id="pa-view-internal" onclick="paSetView('internal')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Internal</button><button id="pa-view-client" onclick="paSetView('client')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Client View</button><button id="pa-view-area" onclick="paSetView('area')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button><button id="pa-view-byarea" onclick="paSetView('byarea')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button></div>
+          <div id="pa-view-toggle" style="display:flex;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden"><button id="pa-view-internal" onclick="paSetView('internal')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Internal</button><button id="pa-view-client" onclick="paSetView('client')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Client View</button><button id="pa-view-area" onclick="paSetView('area')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button><button id="pa-view-byarea" onclick="paSetView('byarea')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button><button id="pa-view-longlead" onclick="paSetView('longlead')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Long Lead &amp; Fabrics</button></div>
+          <label id="pa-ll-wrap" style="display:none;align-items:center;gap:4px;font-size:11.5px;color:var(--text2)">Long lead ≥ <input type="number" id="pa-ll-weeks" min="1" step="1" style="width:46px;padding:3px 5px;font-size:11.5px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--radius-sm)" oninput="try{localStorage.setItem('steve_pa_ll_weeks',this.value)}catch(e){};recalcPA()" /> wks</label>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <button class="btn btn-sm btn-primary" onclick="addPALineItem()">+ Item</button>
           <button class="btn btn-sm" onclick="addPACategory()">+ Category</button>
           <button class="btn btn-sm" onclick="addPANote()">+ Note</button>
+          <button class="btn btn-sm" onclick="paSortNow()" title="Put every line in item-number order within its category">Sort</button>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <button class="btn btn-sm" onclick="paFindAlternatives()" title="Find alternatives for all PA items">🔄 Find Alternatives</button>
         </div>
@@ -7488,6 +7490,29 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
         </td>
       </tr>`;
   };
+  if(window.paLongLead){
+    // Purchasing-priority view: fabrics / COM (item # ending in "A") and anything at or over the long-lead threshold.
+    const llw=parseFloat((document.getElementById('pa-ll-weeks')||{}).value)||12;
+    const isFab=it=>/\dA$/i.test(String(it.itemNum||'').trim());
+    const fab=[], ll=[]; let cat='';
+    items.forEach((item,i)=>{
+      if(item.isCategory){ cat=item.name||''; return; }
+      if(paIsDrapFabric(item,cat)) return;
+      if(isFab(item)) fab.push({item,i,cat});
+      else { const w=paLeadWeeks(item.leadTime); if(w!=null&&w>=llw) ll.push({item,i,cat,w}); }
+    });
+    ll.sort((a,b)=>b.w-a.w);
+    const sec=(title,list,empty)=>{
+      const gsub=list.reduce((a,o)=>a+(o.item.costType==='excluded'?0:(parseFloat(o.item.qty)||0)*(parseFloat(o.item.price)||0)),0);
+      rows+=`<tr><td colspan="${_ncol}" style="padding:8px 10px 4px;border-top:1.5px solid #999;border-bottom:1px solid #ccc;background:#f2f2f2"><div style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase"><span style="flex:1">${title} (${list.length})</span><span style="font-weight:600;letter-spacing:0">$${fmtD(gsub)}</span></div></td></tr>`;
+      if(!list.length) rows+=`<tr><td colspan="${_ncol}" style="padding:8px 10px;font-size:11px;color:#888">${empty}</td></tr>`;
+      list.forEach(o=>{ rows+=paRow(o.item,o.i,o.cat); });
+    };
+    window.paGroupByArea=true; // show each line's category under its name
+    sec('Fabrics &amp; COM — item # ending in A',fab,'No item numbers end in A on this PA.');
+    sec('Long lead — '+llw+'+ weeks',ll,'No lead times at or over '+llw+' weeks. Lines with a blank lead time are not counted.');
+    window.paGroupByArea=false;
+  } else
   if(window.paGroupByArea){
     // Same lines, regrouped by project area (Location). Edits write straight back to the line.
     const groups=[], m={}; let cat='';
@@ -7571,16 +7596,32 @@ function recalcPA(){
   const freightPct=paPct('pa-freight-pct',10);
   const tariffPct=paPct('pa-tariff-pct',5);
   const taxPct=paPct('pa-tax-pct',8.9);
-  const allItems=paLineItems.filter(i=>!i.isCategory);
+  // Long Lead & Fabrics view: every total is recalculated on just the selected lines.
+  // Category headers are kept so installation lines are still recognised by category.
+  const _llOn=!!window.paLongLead;
+  const _calcItems=_llOn?paLLItems(paLineItems):paLineItems;
+  const _useOv=!_llOn;
+  const allItems=_calcItems.filter(i=>!i.isCategory);
   const sub=allItems.reduce((a,i)=>a+(i.costType==='excluded'?0:(i.qty||0)*(i.price||0)),0);
   // Installation/labor lines are excluded from the percentage add-ons
-  const _gi=splitGoodsInstall(paLineItems,'price'); const goodsSub=_gi.goods, installSub=_gi.install;
-  // Use saved override amounts when present (e.g. signed PA with exact PDF figures)
-  const curPA=currentPAId?pas.find(p=>p.id===currentPAId):null;
-  const _sfPA=(typeof sfFee==='function')?sfFee(projName,paLineItems,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
-  const fee    =curPA&&curPA.feeOverride    ?curPA.feeOverride    :_sfPA.fee;
+  const _gi=splitGoodsInstall(_calcItems,'price'); const goodsSub=_gi.goods, installSub=_gi.install;
+  // Use saved override amounts when present (e.g. signed PA with exact PDF figures) — not for a sub-selection
+  const curPA=(currentPAId&&_useOv)?pas.find(p=>p.id===currentPAId):null;
+  const _sfPA=(typeof sfFee==='function')?sfFee(projName,_calcItems,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
+  let fee    =curPA&&curPA.feeOverride    ?curPA.feeOverride    :_sfPA.fee;
   if(!(curPA&&curPA.feeOverride)) feePct=_sfPA.label;
-  const _ftPA=ftBaseOf(paLineItems,'price',projName);
+  // Long Lead & Fabrics is the first PA, so it carries ai3's ENTIRE procurement fee
+  // (calculated on all goods in the PA), while freight/tariff/tax/contingency follow the selected lines.
+  let _llFullFee=0;
+  if(_llOn){
+    const fullPA=currentPAId?pas.find(p=>p.id===currentPAId):null;
+    const _giAll=splitGoodsInstall(paLineItems,'price');
+    const _sfAll=(typeof sfFee==='function')?sfFee(projName,paLineItems,_giAll.goods,paPct('pa-fee-pct',25)):{fee:_giAll.goods*paPct('pa-fee-pct',25)/100,label:paPct('pa-fee-pct',25)};
+    fee=fullPA&&fullPA.feeOverride?fullPA.feeOverride:_sfAll.fee;
+    feePct=fullPA&&fullPA.feeOverride?feePct:_sfAll.label;
+    _llFullFee=_giAll.goods;
+  }
+  const _ftPA=ftBaseOf(_calcItems,'price',projName);
   const cont   =curPA&&curPA.contOverride   ?curPA.contOverride   :contBaseOf(projName,goodsSub,installSub)*contPct/100;
   const freight=curPA&&curPA.freightOverride?curPA.freightOverride:_ftPA*freightPct/100;
   const tariff =curPA&&curPA.tariffOverride ?curPA.tariffOverride :goodsSub*tariffPct/100;
@@ -7617,6 +7658,14 @@ function recalcPA(){
   }
   const _pv=document.getElementById('pa-preview');
   _pv.innerHTML=_paBodyV+authBlock;
+  if(_llOn){
+    const llw=parseFloat((document.getElementById('pa-ll-weeks')||{}).value)||12;
+    const n=allItems.length;
+    const note=document.createElement('div');
+    note.style.cssText="font-family:'Source Sans 3','Helvetica Neue',Arial,sans-serif;max-width:900px;margin:0 auto;padding:14px 48px 0;font-size:11px;color:#555";
+    note.textContent='Long Lead & Fabrics: '+n+' line'+(n===1?'':'s')+' (item # ending in A, or lead time '+llw+'+ weeks; lines with "drapery" excluded). Subtotal, contingency, freight, tariff and tax are for these lines only. The procurement fee is the full fee for the whole PA ($'+fmtD(fee)+' on $'+fmtD(_llFullFee)+' cost of goods), collected up front.';
+    _pv.insertBefore(note,_pv.firstChild);
+  }
   if((paViewMode==='client'||paViewMode==='area') && tariffPct){
     // Those layouts have no tariff line; add one under freight so the lines add up to the total.
     [].slice.call(_pv.querySelectorAll('tr')).some(tr=>{
@@ -7644,11 +7693,37 @@ function paLocations(){
   }
   return out.sort((x,y)=>x.localeCompare(y,undefined,{numeric:true}));
 }
+// Lines with the word "drapery" in their name or description are left out of Long Lead & Fabrics.
+// D-prefix items without it (shades, hardware, blinds…) are still included.
+function paIsDrapFabric(it){
+  return /draper(y|ies)/i.test(String(it.name||'')+' '+String(it.description||''));
+}
+function paLLItems(items){
+  const llw=parseFloat((document.getElementById('pa-ll-weeks')||{}).value)||12;
+  const out=[]; let head=null, headPushed=false;
+  items.forEach(it=>{
+    if(it.isCategory){ head=it; headPushed=false; return; }
+    if(paIsDrapFabric(it,head?head.name:'')) return;
+    const fab=/\dA$/i.test(String(it.itemNum||'').trim());
+    const w=paLeadWeeks(it.leadTime);
+    if(fab||(w!=null&&w>=llw)){ if(head&&!headPushed){ out.push(head); headPushed=true; } out.push(it); }
+  });
+  return out;
+}
+function paLeadWeeks(s){
+  // "12-14 weeks" → 14, "3 months" → 13, "45 days" → 6.4, "16" → 16
+  s=String(s||'').toLowerCase(); const n=(s.match(/\d+(\.\d+)?/g)||[]).map(Number); if(!n.length) return null;
+  const v=Math.max.apply(null,n);
+  if(/month|mo\b/.test(s)) return v*4.33; if(/day/.test(s)) return v/7; return v;
+}
 function paSetView(mode){
   window.paGroupByArea=(mode==='byarea');
-  paViewMode=(mode==='byarea')?'internal':mode;
-  [['pa-view-internal','internal'],['pa-view-client','client'],['pa-view-area','area'],['pa-view-byarea','byarea']].forEach(function(p){
-    const act=p[1]==='byarea'?window.paGroupByArea:(p[1]===paViewMode&&!window.paGroupByArea);
+  window.paLongLead=(mode==='longlead');
+  const llw=document.getElementById('pa-ll-wrap'); if(llw) llw.style.display=window.paLongLead?'flex':'none';
+  const lli=document.getElementById('pa-ll-weeks'); if(lli&&!lli.value){ let v=12; try{ v=localStorage.getItem('steve_pa_ll_weeks')||12; }catch(e){} lli.value=v; }
+  paViewMode=(mode==='byarea'||mode==='longlead')?'internal':mode;
+  [['pa-view-internal','internal'],['pa-view-client','client'],['pa-view-area','area'],['pa-view-byarea','byarea'],['pa-view-longlead','longlead']].forEach(function(p){
+    const act=p[1]==='byarea'?window.paGroupByArea:p[1]==='longlead'?window.paLongLead:(p[1]===paViewMode&&!window.paGroupByArea&&!window.paLongLead);
     const b=document.getElementById(p[0]); if(!b) return;
     b.style.background=act?'var(--accent)':'var(--surface)'; b.style.color=act?'#fff':'var(--text2)';
   });
@@ -19100,7 +19175,7 @@ document.addEventListener('wheel', function(e){
 </script>
 <script>
 // Version stamp: when this copy of STEVE was last updated, plus a nudge when a newer one is online.
-var STEVE_BUILD='2026-11-11T22:14:26.750Z';
+var STEVE_BUILD='2026-11-17T20:23:14.735Z';
 (function(){
   function fmt(iso){ var d=new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
   function show(newer){
