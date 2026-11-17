@@ -2239,6 +2239,10 @@
             <select id="pa-project" onchange="paProjectChanged()" style="padding:4px 6px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit;background:var(--surface)"><option value="">Select…</option></select>
           </div>
           <div style="display:flex;align-items:center;gap:6px;font-size:12px">
+            <label style="color:var(--text2);white-space:nowrap" title="This PA's number within the project — PA 1, PA 2, PA 3…">PA #</label>
+            <input type="number" id="pa-seq" min="1" step="1" oninput="paSeqChanged()" style="width:52px;padding:4px 6px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit" />
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px">
             <label style="color:var(--text2)">Date</label>
             <input type="date" id="pa-date" oninput="recalcPA();paPersist()" style="padding:4px 6px;border:1px solid var(--border2);border-radius:3px;font-size:12px;font-family:inherit" />
           </div>
@@ -2280,6 +2284,7 @@
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <div id="pa-view-toggle" style="display:flex;border:1px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden"><button id="pa-view-internal" onclick="paSetView('internal')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;background:var(--surface);color:var(--text2);cursor:pointer">Internal</button><button id="pa-view-client" onclick="paSetView('client')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Client View</button><button id="pa-view-area" onclick="paSetView('area')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Category</button><button id="pa-view-byarea" onclick="paSetView('byarea')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">By Area</button><button id="pa-view-longlead" onclick="paSetView('longlead')" style="padding:4px 10px;font-size:11.5px;font-family:inherit;border:none;border-left:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer">Long Lead &amp; Fabrics</button></div>
           <label id="pa-ll-wrap" style="display:none;align-items:center;gap:4px;font-size:11.5px;color:var(--text2)">Long lead ≥ <input type="number" id="pa-ll-weeks" min="1" step="1" style="width:46px;padding:3px 5px;font-size:11.5px;font-family:inherit;border:1px solid var(--border2);border-radius:var(--radius-sm)" oninput="try{localStorage.setItem('steve_pa_ll_weeks',this.value)}catch(e){};recalcPA()" /> wks</label>
+          <button id="pa-ll-split" class="btn btn-sm btn-primary" onclick="paSplitLongLead()" style="display:none" title="Create two new PAs from this one — the long-lead lines with the full fee, and the remaining lines. This PA is left as it is.">Split into new PAs</button>
           <div style="width:1px;height:20px;background:var(--border2);margin:0 4px"></div>
           <button class="btn btn-sm btn-primary" onclick="addPALineItem()">+ Item</button>
           <button class="btn btn-sm" onclick="addPACategory()">+ Category</button>
@@ -6805,7 +6810,48 @@ let paLineItems = []; // working copy while editing
 let paNotes = [];
 
 // --- List ---
+// PA numbering within a project: PA 1, PA 2, PA 3… (paSeq). The system number (paNum) stays as the record ID.
+function paNextSeq(project, exceptId){
+  return (pas||[]).filter(p=>p.project===project&&p.id!==exceptId).reduce((m,p)=>Math.max(m,parseInt(p.paSeq)||0),0)+1;
+}
+function paLabel(p){ return (p.paSeq?'PA '+p.paSeq+' · ':'')+(p.paNum||''); }
+function paEnsureSeq(){
+  // A PA whose system number is itself a PA number ("2", "PA 2", "PA-2") keeps that number.
+  // Everything else without a number is filled in date order, skipping numbers already taken.
+  // The v2 pass also corrects numbers an earlier version assigned over a user-named PA.
+  const fromNum=p=>{ const m=String(p.paNum||'').trim().match(/^(?:PA\s*-?\s*)?(\d{1,2})$/i); return m?parseInt(m[1],10):0; };
+  let changed=false; const by={};
+  (pas||[]).forEach(p=>{ (by[p.project||'']=by[p.project||'']||[]).push(p); });
+  Object.keys(by).forEach(k=>{
+    const list=by[k];
+    const named=list.filter(p=>fromNum(p));
+    if(named.length && list.some(p=>!p._seqV2)){
+      // reserve user-named numbers; clear auto numbers that collide with them so they re-fill
+      const reserved={}; named.forEach(p=>{ const n=fromNum(p); reserved[n]=1; if(parseInt(p.paSeq)!==n){ p.paSeq=n; changed=true; } });
+      list.forEach(p=>{ if(!fromNum(p) && !p._seqUser && reserved[parseInt(p.paSeq)]){ p.paSeq=null; changed=true; } });
+    }
+    const used={};
+    list.forEach(p=>{ const n=parseInt(p.paSeq); if(n) used[n]=1; });
+    let next=1;
+    list.filter(p=>!parseInt(p.paSeq)).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||(a.id>b.id?1:-1))
+      .forEach(p=>{ while(used[next]) next++; p.paSeq=next; used[next]=1; changed=true; });
+    list.forEach(p=>{ if(!p._seqV2){ p._seqV2=1; changed=true; } });
+  });
+  if(changed){ try{ saveAll(); }catch(e){} }
+}
+function paSeqChanged(){
+  const el=document.getElementById('pa-seq'); const n=parseInt(el.value); el.dataset.userSet='1';
+  const projName=document.getElementById('pa-project').value;
+  const dup=n&&(pas||[]).find(p=>p.project===projName&&p.id!==currentPAId&&parseInt(p.paSeq)===n);
+  el.style.borderColor=dup?'#C5311B':'var(--border2)';
+  el.title=dup?('PA '+n+' is already used on this project ('+dup.paNum+')'):'';
+  if(dup&&typeof ai3Toast==='function') ai3Toast('⚠ PA '+n+' is already used on '+projName,3000);
+  const cur=currentPAId?pas.find(p=>p.id===currentPAId):null;
+  const bc=document.getElementById('pa-editor-breadcrumb'); if(bc&&cur){ cur.paSeq=n||null; cur._seqUser=1; bc.textContent=paLabel(cur); }
+  recalcPA(); paPersist();
+}
 function renderPAList(){
+  paEnsureSeq();
   const q=(document.getElementById('pa-search').value||'').toLowerCase();
   const sf=document.getElementById('pa-status-filter').value;
   const projFilter = activeProject ? activeProject.name : null;
@@ -6821,7 +6867,7 @@ function renderPAList(){
         const sub=p.items?p.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty*(i.price||0)),0):0;
         const total=calcPATotal(p);
         return`<tr>
-          <td style="font-weight:500;color:var(--accent-ink)">${p.paNum||'—'}</td>
+          <td style="font-weight:500;color:var(--accent-ink)">${p.paSeq?'PA '+p.paSeq:'—'}<div style="font-size:11px;font-weight:400;color:var(--text3)">${p.paNum||''}</div></td>
           ${showProjCol?`<td>${p.project||'—'}</td><td style="color:var(--text2);font-size:13px">${p.client||'—'}</td>`:''}
           <td>${p.date||'—'}</td>
           <td>$${fmtD(sub)}</td><td style="font-weight:500">$${fmtD(total)}</td>
@@ -6905,7 +6951,7 @@ function calcPATotal(pa){
   const sub=allItems.reduce((a,i)=>a+((i.costType==='excluded'?0:(i.qty||0)*(i.price||0))),0);
   const goodsSub=splitGoodsInstall(pa.items,'price').goods;  // installation excluded from % add-ons
   const feePct=(pa.feePct??25)/100, contPct=(pa.contPct??5)/100, freightPct=(pa.freightPct??10)/100, tariffPct=(pa.tariffPct??5)/100, taxPct=(pa.taxPct??8.9)/100;
-  const fee=(typeof sfFee==='function')?sfFee(pa.project,pa.items,goodsSub,feePct*100).fee:goodsSub*feePct, cont=contBaseOf(pa.project,goodsSub,sub-goodsSub)*contPct, freight=ftBaseOf(pa.items,'price',pa.project)*freightPct, tariff=goodsSub*tariffPct;
+  const fee=pa.feeFixed!=null?pa.feeFixed:(typeof sfFee==='function')?sfFee(pa.project,pa.items,goodsSub,feePct*100).fee:goodsSub*feePct, cont=contBaseOf(pa.project,goodsSub,sub-goodsSub)*contPct, freight=ftBaseOf(pa.items,'price',pa.project)*freightPct, tariff=goodsSub*tariffPct;
   const tax=(ftBaseOf(pa.items,'price',pa.project)+freight)*taxPct;
   return sub+fee+cont+freight+tariff+tax;
 }
@@ -7229,7 +7275,9 @@ function showPAEditor(pa, previewOnly){
     document.getElementById('pa-tariff-pct').value=5;
     document.getElementById('pa-tax-pct').value=8.9;
   }
-  document.getElementById('pa-editor-breadcrumb').textContent=pa?pa.paNum:'New Authorization';
+  paEnsureSeq();
+  { const sq=document.getElementById('pa-seq'); if(sq) delete sq.dataset.userSet; if(sq) sq.value=pa&&pa.paSeq?pa.paSeq:(pa&&pa.project?paNextSeq(pa.project):''); }
+  document.getElementById('pa-editor-breadcrumb').textContent=pa?paLabel(pa):'New Authorization';
   renderPALineItemsForm();
   renderPANotesForm();
   recalcPA();
@@ -7244,8 +7292,15 @@ function closePAEditor(){
   renderPAList();
 }
 
+function paFillSeqIfNew(){
+  const el=document.getElementById('pa-seq'); if(!el) return;
+  const projName=document.getElementById('pa-project').value;
+  const cur=currentPAId?pas.find(p=>p.id===currentPAId):null;
+  if(projName&&(!cur||!cur.paSeq)&&!el.dataset.userSet) el.value=paNextSeq(projName,currentPAId);
+}
 function paProjectChanged(){
   const name=document.getElementById('pa-project').value;
+  paFillSeqIfNew();
   recalcPA();
   paPersist();
 }
@@ -7333,6 +7388,7 @@ function savePA(){
     feePct, contPct, freightPct, tariffPct, taxPct,
     items:JSON.parse(JSON.stringify(paLineItems)),
     notes:JSON.parse(JSON.stringify(paNotes)),
+    paSeq:parseInt((document.getElementById('pa-seq')||{}).value)||null,
   };
   if(currentPAId){
     const idx=pas.findIndex(p=>p.id===currentPAId);
@@ -7366,6 +7422,7 @@ function paPersist(){
     feePct, contPct, freightPct, tariffPct, taxPct,
     items:JSON.parse(JSON.stringify(paLineItems)),
     notes:JSON.parse(JSON.stringify(paNotes)),
+    paSeq:parseInt((document.getElementById('pa-seq')||{}).value)||null,
   };
   if(currentPAId){
     const idx=pas.findIndex(p=>p.id===currentPAId);
@@ -7552,7 +7609,7 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
       ${proj&&proj.client&&proj.client!==projName?`<div style="font-size:22px;font-weight:700;margin-bottom:2px">${escHtml(proj.client)}</div>`:''}
       <div style="font-size:${proj&&proj.client&&proj.client!==projName?'15':'22'}px;font-weight:700;margin-bottom:2px">${escHtml(projName||'[Project Name]')}</div>
       ${proj&&proj.location?`<div style="font-size:11px;color:#666;margin-bottom:4px">${escHtml(proj.location)}</div>`:''}
-      <div style="font-size:13px;font-weight:600;margin-bottom:2px">Purchase Authorization</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">Purchase Authorization${(!isPrelim&&(document.getElementById('pa-seq')||{}).value)?' No. '+escHtml(document.getElementById('pa-seq').value):''}</div>
       <div style="font-size:12px;color:#666">${dateStr||'[Date]'}</div>
     </div>
     ${LOGO?`<img src="${LOGO}" style="height:44px;width:auto" />`:'<div style="font-weight:700;font-size:20px">ai3</div>'}
@@ -7610,6 +7667,7 @@ function recalcPA(){
   const _sfPA=(typeof sfFee==='function')?sfFee(projName,_calcItems,goodsSub,feePct):{fee:goodsSub*feePct/100,label:feePct};
   let fee    =curPA&&curPA.feeOverride    ?curPA.feeOverride    :_sfPA.fee;
   if(!(curPA&&curPA.feeOverride)) feePct=_sfPA.label;
+  if(curPA&&curPA.feeFixed!=null) fee=curPA.feeFixed;
   // Long Lead & Fabrics is the first PA, so it carries ai3's ENTIRE procurement fee
   // (calculated on all goods in the PA), while freight/tariff/tax/contingency follow the selected lines.
   let _llFullFee=0;
@@ -7654,10 +7712,14 @@ function recalcPA(){
   let _paBodyV=paBody;
   if(paViewMode==='client'||paViewMode==='area'){
     const args={projName,proj,dateStr,feePct,contPct,freightPct,taxPct,sub,fee,cont,freight,tax,total,goodsSub,installSub,items:paLineItems};
-    _paBodyV=(paViewMode==='client'?buildPBClientPreview(args):buildPBAreaPreview(args)).split('Preliminary Budget').join('Purchase Authorization');
+    _paBodyV=(paViewMode==='client'?buildPBClientPreview(args):buildPBAreaPreview(args)).split('Preliminary Budget').join('Purchase Authorization'+(((document.getElementById('pa-seq')||{}).value)?' No. '+escHtml(document.getElementById('pa-seq').value):''));
   }
   const _pv=document.getElementById('pa-preview');
   _pv.innerHTML=_paBodyV+authBlock;
+  { const cp=currentPAId?pas.find(p=>p.id===currentPAId):null;
+    if(cp&&cp.feeFixed!=null&&cp.feeLabel&&!_llOn){
+      [].slice.call(_pv.querySelectorAll('tr')).some(tr=>{ const c=tr.children; if(!c.length||!/^Procurement Fee/i.test(c[0].textContent.trim())) return false; c[0].textContent=cp.feeLabel; return true; });
+    } }
   if(_llOn){
     const llw=parseFloat((document.getElementById('pa-ll-weeks')||{}).value)||12;
     const n=allItems.length;
@@ -7698,6 +7760,43 @@ function paLocations(){
 function paIsDrapFabric(it){
   return /draper(y|ies)/i.test(String(it.name||'')+' '+String(it.description||''));
 }
+// Split: leaves this PA untouched and creates two new PAs — the long-lead / fabric lines
+// carrying ai3's full procurement fee, and the remaining lines with the fee shown as collected.
+function paSplitLongLead(){
+  if(!currentPAId){ alert('Save this PA first, then split it.'); return; }
+  paPersist();
+  const orig=pas.find(p=>p.id===currentPAId); if(!orig) return;
+  const projName=orig.project;
+  const sel=paLLItems(paLineItems);
+  const selSet=new Set(sel.filter(i=>!i.isCategory));
+  if(!selSet.size){ alert('No lines match Long Lead & Fabrics on this PA.'); return; }
+  const rest=[]; let head=null, pushed=false;
+  paLineItems.forEach(it=>{
+    if(it.isCategory){ head=it; pushed=false; return; }
+    if(selSet.has(it)) return;
+    if(head&&!pushed){ rest.push(head); pushed=true; } rest.push(it);
+  });
+  const restN=rest.filter(i=>!i.isCategory).length;
+  const gAll=splitGoodsInstall(paLineItems,'price');
+  const fp=paPct('pa-fee-pct',25);
+  const fullFee=orig.feeOverride?orig.feeOverride:((typeof sfFee==='function')?sfFee(projName,paLineItems,gAll.goods,fp).fee:gAll.goods*fp/100);
+  const seqA=paNextSeq(projName), seqB=seqA+1;
+  const origLbl=paLabel(orig);
+  if(!confirm('Split '+origLbl+' into two new PAs?\n\nPA '+seqA+': '+selSet.size+' long-lead / fabric line'+(selSet.size===1?'':'s')+', with the full procurement fee ($'+fmtD(fullFee)+').\nPA '+seqB+': the remaining '+restN+' line'+(restN===1?'':'s')+', procurement fee shown as collected on PA '+seqA+'.\n\n'+origLbl+' is left exactly as it is.')) return;
+  pushUndo('Split PA');
+  const clone=o=>JSON.parse(JSON.stringify(o));
+  const base=clone(orig);
+  ['id','paNum','paSeq','_seqV2','_seqUser','feeOverride','contOverride','freightOverride','tariffOverride','taxOverride','totalOverride','splitInto','feeFixed','feeLabel'].forEach(k=>delete base[k]);
+  const today=new Date().toISOString().split('T')[0];
+  const mk=(seq,items,extra)=>{ const p=Object.assign(clone(base),{id:genId(),paNum:'PA-'+new Date().getFullYear()+'-'+String(pas.length+1).padStart(3,'0'),paSeq:seq,_seqV2:1,_seqUser:1,date:today,status:'Draft',items:clone(items),splitFrom:orig.id},extra); pas.push(p); return p; };
+  const A=mk(seqA,sel,{feeFixed:fullFee,feeLabel:'Procurement Fee — full project fee (all PAs)',notes:(base.notes||[]).concat(['Includes ai3\u2019s full procurement fee ($'+fmtD(fullFee)+') for this scope. Remaining items are on PA '+seqB+'.'])});
+  const B=mk(seqB,rest,{feeFixed:0,feeLabel:'Procurement Fee — collected on PA '+seqA,notes:(base.notes||[]).concat(['Procurement fee of $'+fmtD(fullFee)+' was collected on PA '+seqA+'.'])});
+  orig.splitInto=[A.id,B.id];
+  saveAll();
+  if(typeof ai3Toast==='function') ai3Toast('\u2713 Created PA '+seqA+' and PA '+seqB+' \u00b7 '+origLbl+' unchanged',4200);
+  paSetView('internal');
+  currentPAId=A.id; showPAEditor(A);
+}
 function paLLItems(items){
   const llw=parseFloat((document.getElementById('pa-ll-weeks')||{}).value)||12;
   const out=[]; let head=null, headPushed=false;
@@ -7720,6 +7819,7 @@ function paSetView(mode){
   window.paGroupByArea=(mode==='byarea');
   window.paLongLead=(mode==='longlead');
   const llw=document.getElementById('pa-ll-wrap'); if(llw) llw.style.display=window.paLongLead?'flex':'none';
+  const lls=document.getElementById('pa-ll-split'); if(lls) lls.style.display=window.paLongLead?'':'none';
   const lli=document.getElementById('pa-ll-weeks'); if(lli&&!lli.value){ let v=12; try{ v=localStorage.getItem('steve_pa_ll_weeks')||12; }catch(e){} lli.value=v; }
   paViewMode=(mode==='byarea'||mode==='longlead')?'internal':mode;
   [['pa-view-internal','internal'],['pa-view-client','client'],['pa-view-area','area'],['pa-view-byarea','byarea'],['pa-view-longlead','longlead']].forEach(function(p){
@@ -13014,10 +13114,18 @@ function btUpdateField(projName, itemId, field, value){
 const BT_PAY_TYPES = ['', 'Check', 'Wire', 'ACH', 'Credit Card', 'Deposit', 'Cash', 'Pay Multiple', 'Other'];
 
 // Natural compare of item #s like "100", "101A" — numeric part first, then suffix
+// Natural compare of item #s: prefix letters, then number, then suffix (D-200 < D-201B < PDR-200 < PP-200)
 function btCmpItemNum(a, b){
-  const ma = String(a).match(/^(\d+)\s*(.*)$/), mb = String(b).match(/^(\d+)\s*(.*)$/);
-  const na = ma ? parseInt(ma[1],10) : NaN, nb = mb ? parseInt(mb[1],10) : NaN;
-  if(!isNaN(na) && !isNaN(nb)){ if(na!==nb) return na-nb; return (ma[2]||'').localeCompare(mb[2]||''); }
+  const re=/^([A-Za-z]*)[\s._-]*(\d+)\s*([A-Za-z]*)$/;
+  const ma = String(a).trim().match(re), mb = String(b).trim().match(re);
+  if(ma && mb){
+    const pa=ma[1].toUpperCase(), pb=mb[1].toUpperCase();
+    if(pa!==pb) return pa<pb?-1:1;
+    const na=parseInt(ma[2],10), nb=parseInt(mb[2],10);
+    if(na!==nb) return na-nb;
+    return ma[3].toUpperCase().localeCompare(mb[3].toUpperCase());
+  }
+  if(ma) return -1; if(mb) return 1;
   return String(a).localeCompare(String(b));
 }
 function btLowestItemNum(arr){ return [...arr].map(s=>String(s).trim()).filter(Boolean).sort(btCmpItemNum)[0]; }
@@ -19175,7 +19283,7 @@ document.addEventListener('wheel', function(e){
 </script>
 <script>
 // Version stamp: when this copy of STEVE was last updated, plus a nudge when a newer one is online.
-var STEVE_BUILD='2026-11-17T20:32:53.729Z';
+var STEVE_BUILD='2026-11-17T20:48:05.197Z';
 (function(){
   function fmt(iso){ var d=new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
   function show(newer){
