@@ -41,7 +41,8 @@
   var UNKNOWN_BAND = 90;
 
   function toast(m, ms) { try { if (typeof ai3Toast === 'function') ai3Toast(m, ms); } catch (e) {} }
-  function lines() { return (typeof pbLineItems !== 'undefined' && Array.isArray(pbLineItems)) ? pbLineItems : []; }
+  var _target = null;   // when set, sorting works on this list (the PA) instead of the budget
+  function lines() { if (_target) return _target; return (typeof pbLineItems !== 'undefined' && Array.isArray(pbLineItems)) ? pbLineItems : []; }
 
   // ── Parsing ───────────────────────────────────────────────────────────────
   // "C-101A" → {prefix:'C', num:101, suffix:'A'};  "101" → {prefix:'', num:101}
@@ -121,8 +122,9 @@
     gs.forEach(function (g) { if (g.head) flat.push(g.head); g.items.forEach(function (it) { flat.push(it); }); });
     if (flat.map(function (i) { return i.id; }).join('|') === before) return false;
 
-    pbLineItems.length = 0;
-    flat.forEach(function (it) { pbLineItems.push(it); });
+    var arr = lines();
+    arr.length = 0;
+    flat.forEach(function (it) { arr.push(it); });
     if (!opts.quiet) persist('Sort by item number');
     return true;
   }
@@ -254,7 +256,37 @@
   }
 
   // ── Hooks ─────────────────────────────────────────────────────────────────
-  var pendingSort = false, hooked = false;
+  var pendingSort = false, pendingPA = false, hooked = false, hookedPA = false;
+  // Fingerprint of which lines exist and what they're numbered — ignores order, so a manual
+  // drag doesn't trigger a re-sort, but adding a line or changing a number (by any route:
+  // + Item, the side panel, Sourcing, import, paste) does.
+  var sigPB = '', sigPA = '';
+  function sigOf(arr) {
+    return (arr || []).filter(function (i) { return !i.isCategory; })
+      .map(function (i) { return String(i.id) + ':' + String(i.itemNum || '').trim(); }).sort().join('|');
+  }
+  function hookPA() {
+    if (hookedPA || typeof window.recalcPA !== 'function') return;
+    var origPA = window.recalcPA;
+    window.recalcPA = function () {
+      var sg = (typeof paLineItems !== 'undefined') ? sigOf(paLineItems) : '';
+      if (sg !== sigPA) { sigPA = sg; pendingPA = true; }
+      if (pendingPA) {
+        pendingPA = false;
+        if (sortPA()) { sigPA = sigOf(paLineItems); try { if (typeof paPersist === 'function') paPersist(); } catch (e) {} }
+      }
+      return origPA.apply(this, arguments);
+    };
+    if (typeof window.addPALineItem === 'function') {
+      var origAddPA = window.addPALineItem;
+      window.addPALineItem = function () {
+        var r = origAddPA.apply(this, arguments);
+        try { var last = paLineItems[paLineItems.length - 1]; if (last && !last.isCategory) { last._new = true; if (typeof ai3Toast === 'function') ai3Toast('Type the item # and the line moves into its category', 3200); } } catch (e) {}
+        return r;
+      };
+    }
+    hookedPA = true;
+  }
 
   function hook() {
     if (hooked) return;
@@ -266,6 +298,7 @@
     window._docSet = function (store, idx, field, val) {
       var r = origSet.apply(this, arguments);
       if (store === 'pb' && field === 'itemNum') pendingSort = true;
+      if (store === 'pa' && field === 'itemNum') pendingPA = true;
       return r;
     };
 
@@ -280,6 +313,8 @@
 
     var origRecalc = window.recalcPB;
     window.recalcPB = function () {
+      var sg = sigOf(lines());
+      if (sg !== sigPB) { sigPB = sg; pendingSort = true; }
       if (pendingSort) {
         pendingSort = false;
         if (sortBudget({ quiet: true })) {
@@ -312,6 +347,43 @@
     hooked = true;
   }
 
+  // A new PA line is added at the bottom. Once its item # is typed, move it under
+  // the category for its hundreds band (C-104 → Seating, D-401F → Drapery),
+  // creating that category if the PA doesn't have one yet.
+  function fileNew(arr) {
+    var moved = false;
+    arr.slice().forEach(function (it) {
+      if (it.isCategory || !it._new) return;
+      var p = parseNum(it.itemNum); if (!p) return;
+      delete it._new;
+      var band = Math.floor(p.num / 100); if (band < 1 || band > 9) return;
+      var hi = -1;
+      for (var k = 0; k < arr.length; k++) if (arr[k].isCategory && bandOfCategory(arr[k].name) === band) { hi = k; break; }
+      var cur = arr.indexOf(it), curHead = -1;
+      for (var j = cur; j >= 0; j--) if (arr[j].isCategory) { curHead = j; break; }
+      if (hi >= 0 && hi === curHead) return;
+      arr.splice(cur, 1);
+      if (hi < 0) {
+        var lbl = BANDS.filter(function (b) { return b.n === band; })[0].label;
+        var at = arr.length;
+        for (var m = 0; m < arr.length; m++) if (arr[m].isCategory && bandOfCategory(arr[m].name) > band) { at = m; break; }
+        arr.splice(at, 0, { id: Date.now() + Math.random(), isCategory: true, name: lbl, bold: true }, it);
+      } else {
+        var end = hi + 1;
+        while (end < arr.length && !arr[end].isCategory) end++;
+        arr.splice(end, 0, it);
+      }
+      moved = true;
+    });
+    return moved;
+  }
+  function sortPA() {
+    if (typeof paLineItems === 'undefined' || !Array.isArray(paLineItems)) return false;
+    _target = paLineItems;
+    try { var a = fileNew(paLineItems); var b = sortBudget({ quiet: true }); return a || b; }
+    finally { _target = null; }
+  }
+
   // The freshly added row is the one blank line in that category.
   function stampNewest(catIdx) {
     var gs = groups();
@@ -334,11 +406,12 @@
   window.pbRenumber = renumber;
   window.pbLocations = locations;
   window.pbNextNumber = nextNumber;
+  window.paSortNow = function () { _target = paLineItems; try { var ch = sortBudget({ quiet: true }); } finally { _target = null; } if (ch) { try { paPersist(); } catch (e) {} } if (typeof recalcPA === 'function') recalcPA(); toast(ch ? '\u2713 Sorted by item number' : 'Already in order', 2600); };
 
   function boot() {
-    hook();
+    hook(); hookPA();
     var n = 0;
-    var iv = setInterval(function () { hook(); if (hooked || ++n > 40) clearInterval(iv); }, 400);
+    var iv = setInterval(function () { hook(); hookPA(); if ((hooked && hookedPA) || ++n > 40) clearInterval(iv); }, 400);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
