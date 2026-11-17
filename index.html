@@ -6814,14 +6814,20 @@ let paNotes = [];
 function paNextSeq(project, exceptId){
   return (pas||[]).filter(p=>p.project===project&&p.id!==exceptId).reduce((m,p)=>Math.max(m,parseInt(p.paSeq)||0),0)+1;
 }
-function paLabel(p){ return (p.paSeq?'PA '+p.paSeq+' · ':'')+(p.paNum||''); }
+function paLabel(p){ return (p.isOriginalFull?'ORIGINAL FULL PA · ':(p.paSeq?'PA '+p.paSeq+' · ':''))+(p.paNum||''); }
+function paHeadingSuffix(){
+  const cp=currentPAId?pas.find(p=>p.id===currentPAId):null;
+  if(cp&&cp.isOriginalFull) return ' \u2014 ORIGINAL FULL PA';
+  const v=(document.getElementById('pa-seq')||{}).value;
+  return v?' '+escHtml(v):'';
+}
 function paEnsureSeq(){
   // A PA whose system number is itself a PA number ("2", "PA 2", "PA-2") keeps that number.
   // Everything else without a number is filled in date order, skipping numbers already taken.
   // The v2 pass also corrects numbers an earlier version assigned over a user-named PA.
   const fromNum=p=>{ const m=String(p.paNum||'').trim().match(/^(?:PA\s*-?\s*)?(\d{1,2})$/i); return m?parseInt(m[1],10):0; };
   let changed=false; const by={};
-  (pas||[]).forEach(p=>{ (by[p.project||'']=by[p.project||'']||[]).push(p); });
+  (pas||[]).forEach(p=>{ if(p.isOriginalFull) return; (by[p.project||'']=by[p.project||'']||[]).push(p); });
   Object.keys(by).forEach(k=>{
     const list=by[k];
     const named=list.filter(p=>fromNum(p));
@@ -6867,7 +6873,7 @@ function renderPAList(){
         const sub=p.items?p.items.filter(i=>!i.isCategory).reduce((a,i)=>a+(i.qty*(i.price||0)),0):0;
         const total=calcPATotal(p);
         return`<tr>
-          <td style="font-weight:500;color:var(--accent-ink)">${p.paSeq?'PA '+p.paSeq:'—'}<div style="font-size:11px;font-weight:400;color:var(--text3)">${p.paNum||''}</div></td>
+          <td style="font-weight:500;color:var(--accent-ink)">${p.isOriginalFull?'ORIGINAL FULL PA':(p.paSeq?'PA '+p.paSeq:'—')}<div style="font-size:11px;font-weight:400;color:var(--text3)">${p.paNum||''}</div></td>
           ${showProjCol?`<td>${p.project||'—'}</td><td style="color:var(--text2);font-size:13px">${p.client||'—'}</td>`:''}
           <td>${p.date||'—'}</td>
           <td>$${fmtD(sub)}</td><td style="font-weight:500">$${fmtD(total)}</td>
@@ -7276,7 +7282,8 @@ function showPAEditor(pa, previewOnly){
     document.getElementById('pa-tax-pct').value=8.9;
   }
   paEnsureSeq();
-  { const sq=document.getElementById('pa-seq'); if(sq) delete sq.dataset.userSet; if(sq) sq.value=pa&&pa.paSeq?pa.paSeq:(pa&&pa.project?paNextSeq(pa.project):''); }
+  { const sq=document.getElementById('pa-seq'); if(sq){ sq.disabled=!!(pa&&pa.isOriginalFull); sq.title=sq.disabled?'This is the ORIGINAL FULL PA — it is kept for reference and is not numbered':''; } }
+  { const sq=document.getElementById('pa-seq'); if(sq) delete sq.dataset.userSet; if(sq) sq.value=(pa&&pa.isOriginalFull)?'':pa&&pa.paSeq?pa.paSeq:(pa&&pa.project?paNextSeq(pa.project):''); }
   document.getElementById('pa-editor-breadcrumb').textContent=pa?paLabel(pa):'New Authorization';
   renderPALineItemsForm();
   renderPANotesForm();
@@ -7609,7 +7616,7 @@ function buildBudgetPreview({projName,proj,dateStr,feePct,contPct,freightPct,tax
       ${proj&&proj.client&&proj.client!==projName?`<div style="font-size:22px;font-weight:700;margin-bottom:2px">${escHtml(proj.client)}</div>`:''}
       <div style="font-size:${proj&&proj.client&&proj.client!==projName?'15':'22'}px;font-weight:700;margin-bottom:2px">${escHtml(projName||'[Project Name]')}</div>
       ${proj&&proj.location?`<div style="font-size:11px;color:#666;margin-bottom:4px">${escHtml(proj.location)}</div>`:''}
-      <div style="font-size:13px;font-weight:600;margin-bottom:2px">Purchase Authorization${(!isPrelim&&(document.getElementById('pa-seq')||{}).value)?' No. '+escHtml(document.getElementById('pa-seq').value):''}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:2px">Purchase Authorization${!isPrelim?paHeadingSuffix():''}</div>
       <div style="font-size:12px;color:#666">${dateStr||'[Date]'}</div>
     </div>
     ${LOGO?`<img src="${LOGO}" style="height:44px;width:auto" />`:'<div style="font-weight:700;font-size:20px">ai3</div>'}
@@ -7712,7 +7719,7 @@ function recalcPA(){
   let _paBodyV=paBody;
   if(paViewMode==='client'||paViewMode==='area'){
     const args={projName,proj,dateStr,feePct,contPct,freightPct,taxPct,sub,fee,cont,freight,tax,total,goodsSub,installSub,items:paLineItems};
-    _paBodyV=(paViewMode==='client'?buildPBClientPreview(args):buildPBAreaPreview(args)).split('Preliminary Budget').join('Purchase Authorization'+(((document.getElementById('pa-seq')||{}).value)?' No. '+escHtml(document.getElementById('pa-seq').value):''));
+    _paBodyV=(paViewMode==='client'?buildPBClientPreview(args):buildPBAreaPreview(args)).split('Preliminary Budget').join('Purchase Authorization'+paHeadingSuffix());
   }
   const _pv=document.getElementById('pa-preview');
   _pv.innerHTML=_paBodyV+authBlock;
@@ -7780,9 +7787,10 @@ function paSplitLongLead(){
   const gAll=splitGoodsInstall(paLineItems,'price');
   const fp=paPct('pa-fee-pct',25);
   const fullFee=orig.feeOverride?orig.feeOverride:((typeof sfFee==='function')?sfFee(projName,paLineItems,gAll.goods,fp).fee:gAll.goods*fp/100);
-  const seqA=paNextSeq(projName), seqB=seqA+1;
+  const seqA=1, seqB=2;
+  const clash=pas.filter(p=>p.project===projName&&p.id!==orig.id&&!p.isOriginalFull&&(parseInt(p.paSeq)===1||parseInt(p.paSeq)===2));
   const origLbl=paLabel(orig);
-  if(!confirm('Split '+origLbl+' into two new PAs?\n\nPA '+seqA+': '+selSet.size+' long-lead / fabric line'+(selSet.size===1?'':'s')+', with the full procurement fee ($'+fmtD(fullFee)+').\nPA '+seqB+': the remaining '+restN+' line'+(restN===1?'':'s')+', procurement fee shown as collected on PA '+seqA+'.\n\n'+origLbl+' is left exactly as it is.')) return;
+  if(!confirm('Split '+origLbl+' into two new PAs?\n\nPA '+seqA+': '+selSet.size+' long-lead / fabric line'+(selSet.size===1?'':'s')+', with the full procurement fee ($'+fmtD(fullFee)+').\nPA '+seqB+': the remaining '+restN+' line'+(restN===1?'':'s')+', procurement fee shown as collected on PA '+seqA+'.\n\n'+origLbl+' is kept with all its lines and labeled ORIGINAL FULL PA.'+(clash.length?'\n\n\u26a0 This project already has '+clash.map(paLabel).join(' and ')+'. Those will be renumbered after PA 2.':''))) return;
   pushUndo('Split PA');
   const clone=o=>JSON.parse(JSON.stringify(o));
   const base=clone(orig);
@@ -7791,9 +7799,10 @@ function paSplitLongLead(){
   const mk=(seq,items,extra)=>{ const p=Object.assign(clone(base),{id:genId(),paNum:'PA-'+new Date().getFullYear()+'-'+String(pas.length+1).padStart(3,'0'),paSeq:seq,_seqV2:1,_seqUser:1,date:today,status:'Draft',items:clone(items),splitFrom:orig.id},extra); pas.push(p); return p; };
   const A=mk(seqA,sel,{feeFixed:fullFee,feeLabel:'Procurement Fee — full project fee (all PAs)',notes:(base.notes||[]).concat(['Includes ai3\u2019s full procurement fee ($'+fmtD(fullFee)+') for this scope. Remaining items are on PA '+seqB+'.'])});
   const B=mk(seqB,rest,{feeFixed:0,feeLabel:'Procurement Fee — collected on PA '+seqA,notes:(base.notes||[]).concat(['Procurement fee of $'+fmtD(fullFee)+' was collected on PA '+seqA+'.'])});
-  orig.splitInto=[A.id,B.id];
+  orig.splitInto=[A.id,B.id]; orig.isOriginalFull=true; orig.paSeq=null;
+  let nx=3; clash.forEach(p=>{ while(pas.some(q=>q.project===projName&&!q.isOriginalFull&&q!==p&&parseInt(q.paSeq)===nx)) nx++; p.paSeq=nx++; });
   saveAll();
-  if(typeof ai3Toast==='function') ai3Toast('\u2713 Created PA '+seqA+' and PA '+seqB+' \u00b7 '+origLbl+' unchanged',4200);
+  if(typeof ai3Toast==='function') ai3Toast('\u2713 Created Purchase Authorization 1 and 2 \u00b7 original kept as ORIGINAL FULL PA',4200);
   paSetView('internal');
   currentPAId=A.id; showPAEditor(A);
 }
@@ -19283,7 +19292,7 @@ document.addEventListener('wheel', function(e){
 </script>
 <script>
 // Version stamp: when this copy of STEVE was last updated, plus a nudge when a newer one is online.
-var STEVE_BUILD='2026-11-17T20:48:05.197Z';
+var STEVE_BUILD='2026-11-17T20:58:25.425Z';
 (function(){
   function fmt(iso){ var d=new Date(iso); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
   function show(newer){
